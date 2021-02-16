@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+
+const program = require('commander');
+const pkg = require('../package.json');
+
+const { config } = require('./cmds/config');
+const { ping } = require('./cmds/ping');
+const { insertion } = require('./cmds/insertion');
+const { reset } = require('./cmds/reset');
+
+program.on('command:*', () => {
+  console.error(`Invalid command: ${program.args.join(' ')}\nSee --help for a list of available commands.`);
+  process.exit(1);
+});
+
+program.version(pkg.version);
+
+program
+  .command('config')
+  .option('-g --get', 'display the configuration')
+  .option('-s --set', 'initialize the configuration file in $HOME/.config')
+  .option('--url <url>', 'elastic url')
+  .option('--port <port>', 'elastic port')
+  .option('--user <user>', 'elastic user')
+  .option('--password <password>', 'elastic password')
+  .option('-l --list', 'list of attributes required for configuration')
+  .description('make the config to fetch ez-meta')
+  .action((args) => config(args));
+
+program
+  .command('reset')
+  .description('empty elastic index')
+  .action(() => reset());
+
+program
+  .command('ping')
+  .description('Check if service is available')
+  .option('-u --use <use>', 'use a custom config')
+  .action((args) => ping(args));
+
+program
+  .command('insert')
+  .option('-f --file <file>', 'todo')
+  .option('-u --use <use>', 'use a custom config')
+  .action((args) => insertion(args));
+
+program.parse(process.argv);
