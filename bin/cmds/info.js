@@ -52,7 +52,7 @@ module.exports = {
     const INSMI = await countInstitutes('etatcollhlm', 'INSMI', client);
     const INSU = await countInstitutes('etatcollhlm', 'INSU', client);
 
-    logger.info(`number total documents in index etatcollhlm: ${documents}`);
+    logger.info(`Number total documents in index etatcollhlm: ${documents}`);
     logger.info(`IN2P3: ${IN2P3}`);
     logger.info(`INC: ${INC}`);
     logger.info(`INEE: ${INEE}`);

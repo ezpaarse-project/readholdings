@@ -57,7 +57,7 @@ const resetIndex = async (name, index, client) => {
 const initIndex = async (name, index, client) => {
   const exist = await isIndexExist(name, client);
   if (exist) {
-    logger.error(`${name} already exist`);
+    logger.error(`${name} index already exist`);
     process.exit(1);
   }
   try {
@@ -68,6 +68,7 @@ const initIndex = async (name, index, client) => {
   } catch (err) {
     logger.error(`indices.delete resetIndex: ${err}`);
   }
+  logger.info(`${name} index has created`);
 };
 
 const reset = async (args) => {
