@@ -16,6 +16,8 @@ The tools you need to let node-etatcollhlm run are :
 ## Installation
 
 ```bash
+$ git clone https://github.com/ezpaarse-project/node-etatcollhlm
+$ cd node-etatcollhlm
 $ npm i -g .
 ```
 
@@ -31,46 +33,87 @@ You can get help for any command by typing `node-etatcollhlm <command> --help`.
 The module provides an `etatcollhlm` command (aliased `hlm`).
 
 ## Commands
-### hlm config
+
+- [config](#etatcollhlm-config)
+- [ping](#etatcollhlm-ping)
+- [init](#etatcollhlm-init)
+- [insert](#etatcollhlm-insert)
+- [info](#etatcollhlm-info)
+- [reset](#etatcollhlm-reset)
+### etatcollhlm config
 Update config to fetch ez-meta.
+The default configuration is saved in a file at $HOME/.config/.etatcollhlmrc
 #### parameters
 | Name | Description |
 | --- | --- |
-| -ur --url | elastic url |
-| -p --port | elastic port |
-| -us --user | elastic user |
-| -pwd --password | elastic password |
+| -g --get | display the configuration of $HOME/.config/.etatcollhlmrc |
+| -s --set | initiate a configuration file at $HOME/.config/.etatcollhlmrc  |
+| --url | elastic url |
+| --port | elastic port |
+| --user | elastic user |
+| --password | elastic password |
 | -f --file | display the configuration |
 #### Example
 ```bash
-$ etatcollhlm config -u http://localhost
-$ etatcollhlm config -p 8080
-$ etatcollhlm config -us elastic
-$ etatcollhlm config -pwd changeme
+$ etatcollhlm config --set
+$ etatcollhlm config --url http://localhost
+$ etatcollhlm config --port 8080
+$ etatcollhlm config --user elastic
+$ etatcollhlm config --password changeme
 ```
-### hlm ping
+### etatcollhlm ping
 Check if service is available.
+#### Parameter
+
+| Name | Description |
+| --- | --- |
+| -u --use | use a custom configuration file |
 #### Example
 ```bash
 $ etatcollhlm ping
 ```
+### etatcollhlm init
 
-### hlm insert
-Starts an etatcollhlm data insertion.
+initiates the etatcollhlm index with this [mapping](https://github.com/ezpaarse-project/node-etatcollhlm/blob/master/index/etatcollhlm.json) 
+#### Parameter
+| Nom | Description |
+| --- | --- |
+| -u --use | use a custom configuration file |
+#### Example
 
+```bash
+$ etatcollhlm init
+```
+### etatcollhlm insert
+before use this command, make sure etatcollhlm is created.
+Insert the contents of a file into the etatcollhlm index.
 #### Parameters
 | Name | Description |
 | --- | --- |
 | -f --file | file need to be insert |
-
+|-v --verbose | display ther number of lines in the file as a parameter and how many lines have been inserted |
+| -u --use | use a custom configuration file |
 #### Example
 ```bash
-$ etatcollhlm insert -f file.csv
+$ etatcollhlm insert -f ./file.csv
 ```
+### etatcollhlm info
+#### Parameter
 
-### hlm reset
-reset etatcollhlm index on ez-meta.
+| Nom | Description |
+| --- | --- |
+| -u --use | use a custom configuration file |
+#### Exemple
+```bash
+$ etatcollhlm info
+```
+### etatcollhlm reset
+empty etatcollhlm index on ez-meta.
+#### Parameter
 
+| Name | Description |
+| --- | --- |
+| -u --use | use a custom configuration file |
 #### Example
 ```bash
 $ etatcollhlm reset
