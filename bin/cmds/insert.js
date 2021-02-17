@@ -139,7 +139,7 @@ const insertion = async (args) => {
   bar.stop();
   console.log('\n');
   if (args.verbose) {
-    logger.info(`${lineInserted}/${lineInFile - 1}`);
+    logger.info(`${lineInserted}/${lineInFile - 1} lines inserted`);
   }
 };
 
