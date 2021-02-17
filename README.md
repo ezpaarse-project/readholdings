@@ -61,6 +61,16 @@ $ etatcollhlm config --port 8080
 $ etatcollhlm config --user elastic
 $ etatcollhlm config --password changeme
 ```
+output
+```bash
+info: {
+  "url": "http://localhost",
+  "port": "9200",
+  "user": "elastic",
+  "password": "changeme"
+}
+info: from /home/felix/.config/.etatcollhlmrc
+```
 ### etatcollhlm ping
 Check if service is available.
 #### Parameter
@@ -71,6 +81,11 @@ Check if service is available.
 #### Example
 ```bash
 $ etatcollhlm ping
+```
+
+output
+```bash
+info: service available http://localhost:9200
 ```
 ### etatcollhlm init
 
@@ -84,6 +99,12 @@ initiates the etatcollhlm index with this [mapping](https://github.com/ezpaarse-
 ```bash
 $ etatcollhlm init
 ```
+output
+```bash
+info: etatcollhlm index has created
+# or
+error: etatcollhlm index already exist
+```
 ### etatcollhlm insert
 before use this command, make sure etatcollhlm is created.
 Insert the contents of a file into the etatcollhlm index.
@@ -95,7 +116,13 @@ Insert the contents of a file into the etatcollhlm index.
 | -u --use | use a custom configuration file |
 #### Example
 ```bash
-$ etatcollhlm insert -f ./file.csv
+$ etatcollhlm insert -f ./file.csv -v
+```
+output
+```bash
+info: lines that must be inserted 437329
+progress [========================================] 100% | 270929541/270929541 bytes
+info: 437329/437329 lines inserted
 ```
 ### etatcollhlm info
 #### Parameter
@@ -107,6 +134,21 @@ $ etatcollhlm insert -f ./file.csv
 ```bash
 $ etatcollhlm info
 ```
+
+output
+```bash
+info: Number total documents in index etatcollhlm: 20
+info: IN2P3: 1
+info: INC: 2
+info: INEE: 3
+info: INP: 4
+info: INS2I: 0
+info: INSB: 1
+info: INSHS: 2
+info: INSIS: 3
+info: INSMI: 4
+info: INSU: 0
+```
 ### etatcollhlm reset
 empty etatcollhlm index on ez-meta.
 #### Parameter
@@ -117,4 +159,9 @@ empty etatcollhlm index on ez-meta.
 #### Example
 ```bash
 $ etatcollhlm reset
+```
+
+output
+```bash
+info: documents deleted : 20
 ```
