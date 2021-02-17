@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const Papa = require('papaparse');
 const cliProgress = require('cli-progress');
+const { exec } = require('child_process');
 const { connection } = require('../../lib/client');
 
 const logger = require('../../lib/logger');
@@ -18,16 +19,15 @@ const bar = new cliProgress.SingleBar({
  * @param {*} data array of HLM datas
  */
 const insertHLM = async (client, data) => {
+  let res;
   const body = data.flatMap((doc) => [{ index: { _index: 'etatcollhlm' } }, doc]);
   try {
-    const res = await client.bulk({ refresh: true, body });
-    if (res.body.errors) {
-      logger.error(res.body.errors);
-    }
+    res = await client.bulk({ refresh: true, body });
   } catch (err) {
-    logger.error(`Error in insertHLM: ${err}`);
+    logger.error(`insertHLM: ${err}`);
     process.exit(1);
   }
+  return res.body.items.length;
 };
 
 const transformStringToArray = (data, name) => {
@@ -52,6 +52,8 @@ const transformStringToArray = (data, name) => {
 };
 
 const insertion = async (args) => {
+  let lineInFile = 0;
+  let lineInserted = 0;
   if (!args.file || args.file === '') {
     logger.error('file expected');
     process.exit(1);
@@ -64,6 +66,19 @@ const insertion = async (args) => {
     process.exit(1);
   }
 
+  if (args.verbose) {
+    await new Promise((resolve) => {
+      exec(`wc -l < ${filePath}`, (error, results) => {
+        if (error) {
+          logger.error(`wc -l: ${error}`);
+        }
+        lineInFile = results;
+        logger.info(`lines that must be inserted ${results - 1}`);
+        resolve();
+      });
+    });
+  }
+
   const client = await connection(args.use);
 
   let readStream;
@@ -72,7 +87,7 @@ const insertion = async (args) => {
   try {
     readStream = fs.createReadStream(filePath);
   } catch (err) {
-    logger.error(`Error in readstream in insertDatasHLM: ${err}`);
+    logger.error(`readstream in insertDatasHLM: ${err}`);
   }
 
   const stat = await fs.stat(readStream.path);
@@ -105,7 +120,7 @@ const insertion = async (args) => {
         tab.push(data);
         if (tab.length === 1000) {
           await parser.pause();
-          await insertHLM(client, tab);
+          lineInserted += await insertHLM(client, tab);
           tab = [];
           bar.update(results.meta.cursor);
           await parser.resume();
@@ -117,11 +132,15 @@ const insertion = async (args) => {
     });
   });
   if (tab.length !== 0) {
-    await insertHLM(client, tab);
+    lineInserted += await insertHLM(client, tab);
     tab = [];
   }
   bar.update(stat.size);
   bar.stop();
+  console.log('\n');
+  if (args.verbose) {
+    logger.info(`${lineInserted}/${lineInFile - 1}`);
+  }
 };
 
 module.exports = {

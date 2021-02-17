@@ -5,8 +5,9 @@ const pkg = require('../package.json');
 
 const { config } = require('./cmds/config');
 const { ping } = require('./cmds/ping');
-const { insertion } = require('./cmds/insertion');
-const { reset } = require('./cmds/reset');
+const { insertion } = require('./cmds/insert');
+const { reset, init } = require('./cmds/index');
+const { info } = require('./cmds/info');
 
 program.on('command:*', () => {
   console.error(`Invalid command: ${program.args.join(' ')}\nSee --help for a list of available commands.`);
@@ -28,9 +29,16 @@ program
   .action((args) => config(args));
 
 program
+  .command('init')
+  .description('init elastic index')
+  .option('-u --use <use>', 'use a custom config')
+  .action((args) => init(args));
+
+program
   .command('reset')
   .description('empty elastic index')
-  .action(() => reset());
+  .option('-u --use <use>', 'use a custom config')
+  .action((args) => reset(args));
 
 program
   .command('ping')
@@ -40,8 +48,15 @@ program
 
 program
   .command('insert')
-  .option('-f --file <file>', 'todo')
+  .option('-f --file <file>', 'file to which its content is inserted in a elastic')
+  .option('-v --verbose', 'verbose')
   .option('-u --use <use>', 'use a custom config')
   .action((args) => insertion(args));
+
+program
+  .command('info')
+  .description('info of elastic index')
+  .option('-u --use <use>', 'use a custom config')
+  .action((args) => info(args));
 
 program.parse(process.argv);
