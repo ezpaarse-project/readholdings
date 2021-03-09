@@ -90,6 +90,9 @@ const insertion = async (args) => {
     logger.error(`readstream in insertDatasHLM: ${err}`);
   }
 
+  const tmp = readStream.path.split('/');
+  const [file] = tmp[tmp.length - 1].split('.');
+
   const stat = await fs.stat(readStream.path);
   bar.start(stat.size, 0);
 
@@ -100,7 +103,9 @@ const insertion = async (args) => {
       transformHeader: (header) => header.trim(),
       step: async (results, parser) => {
         // update bar
+        results.data.BibCNRS = file;
         data = results.data;
+        console.log(data);
         for (const attr in data) {
           if (attr.trim() !== attr) {
             data[attr.trim()] = data[attr];
