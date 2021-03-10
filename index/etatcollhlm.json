@@ -28,7 +28,7 @@
       "CustomEmbargo": { "type": "keyword" },
       "Description": { "type": "keyword" },
       "Subject": { "type": "keyword" },
-      "RessourceType": { "type": "keyword" },
+      "ResourceType": { "type": "keyword" },
       "PackageContentType": { "type": "keyword" },
       "CreateCustom": { "type": "keyword" },
       "HideOnPublicationFinder": { "type": "keyword" },
