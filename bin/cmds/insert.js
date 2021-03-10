@@ -105,7 +105,6 @@ const insertion = async (args) => {
         // update bar
         results.data.BibCNRS = file;
         data = results.data;
-        console.log(data);
         for (const attr in data) {
           if (attr.trim() !== attr) {
             data[attr.trim()] = data[attr];
