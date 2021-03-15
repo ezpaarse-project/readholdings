@@ -36,17 +36,10 @@ const transformStringToArray = (data, name) => {
       const dates = data[name].split('|');
       const newdates = [];
       dates.forEach((date) => {
-        if (date === 'Present') {
-          newdates.push(null);
-        } else {
-          newdates.push(date);
-        }
+        newdates.push(date);
       });
       data[name] = newdates;
     }
-  }
-  if (data[name] === 'Present') {
-    data[name] = null;
   }
   return data;
 };
