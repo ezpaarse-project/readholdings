@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "bin": {
+    "etatcollhlm": "./bin/etatcollhlm"
+  },
   "scripts": {
     "precommit": "npm run lint"
   },
