@@ -36,11 +36,38 @@ const transformStringToArray = (data, name) => {
       const dates = data[name].split('|');
       const newdates = [];
       dates.forEach((date) => {
+        if (date === 'Present') {
+          newdates.push('3000-01-01');
+        } else {
+          newdates.push(date);
+        }
         newdates.push(date);
       });
       data[name] = newdates;
     }
   }
+  if (data[name] === 'Present') {
+    data[name] = '3000-01-01';
+  }
+  return data;
+};
+
+const transformEmbargo = (data, embargo) => {
+  if (!data[embargo]) {
+    return data;
+  }
+  const time = data[embargo];
+  const splited = time.split(' ');
+  const number = splited[0];
+  const indicator = splited[1].toUpperCase();
+  let multiplicator = 1;
+  if (indicator === 'YEARS') {
+    multiplicator = 12;
+  }
+  if (indicator === 'DAYS') {
+    multiplicator = 0.3;
+  }
+  data[embargo] = `${number * multiplicator} mois`;
   return data;
 };
 
@@ -103,17 +130,22 @@ const insertion = async (args) => {
             data[attr.trim()] = data[attr];
             delete data[attr];
           }
-
           // skip empty field
           if (data[attr] === '') {
             delete data[attr];
           }
-
-          data = transformStringToArray(data, 'ManagedCoverageBegin');
-          data = transformStringToArray(data, 'ManagedCoverageEnd');
-          data = transformStringToArray(data, 'CustomCoverageBegin');
-          data = transformStringToArray(data, 'CustomCoverageEnd');
         }
+
+        data = transformStringToArray(data, 'ManagedCoverageBegin');
+        data = transformStringToArray(data, 'ManagedCoverageEnd');
+        data = transformStringToArray(data, 'CustomCoverageBegin');
+        data = transformStringToArray(data, 'CustomCoverageEnd');
+        data = transformEmbargo(data, 'Embargo');
+        data = transformEmbargo(data, 'CustomEmbargo');
+
+        console.log(data.embargo);
+        console.log(data.CustomEmbargo);
+
         tab.push(data);
         if (tab.length === 1000) {
           await parser.pause();
