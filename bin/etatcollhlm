@@ -8,6 +8,7 @@ const { ping } = require('./cmds/ping');
 const { insertion } = require('./cmds/insert');
 const { reset, init } = require('./cmds/index');
 const { info } = require('./cmds/info');
+const { download } = require('./cmds/download');
 
 program.on('command:*', () => {
   console.error(`Invalid command: ${program.args.join(' ')}\nSee --help for a list of available commands.`);
@@ -58,5 +59,12 @@ program
   .description('info of elastic index')
   .option('-u --use <use>', 'use a custom config')
   .action((args) => info(args));
+
+program
+  .command('download')
+  .description('download a package')
+  .option('-i --institute <institute>', 'institute')
+  .option('-u --use <use>', 'use a custom config')
+  .action((args) => download(args));
 
 program.parse(process.argv);

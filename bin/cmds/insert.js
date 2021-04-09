@@ -143,9 +143,6 @@ const insertion = async (args) => {
         data = transformEmbargo(data, 'Embargo');
         data = transformEmbargo(data, 'CustomEmbargo');
 
-        console.log(data.embargo);
-        console.log(data.CustomEmbargo);
-
         tab.push(data);
         if (tab.length === 1000) {
           await parser.pause();
