@@ -3,17 +3,68 @@
 /* eslint-disable max-len */
 const path = require('path');
 const fs = require('fs-extra');
+const Papa = require('papaparse');
 const axios = require('axios');
 const logger = require('../../lib/logger');
 
 const { URL } = process.env;
+const { INSTITUTES } = process.env;
 const { APIKEY } = process.env;
-let { CUSTID } = process.env;
 const format = 'kbart2';
 
-const printAndOnlineIdentifier = (type) => (type === 'serial' ? 'ISSN' : 'ISBN');
+const header = [
+  'BibCNRS',
+  'KBID',
+  'Title',
+  'AlternateTitle',
+  'PackageName',
+  'URL',
+  'ProxiedURL',
+  'Publisher',
+  'Edition',
+  'Author',
+  'Editor',
+  'Illustrator',
+  'PrintISSN',
+  'OnlineISSN',
+  'PrintISBN',
+  'OnlineISBN',
+  'DOI',
+  'PeerReviewed',
+  'ManagedCoverageBegin',
+  'ManagedCoverageEnd',
+  'CustomCoverageBegin',
+  'CustomCoverageEnd',
+  'CoverageStatement',
+  'Embargo',
+  'CustomEmbargo',
+  'Description',
+  'Subject',
+  'ResourceType',
+  'PackageContentType',
+  'CreateCustom',
+  'HideOnPublicationFinder',
+  'Delete',
+  'OrderedThroughEBSCO',
+  'IsCustom',
+  'UserDefinedField1',
+  'UserDefinedField2',
+  'UserDefinedField3',
+  'UserDefinedField4',
+  'UserDefinedField5',
+  'PackageType',
+  'AllowEbscoToAddNewTitles',
+];
 
-const sleep = (waitTimeInMs) => new Promise((resolve) => setTimeout(resolve, waitTimeInMs));
+const createEmptyData = () => {
+  const data = {};
+  header.forEach((element) => {
+    data[element] = '';
+  });
+  return data;
+};
+
+const printAndOnlineIdentifier = (type) => (type === 'serial' ? 'ISSN' : 'ISBN');
 
 const coverage = (data) => {
   if (!data.length) {
@@ -33,8 +84,11 @@ const embargo = (data) => {
 };
 
 const subject = (data) => {
-
-}
+  if (!data.length) {
+    return '';
+  }
+  return data.map((e) => e.subject).join(',');
+};
 
 const generalInformationFromsEbsco = async (custid, count, offset) => {
   let res;
@@ -49,10 +103,10 @@ const generalInformationFromsEbsco = async (custid, count, offset) => {
       },
     });
   } catch (err) {
-    logger.error(`Error in first request : ${err}`);
+    logger.error(`generalInformationFromsEbsco : ${err}`);
     process.exit(1);
   }
-  logger.info('first request success');
+  logger.info('generalInformationFromsEbsco success');
   return res?.data?.holdings;
 };
 
@@ -68,22 +122,22 @@ const additionalInformationFromsEbsco = async (custid, vendorid, packageid, kbid
       },
     });
   } catch (err) {
-    logger.error(`Error in second request : ${err}`);
+    logger.error(`additionalInformationFromsEbsco : ${err}`);
     process.exit(1);
   }
-  logger.info('second request success');
+  logger.info('additionalInformationFromsEbsco success');
   return res.data;
 };
 
 const createData = (firstData, moreInfo, institute) => {
-  const final = {};
+  const final = createEmptyData();
   final.BibCNRS = institute;
   final.KBID = firstData?.title_id;
   final.Title = firstData?.publication_title;
   // 7 AlternateTitle
   final.PackageName = firstData?.package_name;
   final.URL = firstData?.title_url;
-  final.ProxiedURL = ` http://${institute.toLowerCase}.bib.cnrs.fr/login?url=${final.URL}`;
+  final.ProxiedURL = `http://${institute.toLowerCase()}.bib.cnrs.fr/login?url=${final.URL}`;
   final.Publisher = firstData?.publisher_name; // 11
   final.Edition = moreInfo?.edition; // 12
   final.Author = firstData?.first_author; // 13
@@ -120,9 +174,8 @@ const createData = (firstData, moreInfo, institute) => {
 
   final.Embargo = embargo(moreInfo?.customerResourcesList[0]?.managedEmbargoPeriod);
   final.CustomEmbargo = embargo(moreInfo?.customerResourcesList[0]?.customEmbargoPeriod);
-
   final.Description = moreInfo?.description; // 29
-  final.Subject = moreInfo?.subjectsList[0].subject; // 30
+  final.Subject = subject(moreInfo?.subjectsList); // 30
   final.ResourceType = firstData?.resource_type; // 31
   final.PackageContentType = firstData?.package_content_type; // 32
   // 33 CreateCustom // TODO toujours à N dans le fichier
@@ -136,28 +189,60 @@ const createData = (firstData, moreInfo, institute) => {
   return final;
 };
 
+const writeHeader = async (filePath) => {
+  try {
+    await fs.writeFile(filePath, `${header.join(',')}\n`, { flag: 'a' });
+  } catch (err) {
+    logger.error(`writeHeader: ${err}`);
+  }
+};
+
+const convertToCSV = (line) => {
+  const CSVLine = Papa.unparse([line]);
+  const data = CSVLine.split('\n');
+  return data[1];
+};
+
+const writeLineInFile = async (line, filePath) => {
+  try {
+    await fs.writeFile(filePath, `${line}\n`, { flag: 'a' });
+  } catch (err) {
+    logger.error(`writeLineInFile: ${err}`);
+  }
+};
+
+const deleteFile = async (filePath) => {
+  try {
+    await fs.unlink(filePath);
+  } catch (err) {
+    logger.error(`deleteFile: ${err}`);
+  }
+};
+
 const download = async (args) => {
+  const { institute } = args;
+  const filePath = path.resolve(__dirname, '..', '..', 'download', `${institute}.csv`);
+
   let count = 0;
   let offset = 1;
   let resNumber = 1000;
-
-  const { institute } = args;
-  CUSTID = JSON.parse(CUSTID)[institute];
-
+  const CUSTID = JSON.parse(INSTITUTES)[institute];
+  await deleteFile(filePath);
+  await writeHeader(filePath);
   while (resNumber === 1000) {
     count += 1000;
     const data = await generalInformationFromsEbsco(CUSTID, count, offset);
-    console.log(data);
     resNumber = data.length;
-    data.forEach(async (element) => {
-      const moreInfo = await additionalInformationFromsEbsco(CUSTID, element.vendor_id, element.package_id, element.title_id);
-      await sleep(1000);
-      const line = createData(element, moreInfo, institute);
-      console.log(line);
-      // TODO write in a csv file
-    });
+
+    for (let i = 0; i < 1000; i += 1) {
+      const moreInfo = await additionalInformationFromsEbsco(CUSTID, data[i].vendor_id, data[i].package_id, data[i].title_id);
+      const line = createData(data[i], moreInfo, institute);
+      const csvLine = convertToCSV(line);
+      await writeLineInFile(csvLine, filePath);
+    }
     offset += 1000;
   }
+  logger.info('download: end');
 };
 
 module.exports = {
