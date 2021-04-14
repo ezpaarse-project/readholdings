@@ -96,7 +96,7 @@ const subject = (data) => {
 const generalInformationsFromEbsco = async (custid, count, offset) => {
   let res;
   let i = 0;
-  while (res !== undefined && i < 5) {
+  while (res === undefined && i < 5) {
     try {
       res = await axios({
         method: 'get',
