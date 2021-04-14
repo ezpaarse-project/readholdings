@@ -6,6 +6,9 @@ const fs = require('fs-extra');
 const Papa = require('papaparse');
 const axios = require('axios');
 const logger = require('../../lib/logger');
+const HttpsProxyAgent = require('https-proxy-agent');
+
+const httpsAgent = process.env.https_proxy && new HttpsProxyAgent(process.env.https_proxy);
 
 const { URL } = process.env;
 const { INSTITUTES } = process.env;
@@ -103,6 +106,8 @@ const generalInformationFromsEbsco = async (custid, count, offset) => {
         'x-api-key': APIKEY,
         'Content-Type': 'application/json',
       },
+      httpsAgent: (URL.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
+      proxy: (URL.startsWith('https') && httpsAgent) ? false : undefined,
     });
   } catch (err) {
     logger.error(`generalInformationFromsEbsco : ${err}`);
@@ -122,6 +127,8 @@ const additionalInformationFromsEbsco = async (custid, vendorid, packageid, kbid
         'x-api-key': APIKEY,
         'Content-Type': 'application/json',
       },
+      httpsAgent: (URL.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
+      proxy: (URL.startsWith('https') && httpsAgent) ? false : undefined,
     });
   } catch (err) {
     logger.error(`additionalInformationFromsEbsco : ${err}`);
