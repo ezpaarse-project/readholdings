@@ -91,6 +91,8 @@ const subject = (data) => {
 };
 
 const generalInformationFromsEbsco = async (custid, count, offset) => {
+  console.log(`${URL}${custid}/holdings`);
+  console.log(APIKEY);
   let res;
   try {
     res = await axios({
@@ -233,8 +235,9 @@ const download = async (args) => {
     count += 1000;
     const data = await generalInformationFromsEbsco(CUSTID, count, offset);
     resNumber = data.length;
-
+    logger.info(count);
     for (let i = 0; i < 1000; i += 1) {
+      logger.info(i);
       const moreInfo = await additionalInformationFromsEbsco(CUSTID, data[i].vendor_id, data[i].package_id, data[i].title_id);
       const line = createData(data[i], moreInfo, institute);
       const csvLine = convertToCSV(line);
