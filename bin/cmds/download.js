@@ -5,8 +5,8 @@ const path = require('path');
 const fs = require('fs-extra');
 const Papa = require('papaparse');
 const axios = require('axios');
-const logger = require('../../lib/logger');
 const HttpsProxyAgent = require('https-proxy-agent');
+const logger = require('../../lib/logger');
 
 const httpsAgent = process.env.https_proxy && new HttpsProxyAgent(process.env.https_proxy);
 
@@ -93,27 +93,28 @@ const subject = (data) => {
   return data.map((e) => e.subject).join(',');
 };
 
-const generalInformationFromsEbsco = async (custid, count, offset) => {
-  console.log(`${URL}${custid}/holdings`);
-  console.log(APIKEY);
+const generalInformationsFromEbsco = async (custid, count, offset) => {
   let res;
-  try {
-    res = await axios({
-      method: 'get',
-      url: `${URL}${custid}/holdings`,
-      params: { count, offset, format },
-      headers: {
-        'x-api-key': APIKEY,
-        'Content-Type': 'application/json',
-      },
-      httpsAgent: (URL.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
-      proxy: (URL.startsWith('https') && httpsAgent) ? false : undefined,
-    });
-  } catch (err) {
-    logger.error(`generalInformationFromsEbsco : ${err}`);
-    process.exit(1);
+  let i = 0;
+  while (res !== undefined && i < 5) {
+    try {
+      res = await axios({
+        method: 'get',
+        url: `${URL}${custid}/holdings`,
+        params: { count, offset, format },
+        headers: {
+          'x-api-key': APIKEY,
+          'Content-Type': 'application/json',
+        },
+        httpsAgent: (URL.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
+        proxy: (URL.startsWith('https') && httpsAgent) ? false : undefined,
+      });
+    } catch (err) {
+      logger.error(`generalInformationsFromEbsco : ${err}`);
+    }
+    i += 1;
+    logger.info('generalInformationsFromEbsco success');
   }
-  logger.info('generalInformationFromsEbsco success');
   return res?.data?.holdings;
 };
 
@@ -240,7 +241,7 @@ const download = async (args) => {
   await writeHeader(filePath);
   while (resNumber === 1000) {
     count += 1000;
-    const data = await generalInformationFromsEbsco(CUSTID, count, offset);
+    const data = await generalInformationsFromEbsco(CUSTID, count, offset);
     resNumber = data.length;
     logger.info(count);
     for (let i = 0; i < 1000; i += 1) {
