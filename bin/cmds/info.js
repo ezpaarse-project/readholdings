@@ -1,6 +1,12 @@
 const { connection } = require('../../lib/client');
 const logger = require('../../lib/logger');
 
+/**
+ * Count number of documents in index
+ * @param {String} name name of index
+ * @param {Object} client elastic client
+ * @returns {Int} number of documents
+ */
 const countDocuments = async (name, client) => {
   let data;
   try {
@@ -13,6 +19,13 @@ const countDocuments = async (name, client) => {
   return data.body.count ? data.body.count : 0;
 };
 
+/**
+ * Count number of documents for one institute
+ * @param {String} name name of index
+ * @param {Object} client elastic client
+ * @returns {Int} number of documents
+ * @returns number of documents for one institute
+ */
 const countInstitutes = async (name, institute, client) => {
   let data;
   const query = {
@@ -37,6 +50,10 @@ const countInstitutes = async (name, institute, client) => {
   return data.body.count ? data.body.count : 0;
 };
 
+/**
+ * display informations on terminal
+ * @param {Object} args object from commander
+ */
 const info = async (args) => {
   const client = await connection(args.use);
   const documents = await countDocuments('etatcollhlm', client);

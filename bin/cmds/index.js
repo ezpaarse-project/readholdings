@@ -2,6 +2,12 @@ const { connection } = require('../../lib/client');
 const logger = require('../../lib/logger');
 const etatcollhlmIndex = require('../../index/etatcollhlm.json');
 
+/**
+ * check if index exist
+ * @param {String} name name of index
+ * @param {Object} client elastic client
+ * @returns {boolean} isExist
+ */
 const isIndexExist = async (name, client) => {
   let res;
   try {
@@ -14,6 +20,12 @@ const isIndexExist = async (name, client) => {
   return res.body;
 };
 
+/**
+ * return number of document of index
+ * @param {String} name name of index
+ * @param {Object} client elastic client
+ * @returns {Int} number of document
+ */
 const countDocuments = async (name, client) => {
   let data;
   try {
@@ -26,6 +38,11 @@ const countDocuments = async (name, client) => {
   return data.body.count ? data.body.count : 0;
 };
 
+/**
+ * delete index
+ * @param {String} name name of index
+ * @param {Object} client elastic client
+ */
 const deleteIndex = async (name, client) => {
   const exist = await isIndexExist(name, client);
   let nb;
@@ -42,6 +59,12 @@ const deleteIndex = async (name, client) => {
   logger.info(`documents deleted : ${nb}`);
 };
 
+/**
+ * delete index and recreate it
+ * @param {String} name name of index
+ * @param {Object} index mapping of index
+ * @param {Object} client elastic client
+ */
 const resetIndex = async (name, index, client) => {
   await deleteIndex(name, client);
   try {
@@ -54,6 +77,12 @@ const resetIndex = async (name, index, client) => {
   }
 };
 
+/**
+ * create index if it does'nt exist
+ * @param {String} name name of index
+ * @param {Object} index mapping of index
+ * @param {Object} client elastic client
+ */
 const initIndex = async (name, index, client) => {
   const exist = await isIndexExist(name, client);
   if (exist) {
@@ -71,11 +100,19 @@ const initIndex = async (name, index, client) => {
   logger.info(`${name} index has created`);
 };
 
+/**
+ * reset the index
+ * @param {Object} args object from commander
+ */
 const reset = async (args) => {
   const client = await connection(args.use);
   resetIndex('etatcollhlm', etatcollhlmIndex, client);
 };
 
+/**
+ * init the index
+ * @param {Object} args object from commander
+ */
 const init = async (args) => {
   const client = await connection(args.use);
   initIndex('etatcollhlm', etatcollhlmIndex, client);

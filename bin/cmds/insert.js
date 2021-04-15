@@ -11,12 +11,10 @@ const { connection } = require('../../lib/client');
 
 const logger = require('../../lib/logger');
 
-const bar = new cliProgress.SingleBar({
-  format: 'progress [{bar}] {percentage}% | {value}/{total} bytes',
-});
-
 /**
- * @param {*} data array of HLM datas
+ * insert by packet of 1000, parsed data to elastic (ez-meta)
+ * @param {Object} client elastic client
+ * @param {Array} data array of HLM datas
  */
 const insertHLM = async (client, data) => {
   let res;
@@ -30,6 +28,12 @@ const insertHLM = async (client, data) => {
   return res.body.items.length;
 };
 
+/**
+ * parse csv data to json
+ * @param {Object} data unparsed data
+ * @param {String} name key of data need to be parsed
+ * @returns {Object} parsed data
+ */
 const transformStringToArray = (data, name) => {
   if (data[name]) {
     if (data[name].includes('|')) {
@@ -52,6 +56,12 @@ const transformStringToArray = (data, name) => {
   return data;
 };
 
+/**
+ * parse embargo data for json format
+ * @param {Object} data unparsed data
+ * @param {String} embargo type of embargo
+ * @returns {Object} parsed data
+ */
 const transformEmbargo = (data, embargo) => {
   if (!data[embargo]) {
     return data;
@@ -71,6 +81,10 @@ const transformEmbargo = (data, embargo) => {
   return data;
 };
 
+/**
+ * insert the content of file into elastic (ez-meta)
+ * @param {Object} args object from commander
+ */
 const insertion = async (args) => {
   let lineInFile = 0;
   let lineInserted = 0;
@@ -113,6 +127,9 @@ const insertion = async (args) => {
   const tmp = readStream.path.split('/');
   const [file] = tmp[tmp.length - 1].split('.');
 
+  const bar = new cliProgress.SingleBar({
+    format: 'progress [{bar}] {percentage}% | {value}/{total} bytes',
+  });
   const stat = await fs.stat(readStream.path);
   bar.start(stat.size, 0);
 
@@ -163,7 +180,6 @@ const insertion = async (args) => {
   }
   bar.update(stat.size);
   bar.stop();
-  console.log('\n');
   if (args.verbose) {
     logger.info(`${lineInserted}/${lineInFile - 1} lines inserted`);
   }

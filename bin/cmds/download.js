@@ -6,13 +6,13 @@ const fs = require('fs-extra');
 const Papa = require('papaparse');
 const axios = require('axios');
 const HttpsProxyAgent = require('https-proxy-agent');
+const cliProgress = require('cli-progress');
 const logger = require('../../lib/logger');
 
 const httpsAgent = process.env.https_proxy && new HttpsProxyAgent(process.env.https_proxy);
 
 const { URL } = process.env;
 const { INSTITUTES } = process.env;
-const { APIKEY } = process.env;
 const format = 'kbart2';
 
 const header = [
@@ -59,6 +59,10 @@ const header = [
   'AllowEbscoToAddNewTitles',
 ];
 
+/**
+ * create a empty data with all keys from mapping
+ * @returns {Object} empty data with all keys from mapping
+ */
 const createEmptyData = () => {
   const data = {};
   header.forEach((element) => {
@@ -67,8 +71,18 @@ const createEmptyData = () => {
   return data;
 };
 
+/**
+ * return if type is ISSN or ISBN
+ * @param {String} type publication_type
+ * @returns {String} type ISSN or ISBN
+ */
 const printAndOnlineIdentifier = (type) => (type === 'serial' ? 'ISSN' : 'ISBN');
 
+/**
+ * parse coverage data for csv format
+ * @param {String} data unparsed coverage
+ * @returns {String} parsed coverage
+ */
 const coverage = (data) => {
   if (!data.length) {
     return '';
@@ -79,6 +93,11 @@ const coverage = (data) => {
   };
 };
 
+/**
+ * parse embargo data for csv format
+ * @param {String} data unparsed embargo
+ * @returns {String} parsed embargo
+ */
 const embargo = (data) => {
   if (data.embargoUnit === null) {
     return '';
@@ -86,6 +105,11 @@ const embargo = (data) => {
   return `${data.embargoValue} ${data.embargoUnit}`;
 };
 
+/**
+ * parse subject data for csv format
+ * @param {String} data unparsed subject
+ * @returns {String} parsed subject
+ */
 const subject = (data) => {
   if (!data.length) {
     return '';
@@ -93,17 +117,54 @@ const subject = (data) => {
   return data.map((e) => e.subject).join(',');
 };
 
-const generalInformationsFromEbsco = async (custid, count, offset) => {
+/**
+ * get number of data of custid
+ * @param {String} custid
+ * @returns {Int} number of data
+ */
+const getNumberOfDataOfCustid = async (custid, apikey) => {
   let res;
   let i = 0;
-  while (res === undefined && i < 5) {
+  while ((res === undefined || res.length === 0) && i < 5) {
     try {
       res = await axios({
         method: 'get',
-        url: `${URL}${custid}/holdings`,
+        url: `${URL}/${custid}/holdings/status`,
+        headers: {
+          'x-api-key': apikey,
+          'Content-Type': 'application/json',
+        },
+        httpsAgent: (URL.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
+        proxy: (URL.startsWith('https') && httpsAgent) ? false : undefined,
+      });
+    } catch (err) {
+      logger.error(`getNumberOfDataOfCustid : ${err}`);
+    }
+    i += 1;
+  }
+  return res?.data?.totalCount;
+};
+
+/**
+ * get in packets of 5000. the data of custid
+ * in this data, they have general info and kbid (title_id) to do another request to get more infos
+ * @param {String} custid customerID
+ * @param {String} apikey apikey
+ * @param {Int} count number of results to return in the response. can not exceed 5000
+ * @param {Int} offset page
+ * @returns general data
+ */
+const generalInformationsFromEbsco = async (custid, apikey, count, offset) => {
+  let res;
+  let i = 0;
+  while ((res === undefined || res.length === 0) && i < 5) {
+    try {
+      res = await axios({
+        method: 'get',
+        url: `${URL}/${custid}/holdings`,
         params: { count, offset, format },
         headers: {
-          'x-api-key': APIKEY,
+          'x-api-key': apikey,
           'Content-Type': 'application/json',
         },
         httpsAgent: (URL.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
@@ -113,32 +174,44 @@ const generalInformationsFromEbsco = async (custid, count, offset) => {
       logger.error(`generalInformationsFromEbsco : ${err}`);
     }
     i += 1;
-    logger.info('generalInformationsFromEbsco success');
   }
   return res?.data?.holdings;
 };
 
-const additionalInformationFromsEbsco = async (custid, vendorid, packageid, kbid) => {
+/**
+ * get more info of ressource
+ * @param {String} custid
+ * @param {String} apikey apikey
+ * @param {Int} kbid
+ * @returns {Object} additional data
+ */
+const additionalInformationsFromEbsco = async (custid, apikey, kbid) => {
   let res;
   try {
     res = await axios({
       method: 'get',
-      url: `${URL}${custid}/vendors/${vendorid}/packages/${packageid}/titles/${kbid}`,
+      url: `${URL}/${custid}/titles/${kbid}`,
       headers: {
-        'x-api-key': APIKEY,
+        'x-api-key': apikey,
         'Content-Type': 'application/json',
       },
       httpsAgent: (URL.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
       proxy: (URL.startsWith('https') && httpsAgent) ? false : undefined,
     });
   } catch (err) {
-    logger.error(`additionalInformationFromsEbsco : ${err}`);
+    logger.error(`additionalInformationsFromEbsco : ${err}`);
     process.exit(1);
   }
-  logger.info('additionalInformationFromsEbsco success');
   return res.data;
 };
 
+/**
+ * merge firstDate and moreInfos to create unique line like "standard" format
+ * @param {String} firstData data from generalInformationsFromEbsco
+ * @param {String} moreInfo data from additionalInformationsFromEbsco
+ * @param {String} institute name of institute
+ * @returns {String} fusion of both
+ */
 const createData = (firstData, moreInfo, institute) => {
   const final = createEmptyData();
   final.BibCNRS = institute;
@@ -199,6 +272,10 @@ const createData = (firstData, moreInfo, institute) => {
   return final;
 };
 
+/**
+ * Write header in format of mapping "etatcollhlm" in a file
+ * @param {String} filePath
+ */
 const writeHeader = async (filePath) => {
   try {
     await fs.writeFile(filePath, `${header.join(',')}\n`, { flag: 'a' });
@@ -207,12 +284,22 @@ const writeHeader = async (filePath) => {
   }
 };
 
+/**
+ * Parse a json date to csv
+ * @param {String} line
+ * @returns {String} parsed data
+ */
 const convertToCSV = (line) => {
   const CSVLine = Papa.unparse([line]);
   const data = CSVLine.split('\n');
   return data[1];
 };
 
+/**
+ * write a parsed data in csv format in a file
+ * @param {String} line
+ * @param {String} filePath
+ */
 const writeLineInFile = async (line, filePath) => {
   try {
     await fs.writeFile(filePath, `${line}\n`, { flag: 'a' });
@@ -221,37 +308,58 @@ const writeLineInFile = async (line, filePath) => {
   }
 };
 
+/**
+ * delete file
+ * @param {String} filePath filepath
+ */
 const deleteFile = async (filePath) => {
   try {
-    await fs.unlink(filePath);
+    await fs.remove(filePath);
   } catch (err) {
     logger.error(`deleteFile: ${err}`);
   }
 };
 
+/**
+ * write in a file all data in format standard from esbco of custid
+ * @param {Object} args object from commander
+ */
 const download = async (args) => {
+  // get custid and apikey from config
   const { institute } = args;
-  const filePath = path.resolve(__dirname, '..', '..', 'download', `${institute}.csv`);
 
-  let count = 0;
+  const { custid } = JSON.parse(INSTITUTES)[institute];
+  const { apikey } = JSON.parse(INSTITUTES)[institute];
+
+  const count = 5000;
   let offset = 1;
-  let resNumber = 1000;
-  const CUSTID = JSON.parse(INSTITUTES)[institute];
+  let resNumber = 5000;
+
+  // out file
+  const filePath = path.resolve(__dirname, '..', '..', 'download', `${institute}.csv`);
   await deleteFile(filePath);
   await writeHeader(filePath);
-  while (resNumber === 1000) {
-    count += 1000;
-    const data = await generalInformationsFromEbsco(CUSTID, count, offset);
+
+  // intiate bar (terminal view)
+  const numberOfData = await getNumberOfDataOfCustid(custid, apikey);
+  const bar = new cliProgress.SingleBar({
+    format: 'progress [{bar}] {percentage}% | {value}/{total} data',
+  });
+  bar.start(numberOfData, 0);
+
+  while (resNumber === 5000) {
+    // harvest by pack of 5000
+    const data = await generalInformationsFromEbsco(custid, apikey, count, offset);
     resNumber = data.length;
-    logger.info(count);
-    for (let i = 0; i < 1000; i += 1) {
-      logger.info(i);
-      const moreInfo = await additionalInformationFromsEbsco(CUSTID, data[i].vendor_id, data[i].package_id, data[i].title_id);
+    // get more infos to create a "standard" data (like from HLM)
+    for (let i = 0; i < 5000; i += 1) {
+      const moreInfo = await additionalInformationsFromEbsco(custid, apikey, data[i].title_id);
       const line = createData(data[i], moreInfo, institute);
+      bar.increment();
       const csvLine = convertToCSV(line);
       await writeLineInFile(csvLine, filePath);
     }
-    offset += 1000;
+    offset += 1;
   }
   logger.info('download: end');
 };

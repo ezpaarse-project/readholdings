@@ -1,7 +1,6 @@
 #!/bin/bash
 
-export URL="https://sandbox.ebsco.io/rm/rmaccounts/";
-export APIKEY="api_key";
+export URL="https://sandbox.ebsco.io/rm/rmaccounts";
 export INSTITUTES="{}";
 
 if [[ -f env.local.sh ]] ; then
