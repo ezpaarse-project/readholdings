@@ -395,7 +395,7 @@ const download = async (args) => {
   const bar = new cliProgress.SingleBar({
     format: 'progress [{bar}] {percentage}% | {value}/{total} data',
   });
-  bar.start(numberOfData - offset, 0);
+  bar.start(numberOfData, offset);
 
   while (resNumber === 5000) {
     // harvest by pack of 5000

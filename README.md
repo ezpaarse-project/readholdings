@@ -37,6 +37,7 @@ The module provides an `etatcollhlm` command (aliased `hlm`).
 - [config](#etatcollhlm-config)
 - [ping](#etatcollhlm-ping)
 - [init](#etatcollhlm-init)
+- [download](#etatcollhlm-download)
 - [insert](#etatcollhlm-insert)
 - [info](#etatcollhlm-info)
 - [reset](#etatcollhlm-reset)
@@ -52,6 +53,7 @@ The default configuration is saved in a file at $HOME/.config/.etatcollhlmrc
 | --port | elastic port |
 | --user | elastic user |
 | --password | elastic password |
+| --institutes | custif and apikey of institute in JSON format |
 | -f --file | display the configuration |
 #### Example
 ```bash
@@ -60,6 +62,7 @@ $ etatcollhlm config --url http://localhost
 $ etatcollhlm config --port 8080
 $ etatcollhlm config --user elastic
 $ etatcollhlm config --password changeme
+$ etatcollhlm config --institutes "{\"INSTITUTE\": {\"custid\":\"customerID\", \"apikey\": \"x-api-key\"}}",
 ```
 output
 ```bash
@@ -67,9 +70,10 @@ info: {
   "url": "http://localhost",
   "port": "9200",
   "user": "elastic",
-  "password": "changeme"
+  "password": "changeme",
+  "institutes": "{\"INSTITUTE\": {\"custid\":\"customerID\", \"apikey\": \"x-api-key\"}}"
 }
-info: from /home/felix/.config/.etatcollhlmrc
+info: from /home/.config/.etatcollhlmrc
 ```
 ### etatcollhlm ping
 Check if service is available.
