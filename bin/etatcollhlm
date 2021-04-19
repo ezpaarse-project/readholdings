@@ -28,6 +28,7 @@ program
   .option('--port <port>', 'elastic port')
   .option('--user <user>', 'elastic user')
   .option('--password <password>', 'elastic password')
+  .option('--institutes <institutes>', 'custif and apikey of institute in JSON format')
   .option('-l --list', 'list of attributes required for configuration')
   .action((args) => config(args));
 

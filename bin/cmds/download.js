@@ -8,12 +8,13 @@ const axios = require('axios');
 const readline = require('readline');
 const HttpsProxyAgent = require('https-proxy-agent');
 const cliProgress = require('cli-progress');
+
+const { getConfig } = require('../../lib/client');
 const logger = require('../../lib/logger');
 
 const httpsAgent = process.env.https_proxy && new HttpsProxyAgent(process.env.https_proxy);
 
-const { URL } = process.env;
-const { INSTITUTES } = process.env;
+const url = 'https://sandbox.ebsco.io/rm/rmaccounts';
 const format = 'kbart2';
 
 const header = [
@@ -130,13 +131,13 @@ const getNumberOfDataOfCustid = async (custid, apikey) => {
     try {
       res = await axios({
         method: 'get',
-        url: `${URL}/${custid}/holdings/status`,
+        url: `${url}/${custid}/holdings/status`,
         headers: {
           'x-api-key': apikey,
           'Content-Type': 'application/json',
         },
-        httpsAgent: (URL.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
-        proxy: (URL.startsWith('https') && httpsAgent) ? false : undefined,
+        httpsAgent: (url.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
+        proxy: (url.startsWith('https') && httpsAgent) ? false : undefined,
       });
     } catch (err) {
       logger.error(`getNumberOfDataOfCustid : ${err}`);
@@ -162,14 +163,14 @@ const generalInformationsFromEbsco = async (custid, apikey, count, offset) => {
     try {
       res = await axios({
         method: 'get',
-        url: `${URL}/${custid}/holdings`,
+        url: `${url}/${custid}/holdings`,
         params: { count, offset, format },
         headers: {
           'x-api-key': apikey,
           'Content-Type': 'application/json',
         },
-        httpsAgent: (URL.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
-        proxy: (URL.startsWith('https') && httpsAgent) ? false : undefined,
+        httpsAgent: (url.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
+        proxy: (url.startsWith('https') && httpsAgent) ? false : undefined,
       });
     } catch (err) {
       logger.error(`generalInformationsFromEbsco: ${err}`);
@@ -191,13 +192,13 @@ const additionalInformationsFromEbsco = async (custid, apikey, kbid) => {
   try {
     res = await axios({
       method: 'get',
-      url: `${URL}/${custid}/titles/${kbid}`,
+      url: `${url}/${custid}/titles/${kbid}`,
       headers: {
         'x-api-key': apikey,
         'Content-Type': 'application/json',
       },
-      httpsAgent: (URL.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
-      proxy: (URL.startsWith('https') && httpsAgent) ? false : undefined,
+      httpsAgent: (url.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
+      proxy: (url.startsWith('https') && httpsAgent) ? false : undefined,
     });
   } catch (err) {
     logger.error(`additionalInformationsFromEbsco: ${err}`);
@@ -347,6 +348,8 @@ const download = async (args) => {
   const { institute } = args;
   const { resume } = args;
 
+  const config = await getConfig(args.use);
+
   let page = 1;
   let offset = 0;
 
@@ -369,8 +372,8 @@ const download = async (args) => {
     }
   }
 
-  const { custid } = JSON.parse(INSTITUTES)[institute];
-  const { apikey } = JSON.parse(INSTITUTES)[institute];
+  const { custid } = JSON.parse(config.institutes)[institute];
+  const { apikey } = JSON.parse(config.institutes)[institute];
 
   const count = 5000;
   let resNumber = 5000;

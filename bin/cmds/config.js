@@ -13,6 +13,7 @@ const setConfig = async () => {
     port: 8080,
     user: 'elastic',
     password: 'changeme',
+    institutes: '{}',
   };
   try {
     await fs.writeFile(pathConfig, JSON.stringify(config, null, 2), 'utf8');
@@ -75,13 +76,21 @@ const config = async (args) => {
   if (args.password) {
     conf.password = args.password;
   }
+  if (args.institutes) {
+    try {
+      JSON.parse(args.institutes);
+    } catch (err) {
+      logger.error(`${args.institutes} invalid JSON : ${err}`);
+    }
+    conf.institutes = args.institutes;
+  }
 
   try {
     await fs.writeFile(configPath, JSON.stringify(conf, null, 2), 'utf8');
   } catch (err) {
     logger.error(err);
   }
-  logger.info(JSON.stringify(config, null, 2));
+  logger.info(JSON.stringify(conf, null, 2));
   logger.info(`from ${configPath}`);
   process.exit(0);
 };
