@@ -64,6 +64,7 @@ program
   .command('download')
   .description('download a package')
   .option('-i --institute <institute>', 'institute')
+  .option('-r --resume', 'resume')
   .option('-u --use <use>', 'use a custom config')
   .action((args) => download(args));
 

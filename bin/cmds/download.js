@@ -5,8 +5,10 @@ const path = require('path');
 const fs = require('fs-extra');
 const Papa = require('papaparse');
 const axios = require('axios');
+const readline = require('readline');
 const HttpsProxyAgent = require('https-proxy-agent');
 const cliProgress = require('cli-progress');
+const { exec } = require('child_process');
 const logger = require('../../lib/logger');
 
 const httpsAgent = process.env.https_proxy && new HttpsProxyAgent(process.env.https_proxy);
@@ -151,7 +153,7 @@ const getNumberOfDataOfCustid = async (custid, apikey) => {
  * @param {String} custid customerID
  * @param {String} apikey apikey
  * @param {Int} count number of results to return in the response. can not exceed 5000
- * @param {Int} offset page
+ * @param {Int} page page
  * @returns general data
  */
 const generalInformationsFromEbsco = async (custid, apikey, count, offset) => {
@@ -171,7 +173,7 @@ const generalInformationsFromEbsco = async (custid, apikey, count, offset) => {
         proxy: (URL.startsWith('https') && httpsAgent) ? false : undefined,
       });
     } catch (err) {
-      logger.error(`generalInformationsFromEbsco : ${err}`);
+      logger.error(`generalInformationsFromEbsco: ${err}`);
     }
     i += 1;
   }
@@ -199,7 +201,7 @@ const additionalInformationsFromEbsco = async (custid, apikey, kbid) => {
       proxy: (URL.startsWith('https') && httpsAgent) ? false : undefined,
     });
   } catch (err) {
-    logger.error(`additionalInformationsFromEbsco : ${err}`);
+    logger.error(`additionalInformationsFromEbsco: ${err}`);
     process.exit(1);
   }
   return res.data;
@@ -321,45 +323,94 @@ const deleteFile = async (filePath) => {
 };
 
 /**
+ *
+ * @param {String} filePath
+ */
+const countLinesInFile = async (filePath) => {
+  let lines = 0;
+  const readStream = fs.createReadStream(filePath);
+  const rl = readline.createInterface({
+    input: readStream,
+    crlfDelay: Infinity,
+  });
+  for await (const line of rl) {
+    lines += 1;
+  }
+  return lines;
+};
+
+/**
  * write in a file all data in format standard from esbco of custid
  * @param {Object} args object from commander
  */
 const download = async (args) => {
   // get custid and apikey from config
   const { institute } = args;
+  const { resume } = args;
+
+  let page = 1;
+  let offset = 0;
+
+  const filePath = path.resolve(__dirname, '..', '..', 'download', `${institute}.csv`);
+
+  if (resume) {
+    try {
+      // -1 because header of csv file
+      offset = await countLinesInFile(filePath) - 1;
+    } catch (err) {
+      logger.error(`download: countLinesInFile : ${err}`);
+    }
+    if (offset) {
+      page = Math.floor(offset / 5000) + 1;
+      if (page !== 0) {
+        offset -= 5000 * (page - 1);
+      }
+    } else {
+      offset = 0;
+    }
+  }
 
   const { custid } = JSON.parse(INSTITUTES)[institute];
   const { apikey } = JSON.parse(INSTITUTES)[institute];
 
   const count = 5000;
-  let offset = 1;
   let resNumber = 5000;
 
   // out file
-  const filePath = path.resolve(__dirname, '..', '..', 'download', `${institute}.csv`);
-  await deleteFile(filePath);
-  await writeHeader(filePath);
+
+  if (offset === 0) {
+    await deleteFile(filePath);
+    await writeHeader(filePath);
+  }
 
   // intiate bar (terminal view)
   const numberOfData = await getNumberOfDataOfCustid(custid, apikey);
+  if (offset === numberOfData) {
+    logger.info('all data has been downloaded, resume downloading therefore cannot take place');
+    logger.info(`if you want to re-download the data to update it, you have to use: etatcollhlm download -i ${institute}`);
+    process.exit(0);
+  }
   const bar = new cliProgress.SingleBar({
     format: 'progress [{bar}] {percentage}% | {value}/{total} data',
   });
-  bar.start(numberOfData, 0);
+  bar.start(numberOfData - offset, 0);
 
   while (resNumber === 5000) {
     // harvest by pack of 5000
-    const data = await generalInformationsFromEbsco(custid, apikey, count, offset);
+    const data = await generalInformationsFromEbsco(custid, apikey, count, page);
     resNumber = data.length;
     // get more infos to create a "standard" data (like from HLM)
     for (let i = 0; i < 5000; i += 1) {
-      const moreInfo = await additionalInformationsFromEbsco(custid, apikey, data[i].title_id);
-      const line = createData(data[i], moreInfo, institute);
+      if (offset <= i) {
+        const moreInfo = await additionalInformationsFromEbsco(custid, apikey, data[i].title_id);
+        const line = createData(data[i], moreInfo, institute);
+        const csvLine = convertToCSV(line);
+        await writeLineInFile(csvLine, filePath);
+      }
       bar.increment();
-      const csvLine = convertToCSV(line);
-      await writeLineInFile(csvLine, filePath);
     }
-    offset += 1;
+    offset = 0;
+    page += 1;
   }
   logger.info('download: end');
 };
