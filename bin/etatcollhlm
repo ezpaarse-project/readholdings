@@ -3,6 +3,8 @@
 const program = require('commander');
 const pkg = require('../package.json');
 
+const logger = require('../lib/logger');
+
 const { config } = require('./cmds/config');
 const { ping } = require('./cmds/ping');
 const { insertion } = require('./cmds/insert');
@@ -11,7 +13,7 @@ const { info } = require('./cmds/info');
 const { download } = require('./cmds/download');
 
 program.on('command:*', () => {
-  console.error(`Invalid command: ${program.args.join(' ')}\nSee --help for a list of available commands.`);
+  logger.error(`Invalid command: ${program.args.join(' ')}\nSee --help for a list of available commands.`);
   process.exit(1);
 });
 

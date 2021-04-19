@@ -8,7 +8,6 @@ const axios = require('axios');
 const readline = require('readline');
 const HttpsProxyAgent = require('https-proxy-agent');
 const cliProgress = require('cli-progress');
-const { exec } = require('child_process');
 const logger = require('../../lib/logger');
 
 const httpsAgent = process.env.https_proxy && new HttpsProxyAgent(process.env.https_proxy);
