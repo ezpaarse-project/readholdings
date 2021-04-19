@@ -105,6 +105,25 @@ info: etatcollhlm index has created
 # or
 error: etatcollhlm index already exist
 ```
+### etatcollhlm download
+
+Recovers data from ebsco to put them in a csv file in "standard" format
+#### Parameter
+| Nom | Description |
+| --- | --- |
+| i --institute | institute name  |
+| -r --resume | resume downloading where it left off|
+| -u --use | use a custom configuration file |
+
+#### Example
+```bash
+$ etatcollhlm download -i INSU
+```
+output
+```bash
+progress [===================-------------------] 50% | 8196/16392 data
+```
+
 ### etatcollhlm insert
 before use this command, make sure etatcollhlm is created.
 Insert the contents of a file into the etatcollhlm index.

@@ -21,6 +21,7 @@ program.version(pkg.version);
 
 program
   .command('config')
+  .description('Make the config to fetch a elastic cluster')
   .option('-g --get', 'display the configuration')
   .option('-s --set', 'initialize the configuration file in $HOME/.config')
   .option('--url <url>', 'elastic url')
@@ -28,20 +29,7 @@ program
   .option('--user <user>', 'elastic user')
   .option('--password <password>', 'elastic password')
   .option('-l --list', 'list of attributes required for configuration')
-  .description('make the config to fetch ez-meta')
   .action((args) => config(args));
-
-program
-  .command('init')
-  .description('init elastic index')
-  .option('-u --use <use>', 'use a custom config')
-  .action((args) => init(args));
-
-program
-  .command('reset')
-  .description('empty elastic index')
-  .option('-u --use <use>', 'use a custom config')
-  .action((args) => reset(args));
 
 program
   .command('ping')
@@ -50,7 +38,22 @@ program
   .action((args) => ping(args));
 
 program
+  .command('init')
+  .description('Init elastic index')
+  .option('-u --use <use>', 'use a custom config')
+  .action((args) => init(args));
+
+program
+  .command('download')
+  .description('Recovers data from ebsco to put them in a csv file in "standard" format')
+  .option('-i --institute <institute>', 'institute Name')
+  .option('-r --resume', 'resume downloading where it left off')
+  .option('-u --use <use>', 'use a custom config')
+  .action((args) => download(args));
+
+program
   .command('insert')
+  .description('insert the contents of a file into an elastic')
   .option('-f --file <file>', 'file to which its content is inserted in a elastic')
   .option('-v --verbose', 'verbose')
   .option('-u --use <use>', 'use a custom config')
@@ -58,16 +61,14 @@ program
 
 program
   .command('info')
-  .description('info of elastic index')
+  .description('Info of elastic index')
   .option('-u --use <use>', 'use a custom config')
   .action((args) => info(args));
 
 program
-  .command('download')
-  .description('download a package')
-  .option('-i --institute <institute>', 'institute')
-  .option('-r --resume', 'resume')
+  .command('reset')
+  .description('Empty elastic index')
   .option('-u --use <use>', 'use a custom config')
-  .action((args) => download(args));
+  .action((args) => reset(args));
 
 program.parse(process.argv);
