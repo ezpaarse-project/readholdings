@@ -372,11 +372,22 @@ const download = async (args) => {
   // get custid and apikey from config
   const { institute } = args;
   const { resume } = args;
+  const { out } = args;
 
   const config = await getConfig(args.use);
 
   let page = 1;
   let offset = 0;
+
+  if (!out) {
+    logger.error('out pathfile expected');
+    process.exit(1);
+  }
+
+  const isFileExist = await fs.pathExists(out);
+  if (!isFileExist) {
+    await fs.writeFile(out, '');
+  }
 
   const filePath = path.resolve(__dirname, '..', '..', 'download', `${institute}.csv`);
 

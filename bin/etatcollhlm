@@ -50,6 +50,7 @@ program
   .option('-i --institute <institute>', 'institute Name')
   .option('-r --resume', 'resume downloading where it left off')
   .option('-u --use <use>', 'use a custom config')
+  .option('-o --out <out>', 'destination of downloading file')
   .action((args) => download(args));
 
 program
