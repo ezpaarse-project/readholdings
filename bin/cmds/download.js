@@ -127,7 +127,10 @@ const subject = (data) => {
 const getNumberOfDataOfCustid = async (custid, apikey) => {
   let res;
   let i = 0;
-  while ((res === undefined || res.length === 0) && i < 5) {
+  while ((res === undefined || res.length === 0) && i <= 5) {
+    if (i !== 0) {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+    }
     try {
       res = await axios({
         method: 'get',
@@ -144,6 +147,10 @@ const getNumberOfDataOfCustid = async (custid, apikey) => {
     }
     i += 1;
   }
+  if (!res) {
+    logger.error('getNumberOfDataOfCustid: timeout');
+    process.exit(1);
+  }
   return res?.data?.totalCount;
 };
 
@@ -158,8 +165,11 @@ const getNumberOfDataOfCustid = async (custid, apikey) => {
  */
 const generalInformationsFromEbsco = async (custid, apikey, count, offset) => {
   let res;
-  let i = 0;
-  while ((res === undefined || res.length === 0) && i < 5) {
+  let i = 1;
+  while ((res === undefined || res.length === 0) && i <= 5) {
+    if (i !== 0) {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+    }
     try {
       res = await axios({
         method: 'get',
@@ -173,9 +183,13 @@ const generalInformationsFromEbsco = async (custid, apikey, count, offset) => {
         proxy: (url.startsWith('https') && httpsAgent) ? false : undefined,
       });
     } catch (err) {
-      logger.error(`generalInformationsFromEbsco: ${err}`);
+      logger.error(`generalInformationsFromEbsco: ${err}, ${i} attempt`);
     }
     i += 1;
+  }
+  if (!res) {
+    logger.error('generalInformationsFromEbsco: timeout');
+    process.exit(1);
   }
   return res?.data?.holdings;
 };
@@ -189,19 +203,29 @@ const generalInformationsFromEbsco = async (custid, apikey, count, offset) => {
  */
 const additionalInformationsFromEbsco = async (custid, apikey, kbid) => {
   let res;
-  try {
-    res = await axios({
-      method: 'get',
-      url: `${url}/${custid}/titles/${kbid}`,
-      headers: {
-        'x-api-key': apikey,
-        'Content-Type': 'application/json',
-      },
-      httpsAgent: (url.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
-      proxy: (url.startsWith('https') && httpsAgent) ? false : undefined,
-    });
-  } catch (err) {
-    logger.error(`additionalInformationsFromEbsco: ${err}`);
+  let i = 1;
+  while ((res === undefined || res.length === 0) && i <= 5) {
+    if (i !== 0) {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+    }
+    try {
+      res = await axios({
+        method: 'get',
+        url: `${url}/${custid}/titles/${kbid}`,
+        headers: {
+          'x-api-key': apikey,
+          'Content-Type': 'application/json',
+        },
+        httpsAgent: (url.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
+        proxy: (url.startsWith('https') && httpsAgent) ? false : undefined,
+      });
+    } catch (err) {
+      logger.error(`additionalInformationsFromEbsco: ${err} , ${i} attempt`);
+    }
+    i += 1;
+  }
+  if (!res) {
+    logger.error('additionalInformationsFromEbsco: timeout');
     process.exit(1);
   }
   return res.data;
@@ -323,8 +347,9 @@ const deleteFile = async (filePath) => {
 };
 
 /**
- *
- * @param {String} filePath
+ * count number of line in a file
+ * @param {String} filePath filepath
+ * @return {Int} number of line
  */
 const countLinesInFile = async (filePath) => {
   let lines = 0;
