@@ -4,10 +4,10 @@ const os = require('os');
 const logger = require('../../lib/logger');
 
 /**
- * create local config at $HOME/.config/.etatcollhlmrc
+ * create local config at $HOME/.config/.ezhlmrc
  */
 const setConfig = async () => {
-  const pathConfig = path.resolve(os.homedir(), '.config', '.etatcollhlmrc');
+  const pathConfig = path.resolve(os.homedir(), '.config', '.ezhlmrc');
   const config = {
     url: 'http://localhost',
     port: 8080,
@@ -25,7 +25,7 @@ const setConfig = async () => {
 };
 
 /**
- * update the local config at $HOME/.config/.etatcollhlmrc
+ * update the local config at $HOME/.config/.ezhlmrc
  * @param {Object} args object from commander
  */
 const config = async (args) => {
@@ -36,7 +36,7 @@ const config = async (args) => {
     logger.info('--password <password> elastic password');
     process.exit(0);
   }
-  const configPath = path.resolve(os.homedir(), '.config', '.etatcollhlmrc');
+  const configPath = path.resolve(os.homedir(), '.config', '.ezhlmrc');
   if (!await fs.pathExists(configPath)) {
     await setConfig();
   }

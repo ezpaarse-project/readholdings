@@ -56,19 +56,19 @@ const countInstitutes = async (name, institute, client) => {
  */
 const info = async (args) => {
   const client = await connection(args.use);
-  const documents = await countDocuments('etatcollhlm', client);
-  const IN2P3 = await countInstitutes('etatcollhlm', 'IN2P3', client);
-  const INC = await countInstitutes('etatcollhlm', 'INC', client);
-  const INEE = await countInstitutes('etatcollhlm', 'INEE', client);
-  const INP = await countInstitutes('etatcollhlm', 'INP', client);
-  const INS2I = await countInstitutes('etatcollhlm', 'INS2I', client);
-  const INSB = await countInstitutes('etatcollhlm', 'INSB', client);
-  const INSHS = await countInstitutes('etatcollhlm', 'INSHS', client);
-  const INSIS = await countInstitutes('etatcollhlm', 'INSIS', client);
-  const INSMI = await countInstitutes('etatcollhlm', 'INSMI', client);
-  const INSU = await countInstitutes('etatcollhlm', 'INSU', client);
+  const documents = await countDocuments('ezhlm', client);
+  const IN2P3 = await countInstitutes('ezhlm', 'IN2P3', client);
+  const INC = await countInstitutes('ezhlm', 'INC', client);
+  const INEE = await countInstitutes('ezhlm', 'INEE', client);
+  const INP = await countInstitutes('ezhlm', 'INP', client);
+  const INS2I = await countInstitutes('ezhlm', 'INS2I', client);
+  const INSB = await countInstitutes('ezhlm', 'INSB', client);
+  const INSHS = await countInstitutes('ezhlm', 'INSHS', client);
+  const INSIS = await countInstitutes('ezhlm', 'INSIS', client);
+  const INSMI = await countInstitutes('ezhlm', 'INSMI', client);
+  const INSU = await countInstitutes('ezhlm', 'INSU', client);
 
-  logger.info(`Number total documents in index etatcollhlm: ${documents}`);
+  logger.info(`Number total documents in index ezhlm: ${documents}`);
   logger.info(`IN2P3: ${IN2P3}`);
   logger.info(`INC: ${INC}`);
   logger.info(`INEE: ${INEE}`);

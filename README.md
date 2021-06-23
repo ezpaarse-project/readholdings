@@ -1,4 +1,4 @@
-# node-etatcollhlm
+# node-ezhlm
 
 **Table of content**
 - [Prerequisites](#prerequisites)
@@ -10,14 +10,14 @@
 
 ## Prerequisites
 
-The tools you need to let node-etatcollhlm run are :
+The tools you need to let node-ezhlm run are :
 * npm
 * node 14.15.2
 ## Installation
 
 ```bash
-$ git clone https://github.com/ezpaarse-project/node-etatcollhlm
-$ cd node-etatcollhlm
+$ git clone https://github.com/ezpaarse-project/node-ezhlm
+$ cd node-ezhlm
 $ npm i -g .
 ```
 
@@ -27,28 +27,28 @@ $ npm i -g .
 | -V, --version | Boolean | Print the version number |
 | -h, --help | Boolean | Show some help |
 
-You can get help for any command by typing `node-etatcollhlm <command> --help`.
+You can get help for any command by typing `node-ezhlm <command> --help`.
 
 ## Command line usage
-The module provides an `etatcollhlm` command (aliased `hlm`).
+The module provides an `ezhlm` command (aliased `hlm`).
 
 ## Commands
 
-- [config](#etatcollhlm-config)
-- [ping](#etatcollhlm-ping)
-- [init](#etatcollhlm-init)
-- [download](#etatcollhlm-download)
-- [insert](#etatcollhlm-insert)
-- [info](#etatcollhlm-info)
-- [reset](#etatcollhlm-reset)
-### etatcollhlm config
+- [config](#ezhlm-config)
+- [ping](#ezhlm-ping)
+- [init](#ezhlm-init)
+- [download](#ezhlm-download)
+- [insert](#ezhlm-insert)
+- [info](#ezhlm-info)
+- [reset](#ezhlm-reset)
+### ezhlm config
 Update config to fetch ez-meta.
-The default configuration is saved in a file at $HOME/.config/.etatcollhlmrc
+The default configuration is saved in a file at $HOME/.config/.ezhlmrc
 #### parameters
 | Name | Description |
 | --- | --- |
-| -g --get | display the configuration of $HOME/.config/.etatcollhlmrc |
-| -s --set | initiate a configuration file at $HOME/.config/.etatcollhlmrc  |
+| -g --get | display the configuration of $HOME/.config/.ezhlmrc |
+| -s --set | initiate a configuration file at $HOME/.config/.ezhlmrc  |
 | --url | elastic url |
 | --port | elastic port |
 | --user | elastic user |
@@ -57,12 +57,12 @@ The default configuration is saved in a file at $HOME/.config/.etatcollhlmrc
 | -f --file | display the configuration |
 #### Example
 ```bash
-$ etatcollhlm config --set
-$ etatcollhlm config --url http://localhost
-$ etatcollhlm config --port 8080
-$ etatcollhlm config --user elastic
-$ etatcollhlm config --password changeme
-$ etatcollhlm config --institutes "{\"INSTITUTE\": {\"custid\":\"customerID\", \"apikey\": \"x-api-key\"}}",
+$ ezhlm config --set
+$ ezhlm config --url http://localhost
+$ ezhlm config --port 8080
+$ ezhlm config --user elastic
+$ ezhlm config --password changeme
+$ ezhlm config --institutes "{\"INSTITUTE\": {\"custid\":\"customerID\", \"apikey\": \"x-api-key\"}}",
 ```
 output
 ```bash
@@ -73,9 +73,9 @@ info: {
   "password": "changeme",
   "institutes": "{\"INSTITUTE\": {\"custid\":\"customerID\", \"apikey\": \"x-api-key\"}}"
 }
-info: from /home/.config/.etatcollhlmrc
+info: from /home/.config/.ezhlmrc
 ```
-### etatcollhlm ping
+### ezhlm ping
 Check if service is available.
 #### Parameter
 
@@ -84,16 +84,16 @@ Check if service is available.
 | -u --use | use a custom configuration file |
 #### Example
 ```bash
-$ etatcollhlm ping
+$ ezhlm ping
 ```
 
 output
 ```bash
 info: service available http://localhost:9200
 ```
-### etatcollhlm init
+### ezhlm init
 
-initiates the etatcollhlm index with this [mapping](https://github.com/ezpaarse-project/node-etatcollhlm/blob/master/index/etatcollhlm.json) 
+initiates the ezhlm index with this [mapping](https://github.com/ezpaarse-project/node-ezhlm/blob/master/index/ezhlm.json) 
 #### Parameter
 | Nom | Description |
 | --- | --- |
@@ -101,15 +101,15 @@ initiates the etatcollhlm index with this [mapping](https://github.com/ezpaarse-
 #### Example
 
 ```bash
-$ etatcollhlm init
+$ ezhlm init
 ```
 output
 ```bash
-info: etatcollhlm index has created
+info: ezhlm index has created
 # or
-error: etatcollhlm index already exist
+error: ezhlm index already exist
 ```
-### etatcollhlm download
+### ezhlm download
 
 Recovers data from ebsco to put them in a csv file in "standard" format
 #### Parameter
@@ -121,16 +121,16 @@ Recovers data from ebsco to put them in a csv file in "standard" format
 
 #### Example
 ```bash
-$ etatcollhlm download -i INSU
+$ ezhlm download -i INSU
 ```
 output
 ```bash
 progress [===================-------------------] 50% | 8196/16392 data
 ```
 
-### etatcollhlm insert
-before use this command, make sure etatcollhlm is created.
-Insert the contents of a file into the etatcollhlm index.
+### ezhlm insert
+before use this command, make sure ezhlm is created.
+Insert the contents of a file into the ezhlm index.
 #### Parameters
 | Name | Description |
 | --- | --- |
@@ -139,7 +139,7 @@ Insert the contents of a file into the etatcollhlm index.
 | -u --use | use a custom configuration file |
 #### Example
 ```bash
-$ etatcollhlm insert -f ./file.csv -v
+$ ezhlm insert -f ./file.csv -v
 ```
 output
 ```bash
@@ -147,7 +147,7 @@ info: lines that must be inserted 437329
 progress [========================================] 100% | 270929541/270929541 bytes
 info: 437329/437329 lines inserted
 ```
-### etatcollhlm info
+### ezhlm info
 #### Parameter
 
 | Nom | Description |
@@ -155,12 +155,12 @@ info: 437329/437329 lines inserted
 | -u --use | use a custom configuration file |
 #### Exemple
 ```bash
-$ etatcollhlm info
+$ ezhlm info
 ```
 
 output
 ```bash
-info: Number total documents in index etatcollhlm: 20
+info: Number total documents in index ezhlm: 20
 info: IN2P3: 1
 info: INC: 2
 info: INEE: 3
@@ -172,8 +172,8 @@ info: INSIS: 3
 info: INSMI: 4
 info: INSU: 0
 ```
-### etatcollhlm reset
-empty etatcollhlm index on ez-meta.
+### ezhlm reset
+empty ezhlm index on ez-meta.
 #### Parameter
 
 | Name | Description |
@@ -181,7 +181,7 @@ empty etatcollhlm index on ez-meta.
 | -u --use | use a custom configuration file |
 #### Example
 ```bash
-$ etatcollhlm reset
+$ ezhlm reset
 ```
 
 output

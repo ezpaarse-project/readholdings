@@ -18,7 +18,7 @@ const logger = require('../../lib/logger');
  */
 const insertHLM = async (client, data) => {
   let res;
-  const body = data.flatMap((doc) => [{ index: { _index: 'etatcollhlm' } }, doc]);
+  const body = data.flatMap((doc) => [{ index: { _index: 'ezhlm2' } }, doc]);
   try {
     res = await client.bulk({ refresh: true, body });
   } catch (err) {

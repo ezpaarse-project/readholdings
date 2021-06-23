@@ -10,7 +10,6 @@ const HttpsProxyAgent = require('https-proxy-agent');
 const cliProgress = require('cli-progress');
 
 const { getConfig } = require('../../lib/client');
-const logger = require('../../lib/logger');
 
 const httpsAgent = process.env.https_proxy && new HttpsProxyAgent(process.env.https_proxy);
 
@@ -59,6 +58,7 @@ const header = [
   'UserDefinedField5',
   'PackageType',
   'AllowEbscoToAddNewTitles',
+  'VendorName',
 ];
 
 /**
@@ -121,10 +121,11 @@ const subject = (data) => {
 
 /**
  * get number of data of custid
- * @param {String} custid
- * @returns {Int} number of data
+ * @param {string} apikey - apikey
+ * @param {string} custid
+ * @returns {int} number of data
  */
-const getNumberOfDataOfCustid = async (custid, apikey) => {
+const getNumberOfDataOfCustid = async (apikey, custid) => {
   let res;
   let i = 0;
   while ((res === undefined || res.length === 0) && i <= 5) {
@@ -143,12 +144,12 @@ const getNumberOfDataOfCustid = async (custid, apikey) => {
         proxy: (url.startsWith('https') && httpsAgent) ? false : undefined,
       });
     } catch (err) {
-      logger.error(`getNumberOfDataOfCustid : ${err}`);
+      console.error(`interne error: getNumberOfDataOfCustid - ${err}`);
     }
     i += 1;
   }
   if (!res) {
-    logger.error('getNumberOfDataOfCustid: timeout');
+    console.error('interne error: getNumberOfDataOfCustid - timeout');
     process.exit(1);
   }
   return res?.data?.totalCount;
@@ -156,14 +157,14 @@ const getNumberOfDataOfCustid = async (custid, apikey) => {
 
 /**
  * get in packets of 5000. the data of custid
- * in this data, they have general info and kbid (title_id) to do another request to get more infos
- * @param {String} custid customerID
+ *
  * @param {String} apikey apikey
+ * @param {String} custid customerID
  * @param {Int} count number of results to return in the response. can not exceed 5000
  * @param {Int} page page
  * @returns general data
  */
-const generalInformationsFromEbsco = async (custid, apikey, count, offset) => {
+const generalInformationsFromEbsco = async (apikey, custid, count, offset) => {
   let res;
   let i = 1;
   while ((res === undefined || res.length === 0) && i <= 5) {
@@ -183,25 +184,54 @@ const generalInformationsFromEbsco = async (custid, apikey, count, offset) => {
         proxy: (url.startsWith('https') && httpsAgent) ? false : undefined,
       });
     } catch (err) {
-      logger.error(`generalInformationsFromEbsco: ${err}, ${i} attempt`);
+      console.error(`interne error: generalInformationsFromEbsco - ${err}, ${i} attempt`);
     }
     i += 1;
   }
   if (!res) {
-    logger.error('generalInformationsFromEbsco: timeout');
+    console.error('interne error: generalInformationsFromEbsco - timeout');
     process.exit(1);
   }
   return res?.data?.holdings;
 };
 
 /**
+ * Title -> titleName
+ * Publisher -> publisherName
+ * PrintISSN -> identifiersList.subtype = 1 + type = 0
+ * OnlineISSN -> identifiersList.subtype = 2 + type = 0
+ * PrintISBN -> identifiersList.subtype = 1 + type = 1
+ * OnlineISBN -> identifiersList.subtype = 2 + type = 1
+ * Subject -> subjectList[].subject
+ * isCustom -> isTitleCustom
+ * RessourceType -> pubType
+ * PackageName -> customerResourcesList[].packageName
+ * PackageType -> customerResourcesList[].packageType
+ * CustomCoverageBegin -> customerResourcesList[].customCoverage.beginCoverage
+ * CustomCoverageEnd -> customerResourcesList[].customCoverage.endCoverage
+ * CoverageStatement -> customerResourcesList[].CoverageStatement
+ * ManagedCoverageBegin -> customerResourcesList[].managedEmbargoPeriod.embargoUnit + embargoValue
+ * CustomEmbargo -> customerResourcesList[].customEmbargoPeriod.embargoUnit + embargoValue
+ * URL -> customerResourcesList[].url
+ * UserDefinedField1 -> customerResourcesList[].userDefinedField1
+ * UserDefinedField2 -> customerResourcesList[].userDefinedField1
+ * UserDefinedField3 -> customerResourcesList[].userDefinedField1
+ * UserDefinedField4 -> customerResourcesList[].userDefinedField1
+ * UserDefinedField5 -> customerResourcesList[].userDefinedField1
+ * Description -> description
+ * Edition -> edition
+ * PeerReviewed -> isPeerReviewed
+ * Author -> contributorList[].type = Author, .Contributor
+ * Editor -> contributorList[].type = Editor, .Contributor
+ * Illustrator ->  contributorList[].type = Illustrator, .Contributor
  * get more info of ressource
- * @param {String} custid
+ *
  * @param {String} apikey apikey
+ * @param {String} custid
  * @param {Int} kbid
  * @returns {Object} additional data
  */
-const additionalInformationsFromEbsco = async (custid, apikey, kbid) => {
+const additionalInfo1 = async (apikey, custid, kbid) => {
   let res;
   let i = 1;
   while ((res === undefined || res.length === 0) && i <= 5) {
@@ -220,12 +250,124 @@ const additionalInformationsFromEbsco = async (custid, apikey, kbid) => {
         proxy: (url.startsWith('https') && httpsAgent) ? false : undefined,
       });
     } catch (err) {
-      logger.error(`additionalInformationsFromEbsco: ${err} , ${i} attempt`);
+      console.error(`interne error: additionalInfo1 - ${err}, ${i} attempt`);
     }
     i += 1;
   }
   if (!res) {
-    logger.error('additionalInformationsFromEbsco: timeout');
+    console.error('interne error: additionalInfo1 - timeout');
+    process.exit(1);
+  }
+  return res.data;
+};
+
+/**
+ * get more info of ressource
+ * Title -> titleName
+ * Publisher -> publisherName
+ * PrintISSN -> identifiersList.subtype = 1 + type = 0
+ * OnlineISSN -> identifiersList.subtype = 2 + type = 0
+ * PrintISBN -> identifiersList.subtype = 1 + type = 1
+ * OnlineISBN -> identifiersList.subtype = 2 + type = 1
+ * isCustom -> isTitleCustom
+ * Subject -> subjectList.subject
+ * RessourceType -> pubType
+ * PackageName -> customerResourcesList[].packageName
+ * PackageType -> customerResourcesList[].packageType
+ * CustomCoverageBegin -> customerResourcesList[].customCoverage.beginCoverage
+ * CustomCoverageEnd -> customerResourcesList[].customCoverage.endCoverage
+ * CoverageStatement -> customerResourcesList[].CoverageStatement
+ * ManagedCoverageBegin -> customerResourcesList[].managedEmbargoPeriod.embargoUnit + embargoValue
+ * CustomEmbargo -> customerResourcesList[].customEmbargoPeriod.embargoUnit + embargoValue
+ * URL -> customerResourcesList[].url
+ * UserDefinedField1 -> customerResourcesList[].userDefinedField1
+ * UserDefinedField2 -> customerResourcesList[].userDefinedField1
+ * UserDefinedField3 -> customerResourcesList[].userDefinedField1
+ * UserDefinedField4 -> customerResourcesList[].userDefinedField1
+ * UserDefinedField5 -> customerResourcesList[].userDefinedField1
+ * Description -> description
+ * Edition -> edition
+ * PeerReviewed -> isPeerReviewed
+ * Author -> contributorList[].type = Author, .Contributor
+ * Editor -> contributorList[].type = Editor, .Contributor
+ * Illustrator ->  contributorList[].type = Illustrator, .Contributor
+ * @param {String} apikey apikey
+ * @param {String} custid
+ * @param {Int} kbid
+ * @returns {Object} additional data
+ */
+const additionalInfo2 = async (apikey, custid, vendorID, packageID, kbid) => {
+  let res;
+  let i = 1;
+  while ((res === undefined || res.length === 0) && i <= 5) {
+    if (i !== 0) {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+    }
+    try {
+      res = await axios({
+        method: 'get',
+        url: `${url}/${custid}/vendors/${vendorID}/packages/${packageID}/titles/${kbid}`,
+        headers: {
+          'x-api-key': apikey,
+          'Content-Type': 'application/json',
+        },
+        httpsAgent: (url.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
+        proxy: (url.startsWith('https') && httpsAgent) ? false : undefined,
+      });
+    } catch (err) {
+      console.error(`interne error: ${err}, ${i} attempt`);
+    }
+    i += 1;
+  }
+  if (!res) {
+    console.error('interne error: - timeout');
+    process.exit(1);
+  }
+  return res.data;
+};
+
+/**
+ * get more info of ressource
+ *
+ * PackageName -> packageName
+ * VendorName -> vendorName
+ * HideOnPublicationFinder -> visibilityDate.isHidden
+ * PackageContentType -> contentType
+ * CustomCoverageBegin -> customCoverage.beginCoverage
+ * CustomCoverageEnd -> customCoverage.beginCoverage
+ * AllowEbscoToAddTitles -> allowEbscoToAddTitles
+ * PackageType -> packageType
+ *
+ * @param {String} apikey apikey
+ * @param {String} custid
+ * @param {Int} kbid
+ * @returns {Object} additional data
+ */
+const additionalInfo3 = async (apikey, custid, vendorID, packageID) => {
+  let res;
+  let i = 1;
+  while ((res === undefined || res.length === 0) && i <= 5) {
+    if (i !== 0) {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+    }
+    try {
+      res = await axios({
+        method: 'get',
+        url: `${url}/${custid}/vendors/${vendorID}/packages/${packageID}`,
+        headers: {
+          'x-api-key': apikey,
+          'Content-Type': 'application/json',
+        },
+        httpsAgent: (url.startsWith('https') && httpsAgent) ? httpsAgent : undefined,
+        proxy: (url.startsWith('https') && httpsAgent) ? false : undefined,
+      });
+    } catch (err) {
+      console.error(`interne error: ${err}, ${i} attempt`);
+    }
+    i += 1;
+  }
+  if (!res) {
+    console.error('interne error: - timeout');
     process.exit(1);
   }
   return res.data;
@@ -234,25 +376,23 @@ const additionalInformationsFromEbsco = async (custid, apikey, kbid) => {
 /**
  * merge firstDate and moreInfos to create unique line like "standard" format
  * @param {String} firstData data from generalInformationsFromEbsco
- * @param {String} moreInfo data from additionalInformationsFromEbsco
+ * @param {String} moreInfo data from additionalInfo1
  * @param {String} institute name of institute
  * @returns {String} fusion of both
  */
-const createData = (firstData, moreInfo, institute) => {
+const createLine = (firstData, moreInfo, institute) => {
   const final = createEmptyData();
   final.BibCNRS = institute;
   final.KBID = firstData?.title_id;
   final.Title = firstData?.publication_title;
-  // 7 AlternateTitle
   final.PackageName = firstData?.package_name;
   final.URL = firstData?.title_url;
   final.ProxiedURL = `http://${institute.toLowerCase()}.bib.cnrs.fr/login?url=${final.URL}`;
-  final.Publisher = firstData?.publisher_name; // 11
-  final.Edition = moreInfo?.edition; // 12
-  final.Author = firstData?.first_author; // 13
-  final.Editor = firstData?.first_editor; // 14
-
-  // 15 Illustrator
+  final.Publisher = firstData?.publisher_name;
+  final.Edition = moreInfo?.edition;
+  final.Author = firstData?.first_author;
+  final.Editor = firstData?.first_editor;
+  final.Illustrator = firstData?.illustrator;
 
   const type = printAndOnlineIdentifier(firstData.publication_type);
   if (type === 'ISSN') {
@@ -280,33 +420,31 @@ const createData = (firstData, moreInfo, institute) => {
     final.CustomCoverageBegin = begin;
     final.CustomCoverageEnd = end;
   }
-
+  final.CoverageStatement = moreInfo?.customerResourcesList[0]?.corverageStatement;
   final.Embargo = embargo(moreInfo?.customerResourcesList[0]?.managedEmbargoPeriod);
   final.CustomEmbargo = embargo(moreInfo?.customerResourcesList[0]?.customEmbargoPeriod);
-  final.Description = moreInfo?.description; // 29
-  final.Subject = subject(moreInfo?.subjectsList); // 30
-  final.ResourceType = firstData?.resource_type; // 31
-  final.PackageContentType = firstData?.package_content_type; // 32
-  // 33 CreateCustom // TODO toujours à N dans le fichier
+  final.Description = moreInfo?.description;
+  final.Subject = subject(moreInfo?.subjectsList);
+  final.ResourceType = firstData?.resource_type;
+  final.PackageContentType = firstData?.package_content_type;
   final.HideOnPublicationFinder = moreInfo?.customerResourcesList[0]?.visibilityData?.isHidden; // 34
-  // 35 Delete // TODO toujours à N dans le fichier
-  // 36 OrderedThroughEBSCO
-  final.IsCustom = moreInfo.isTitleCustom; // 37
-  final.PackageType = moreInfo?.PackageType; // 43
-  // 44 AllowEbscoToAddNewTitles
+  final.IsCustom = moreInfo.isTitleCustom;
+  final.PackageType = moreInfo?.PackageType;
+  final.AllowEbscoToAddNewTitles = moreInfo?.allowEbscoToAddNewTitles; // todorevoir
+  final.VendorName = firstData?.vendor_name;
 
   return final;
 };
 
 /**
- * Write header in format of mapping "etatcollhlm" in a file
+ * Write header in format of mapping "ezhlm" in a file
  * @param {String} filePath
  */
 const writeHeader = async (filePath) => {
   try {
     await fs.writeFile(filePath, `${header.join(',')}\n`, { flag: 'a' });
   } catch (err) {
-    logger.error(`writeHeader: ${err}`);
+    console.error(`interne error: writeHeader - ${err}`);
   }
 };
 
@@ -330,7 +468,7 @@ const writeLineInFile = async (line, filePath) => {
   try {
     await fs.writeFile(filePath, `${line}\n`, { flag: 'a' });
   } catch (err) {
-    logger.error(`writeLineInFile: ${err}`);
+    console.error(`interne error: writeLineInFile - ${err}`);
   }
 };
 
@@ -342,7 +480,7 @@ const deleteFile = async (filePath) => {
   try {
     await fs.remove(filePath);
   } catch (err) {
-    logger.error(`deleteFile: ${err}`);
+    console.error(`interne error: deleteFile - ${err}`);
   }
 };
 
@@ -374,15 +512,20 @@ const download = async (args) => {
   const { resume } = args;
   const { out } = args;
 
+  if (!out) {
+    console.error('Error: expected exit path with option -o');
+    process.exit(1);
+  }
+
+  if (!institute) {
+    console.error('Error: expected institute with option -i');
+    process.exit(1);
+  }
+
   const config = await getConfig(args.use);
 
   let page = 1;
   let offset = 0;
-
-  if (!out) {
-    logger.error('out pathfile expected');
-    process.exit(1);
-  }
 
   const isFileExist = await fs.pathExists(out);
   if (!isFileExist) {
@@ -396,7 +539,7 @@ const download = async (args) => {
       // -1 because header of csv file
       offset = await countLinesInFile(filePath) - 1;
     } catch (err) {
-      logger.error(`download: countLinesInFile : ${err}`);
+      console.error(`download: countLinesInFile : ${err}`);
     }
     if (offset) {
       page = Math.floor(offset / 5000) + 1;
@@ -422,10 +565,10 @@ const download = async (args) => {
   }
 
   // intiate bar (terminal view)
-  const numberOfData = await getNumberOfDataOfCustid(custid, apikey);
+  const numberOfData = await getNumberOfDataOfCustid(apikey, custid);
   if (offset === numberOfData) {
-    logger.info('all data has been downloaded, resume downloading therefore cannot take place');
-    logger.info(`if you want to re-download the data to update it, you have to use: etatcollhlm download -i ${institute}`);
+    console.info('all data has been downloaded, resume downloading therefore cannot take place');
+    console.info(`if you want to re-download the data to update it, you have to use: ezhlm download -i ${institute}`);
     process.exit(0);
   }
   const bar = new cliProgress.SingleBar({
@@ -435,22 +578,28 @@ const download = async (args) => {
 
   while (resNumber === 5000) {
     // harvest by pack of 5000
-    const data = await generalInformationsFromEbsco(custid, apikey, count, page);
+    const data = await generalInformationsFromEbsco(apikey, custid, count, page);
     resNumber = data.length;
     // get more infos to create a "standard" data (like from HLM)
     for (let i = 0; i < 5000; i += 1) {
       if (offset <= i) {
-        const moreInfo = await additionalInformationsFromEbsco(custid, apikey, data[i].title_id);
-        const line = createData(data[i], moreInfo, institute);
+        let moreInfo;
+        if (data[i].title_id && data[i].vendor_id && data[i].package_id && data[i].title_id) {
+          moreInfo = await additionalInfo2(apikey, custid, data[i].vendor_id, data[i].package_id, data[i].title_id);
+        } else {
+          moreInfo = await additionalInfo1(apikey, custid, data[i].title_id);
+        }
+        console.log(await additionalInfo1(apikey, custid, data[i].title_id));
+        const line = createLine(data[i], moreInfo, institute);
         const csvLine = convertToCSV(line);
         await writeLineInFile(csvLine, filePath);
+        bar.increment();
       }
-      bar.increment();
     }
     offset = 0;
     page += 1;
   }
-  logger.info('download: end');
+  console.info('download: end');
 };
 
 module.exports = {
