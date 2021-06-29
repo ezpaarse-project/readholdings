@@ -576,9 +576,11 @@ const download = async (args) => {
   });
   bar.start(numberOfData, offset);
 
+  let data = await generalInformationsFromEbsco(custid, apikey, count, page);
+  resNumber = data.length;
+
   while (resNumber === 5000) {
     // harvest by pack of 5000
-    const data = await generalInformationsFromEbsco(apikey, custid, count, page);
     resNumber = data.length;
     // get more infos to create a "standard" data (like from HLM)
     for (let i = 0; i < 5000; i += 1) {
@@ -589,13 +591,16 @@ const download = async (args) => {
         } else {
           moreInfo = await additionalInfo1(apikey, custid, data[i].title_id);
         }
-        console.log(await additionalInfo1(apikey, custid, data[i].title_id));
         const line = createLine(data[i], moreInfo, institute);
         const csvLine = convertToCSV(line);
         await writeLineInFile(csvLine, filePath);
         bar.increment();
       }
     }
+
+    data = await generalInformationsFromEbsco(apikey, custid, count, page);
+    resNumber = data.length;
+
     offset = 0;
     page += 1;
   }
