@@ -1,5 +1,5 @@
-const { connection, getConfig } = require('../../lib/client');
-const logger = require('../../lib/logger');
+const { connection, getConfig } = require('../lib/client');
+const logger = require('../lib/logger');
 
 /**
  * check if elastic (ez-meta is available)
@@ -13,11 +13,11 @@ const ping = async (args) => {
   try {
     res = await client.ping();
   } catch (err) {
-    logger.error(`service unavailable ${config.url}:${config.port}`);
+    logger.error(`service unavailable ${config.baseURL}`);
     process.exit(1);
   }
   if (res?.statusCode === 200) {
-    logger.info(`service available ${config.url}:${config.port}`);
+    logger.info(`service available ${config.baseURL}`);
   }
 };
 

@@ -7,22 +7,23 @@ const fs = require('fs-extra');
 const Papa = require('papaparse');
 const cliProgress = require('cli-progress');
 const { exec } = require('child_process');
-const { connection } = require('../../lib/client');
+const { format } = require('date-fns');
+const { connection } = require('../lib/client');
 
-const logger = require('../../lib/logger');
+const logger = require('../lib/logger');
 
 /**
  * insert by packet of 1000, parsed data to elastic (ez-meta)
  * @param {Object} client elastic client
  * @param {Array} data array of HLM datas
  */
-const insertHLM = async (client, data) => {
+const insertInElastic = async (client, data, index) => {
   let res;
-  const body = data.flatMap((doc) => [{ index: { _index: 'ezhlm2' } }, doc]);
+  const body = data.flatMap((doc) => [{ index: { _index: index } }, doc]);
   try {
     res = await client.bulk({ refresh: true, body });
   } catch (err) {
-    logger.error(`insertHLM: ${err}`);
+    logger.error(`insertInElastic: ${err}`);
     process.exit(1);
   }
   return res.body.items.length;
@@ -37,21 +38,8 @@ const insertHLM = async (client, data) => {
 const transformStringToArray = (data, name) => {
   if (data[name]) {
     if (data[name].includes('|')) {
-      const dates = data[name].split('|');
-      const newdates = [];
-      dates.forEach((date) => {
-        if (date === 'Present') {
-          newdates.push('3000-01-01');
-        } else {
-          newdates.push(date);
-        }
-        newdates.push(date);
-      });
-      data[name] = newdates;
+      data[name] = data[name].split('|');
     }
-  }
-  if (data[name] === 'Present') {
-    data[name] = '3000-01-01';
   }
   return data;
 };
@@ -82,38 +70,28 @@ const transformEmbargo = (data, embargo) => {
 };
 
 /**
- * insert the content of file into elastic (ez-meta)
- * @param {Object} args object from commander
+ * insert the content of file in elastic
+ * @param {String} filePath filepath
  */
-const insertion = async (args) => {
+const insertFile = async (filePath, index) => {
+  const client = await connection();
+
+  logger.info(`insert ${filePath}`);
+
   let lineInFile = 0;
   let lineInserted = 0;
-  if (!args.file || args.file === '') {
-    logger.error('file expected');
-    process.exit(1);
-  }
-  const filePath = path.resolve(args.file);
 
-  const fileExist = await fs.pathExists(filePath);
-  if (!fileExist) {
-    logger.error('file not found');
-    process.exit(1);
-  }
-
-  if (args.verbose) {
-    await new Promise((resolve) => {
-      exec(`wc -l < ${filePath}`, (error, results) => {
-        if (error) {
-          logger.error(`wc -l: ${error}`);
-        }
-        lineInFile = results;
-        logger.info(`lines that must be inserted ${results - 1}`);
-        resolve();
-      });
+  await new Promise((resolve) => {
+    exec(`wc -l < ${filePath}`, (error, results) => {
+      if (error) {
+        logger.error(`wc -l: ${error}`);
+        process.exit(1);
+      }
+      lineInFile = results;
+      logger.info(`lines that must be inserted ${results - 1}`);
+      resolve();
     });
-  }
-
-  const client = await connection(args.use);
+  });
 
   let readStream;
   let tab = [];
@@ -130,6 +108,7 @@ const insertion = async (args) => {
   const bar = new cliProgress.SingleBar({
     format: 'progress [{bar}] {percentage}% | {value}/{total} bytes',
   });
+
   const stat = await fs.stat(readStream.path);
   bar.start(stat.size, 0);
 
@@ -159,11 +138,12 @@ const insertion = async (args) => {
         data = transformStringToArray(data, 'CustomCoverageEnd');
         data = transformEmbargo(data, 'Embargo');
         data = transformEmbargo(data, 'CustomEmbargo');
+        data.createdAt = new Date('2022-01-19');
 
         tab.push(data);
         if (tab.length === 1000) {
           await parser.pause();
-          lineInserted += await insertHLM(client, tab);
+          lineInserted += await insertInElastic(client, tab, index);
           tab = [];
           bar.update(results.meta.cursor);
           await parser.resume();
@@ -175,16 +155,51 @@ const insertion = async (args) => {
     });
   });
   if (tab.length !== 0) {
-    lineInserted += await insertHLM(client, tab);
+    lineInserted += await insertInElastic(client, tab, index);
     tab = [];
   }
   bar.update(stat.size);
   bar.stop();
-  if (args.verbose) {
-    logger.info(`${lineInserted}/${lineInFile - 1} lines inserted`);
+  logger.info(`${lineInserted}/${lineInFile - 1} lines inserted`);
+};
+
+/**
+ * insert the content of file into elastic (ez-meta)
+ * @param {Object} args object from commander
+ */
+const insertFromHLM = async (args) => {
+  const { folder } = args;
+  let {
+    index,
+    date,
+  } = args;
+
+  if (!index) {
+    index = `ezHLM-${new Date().getFullYear()}`;
+  }
+
+  if (!date) {
+    date = format(new Date(), 'yyyy-MM-dd');
+  }
+
+  if (!args.folder || args.folder === '') {
+    logger.error('folder expected');
+    process.exit(1);
+  }
+
+  const folderPath = path.resolve(folder);
+
+  const folderExist = await fs.pathExists(folderPath);
+  if (!folderExist) {
+    logger.error('folder not found');
+    process.exit(1);
+  }
+
+  const files = await fs.readdir(folderPath);
+
+  for await (const file of files) {
+    await insertFile(path.resolve(folderPath, file), index);
   }
 };
 
-module.exports = {
-  insertion,
-};
+module.exports = insertFromHLM;

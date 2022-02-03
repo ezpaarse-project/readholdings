@@ -1,0 +1,67 @@
+#!/usr/bin/env node
+
+const program = require('commander');
+const pkg = require('./package.json');
+
+const logger = require('./lib/logger');
+
+const { manageConfig } = require('./cmds/config');
+const { ping } = require('./cmds/ping');
+const insertFromHLM = require('./cmds/insertFromHLM');
+const { reset, init } = require('./cmds/elastic');
+const { info } = require('./cmds/info');
+const { download } = require('./cmds/download');
+
+program.on('command:*', () => {
+  logger.error(`Invalid command: ${program.args.join(' ')}\nSee --help for a list of available commands.`);
+  process.exit(1);
+});
+
+program.version(pkg.version);
+
+program
+  .command('config')
+  .description('config management command to establish the connection between the command and ez-meta')
+  .option('-g --get', 'display the configuration')
+  .option('-s --set <key> <value>', 'update config')
+  .option('-L --list', 'list of attributes required for configuration')
+  .action((options) => manageConfig(options));
+
+program
+  .command('ping')
+  .description('Check if service is available')
+  .action((options) => ping(options));
+
+program
+  .command('init')
+  .description('Init elastic index')
+  .action((options) => init(options));
+
+program
+  .command('info')
+  .description('Info of elastic index')
+  .action((options) => info(options));
+
+program
+  .command('reset')
+  .description('Empty elastic index')
+  .option('-i --index <index>', 'index ')
+  .action((options) => reset(options));
+
+program
+  .command('insertFromHLM')
+  .description('insert the contents of a file into an elastic')
+  .option('-f --folder <folder>', 'folder that content HLM files')
+  .option('-i --index <index>', 'index to wich insert the content of folder')
+  .option('-d --date <date>', 'date of HLM data')
+  .action((options) => insertFromHLM(options));
+
+program
+  .command('download')
+  .description('Recovers data from ebsco to put them in a csv file in "standard" format')
+  .option('-i --institute <institute>', 'institute Name')
+  .option('-r --resume', 'resume downloading where it left off')
+  .option('-o --out <out>', 'destination of downloading file')
+  .action((options) => download(options));
+
+program.parse(process.argv);

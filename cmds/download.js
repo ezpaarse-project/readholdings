@@ -9,7 +9,7 @@ const readline = require('readline');
 const HttpsProxyAgent = require('https-proxy-agent');
 const cliProgress = require('cli-progress');
 
-const { getConfig } = require('../../lib/client');
+const { getConfig } = require('../lib/client');
 
 const httpsAgent = process.env.https_proxy && new HttpsProxyAgent(process.env.https_proxy);
 

@@ -1,5 +1,5 @@
-const { connection } = require('../../lib/client');
-const logger = require('../../lib/logger');
+const { connection } = require('../lib/client');
+const logger = require('../lib/logger');
 
 /**
  * Count number of documents in index

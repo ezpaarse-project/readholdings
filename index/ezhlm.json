@@ -19,10 +19,10 @@
       "OnlineISBN": { "type": "keyword" },
       "DOI": { "type": "keyword" },
       "PeerReviewed": { "type": "keyword" },
-      "ManagedCoverageBegin":  { "type": "date" },
-      "ManagedCoverageEnd":  { "type": "date" },
-      "CustomCoverageBegin":  { "type": "date" },
-      "CustomCoverageEnd":  { "type": "date" },
+      "ManagedCoverageBegin":  { "type": "keyword" },
+      "ManagedCoverageEnd":  { "type": "keyword" },
+      "CustomCoverageBegin":  { "type": "keyword" },
+      "CustomCoverageEnd":  { "type": "keyword" },
       "CoverageStatement": { "type": "keyword" },
       "Embargo": { "type": "keyword" },
       "CustomEmbargo": { "type": "keyword" },
@@ -41,7 +41,11 @@
       "UserDefinedField4": { "type": "keyword" },
       "UserDefinedField5": { "type": "keyword" },
       "PackageType": { "type": "keyword" },
-      "AllowEbscoToAddNewTitles": { "type": "keyword" }
+      "AllowEBSCOtoSelectNewTitles": { "type": "keyword" },
+      "PackageID": { "type": "keyword" },
+      "VendorName": { "type": "keyword" },
+      "VendorID": { "type": "keyword" },
+      "createdAt": { "type": "date" }
     }
   }
 }

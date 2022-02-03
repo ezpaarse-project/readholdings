@@ -1,6 +1,6 @@
-const { connection } = require('../../lib/client');
-const logger = require('../../lib/logger');
-const ezhlmIndex = require('../../index/ezhlm.json');
+const { connection } = require('../lib/client');
+const logger = require('../lib/logger');
+const ezhlmIndex = require('../index/ezhlm.json');
 
 /**
  * check if index exist
@@ -106,7 +106,7 @@ const initIndex = async (name, index, client) => {
  */
 const reset = async (args) => {
   const client = await connection(args.use);
-  resetIndex('ezhlm', ezhlmIndex, client);
+  resetIndex('ezhlm-2022', ezhlmIndex, client);
 };
 
 /**
@@ -115,7 +115,7 @@ const reset = async (args) => {
  */
 const init = async (args) => {
   const client = await connection(args.use);
-  initIndex('ezhlm', ezhlmIndex, client);
+  initIndex('ezhlm-2022', ezhlmIndex, client);
 };
 
 module.exports = {
