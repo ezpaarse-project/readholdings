@@ -1,4 +1,4 @@
-const { connection } = require('../lib/client');
+const { elasticClient } = require('../lib/client');
 const logger = require('../lib/logger');
 const ezhlmIndex = require('../index/ezhlm.json');
 
@@ -15,9 +15,11 @@ const isIndexExist = async (name, client) => {
       index: name,
     });
   } catch (err) {
-    logger.error(`indices.exists in isIndexExist: ${err}`);
+    logger.error(`Cannot check if index [${name}] exist: ${err}`);
+    console.error(err);
+    process.exit(1);
   }
-  return res.body;
+  return res?.body;
 };
 
 /**
@@ -33,7 +35,9 @@ const countDocuments = async (name, client) => {
       index: name,
     });
   } catch (err) {
-    logger.error(`countDocuments: ${err}`);
+    logger.error(`Cannot count documents on index [${name}]`);
+    console.error(err);
+    process.exit(1);
   }
   return data.body.count ? data.body.count : 0;
 };
@@ -53,10 +57,12 @@ const deleteIndex = async (name, client) => {
         index: name,
       });
     } catch (err) {
-      logger.error(`deleteIndex: ${err}`);
+      logger.error(`Cannot delete index [${name}]`);
+      console.error(err);
+      process.exit(1);
     }
   }
-  logger.info(`documents deleted : ${nb}`);
+  logger.info(`index [${name}] - documents deleted : ${nb}`);
 };
 
 /**
@@ -65,7 +71,7 @@ const deleteIndex = async (name, client) => {
  * @param {Object} index mapping of index
  * @param {Object} client elastic client
  */
-const resetIndex = async (name, index, client) => {
+const resetIndexInElastic = async (name, index, client) => {
   await deleteIndex(name, client);
   try {
     await client.indices.create({
@@ -73,7 +79,9 @@ const resetIndex = async (name, index, client) => {
       body: index,
     });
   } catch (err) {
-    logger.error(`indices.delete resetIndex: ${err}`);
+    logger.error(`Cannot create index [${name}]`);
+    console.error(err);
+    process.exit(1);
   }
 };
 
@@ -83,7 +91,7 @@ const resetIndex = async (name, index, client) => {
  * @param {Object} index mapping of index
  * @param {Object} client elastic client
  */
-const initIndex = async (name, index, client) => {
+const createIndexInElastic = async (name, index, client) => {
   const exist = await isIndexExist(name, client);
   if (exist) {
     logger.error(`${name} index already exist`);
@@ -95,7 +103,9 @@ const initIndex = async (name, index, client) => {
       body: index,
     });
   } catch (err) {
-    logger.error(`indices.delete resetIndex: ${err}`);
+    logger.error(`Cannot create index [${name}]`);
+    console.error(err);
+    process.exit(1);
   }
   logger.info(`${name} index has created`);
 };
@@ -104,21 +114,42 @@ const initIndex = async (name, index, client) => {
  * reset the index
  * @param {Object} args object from commander
  */
-const reset = async (args) => {
-  const client = await connection(args.use);
-  resetIndex('ezhlm-2022', ezhlmIndex, client);
+const resetIndex = async (args) => {
+  const { index } = args;
+  if (!index) {
+    logger.error('--index required');
+    process.exit(1);
+  }
+  const client = await elasticClient(args.use);
+  const isExist = await isIndexExist(index, client);
+  if (!isExist) {
+    logger.info(`index [${index}] doesn't exist`);
+    process.exit(0);
+  }
+  resetIndexInElastic(index, ezhlmIndex, client);
 };
 
 /**
- * init the index
+ * create the index
  * @param {Object} args object from commander
  */
-const init = async (args) => {
-  const client = await connection(args.use);
-  initIndex('ezhlm-2022', ezhlmIndex, client);
+const createIndex = async (args) => {
+  const { index } = args;
+  if (!index) {
+    logger.error('--index required');
+    process.exit(1);
+  }
+  const client = await elasticClient(args.use);
+
+  const isExist = await isIndexExist(index, client);
+  if (isExist) {
+    logger.info(`index [${index}] already exist`);
+    process.exit(0);
+  }
+  createIndexInElastic(index, ezhlmIndex, client);
 };
 
 module.exports = {
-  init,
-  reset,
+  createIndex,
+  resetIndex,
 };

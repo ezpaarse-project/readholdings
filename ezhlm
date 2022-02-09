@@ -8,7 +8,8 @@ const logger = require('./lib/logger');
 const { manageConfig } = require('./cmds/config');
 const { ping } = require('./cmds/ping');
 const insertFromHLM = require('./cmds/insertFromHLM');
-const { reset, init } = require('./cmds/elastic');
+const enrichFromHolding = require('./cmds/enrichFromHoldings');
+const { resetIndex, createIndex } = require('./cmds/elastic');
 const { info } = require('./cmds/info');
 const { download } = require('./cmds/download');
 
@@ -33,9 +34,10 @@ program
   .action((options) => ping(options));
 
 program
-  .command('init')
-  .description('Init elastic index')
-  .action((options) => init(options));
+  .command('create-index')
+  .description('create elastic index with ezhlm mapping')
+  .option('-i --index <index>', 'index')
+  .action((options) => createIndex(options));
 
 program
   .command('info')
@@ -45,8 +47,8 @@ program
 program
   .command('reset')
   .description('Empty elastic index')
-  .option('-i --index <index>', 'index ')
-  .action((options) => reset(options));
+  .option('-i --index <index>', 'index')
+  .action((options) => resetIndex(options));
 
 program
   .command('insertFromHLM')
@@ -55,6 +57,11 @@ program
   .option('-i --index <index>', 'index to wich insert the content of folder')
   .option('-d --date <date>', 'date of HLM data')
   .action((options) => insertFromHLM(options));
+
+program
+  .command('enrichFromHoldings')
+  .description('tt')
+  .action((options) => enrichFromHolding(options));
 
 program
   .command('download')

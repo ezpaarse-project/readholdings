@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable guard-for-in */
-/* eslint-disable no-restricted-syntax */
 
 const path = require('path');
 const fs = require('fs-extra');
@@ -8,7 +7,7 @@ const Papa = require('papaparse');
 const cliProgress = require('cli-progress');
 const { exec } = require('child_process');
 const { format } = require('date-fns');
-const { connection } = require('../lib/client');
+const { elasticClient } = require('../lib/client');
 
 const logger = require('../lib/logger');
 
@@ -17,15 +16,31 @@ const logger = require('../lib/logger');
  * @param {Object} client elastic client
  * @param {Array} data array of HLM datas
  */
-const insertInElastic = async (client, data, index) => {
+const insertInElastic = async (client, data) => {
   let res;
-  const body = data.flatMap((doc) => [{ index: { _index: index } }, doc]);
   try {
-    res = await client.bulk({ refresh: true, body });
+    res = await client.bulk({ body: data });
   } catch (err) {
     logger.error(`insertInElastic: ${err}`);
     process.exit(1);
   }
+  const errors = [];
+  const items = Array.isArray(res?.body?.items) ? res?.body?.items : [];
+
+  items.forEach((i) => {
+    if (i?.index?.result === 'created') {
+      return;
+    }
+    if (i?.index?.result === 'updated') {
+      console.error('DOMMAGE');
+      return;
+    }
+
+    if (i?.index?.error !== undefined) {
+      console.error(i?.index?.error);
+      process.exit(1);
+    }
+  });
   return res.body.items.length;
 };
 
@@ -73,8 +88,8 @@ const transformEmbargo = (data, embargo) => {
  * insert the content of file in elastic
  * @param {String} filePath filepath
  */
-const insertFile = async (filePath, index) => {
-  const client = await connection();
+const insertFile = async (filePath, index, date) => {
+  const client = await elasticClient();
 
   logger.info(`insert ${filePath}`);
 
@@ -138,12 +153,16 @@ const insertFile = async (filePath, index) => {
         data = transformStringToArray(data, 'CustomCoverageEnd');
         data = transformEmbargo(data, 'Embargo');
         data = transformEmbargo(data, 'CustomEmbargo');
-        data.createdAt = new Date('2022-01-19');
+        data.createdAt = date;
 
+        data.ezhlmid = `${data.BibCNRS}-${data.VendorID}-${data.PackageID}-${data.KBID}`;
+
+        tab.push({ index: { _index: index, _id: data.ezhlmid } });
         tab.push(data);
         if (tab.length === 1000) {
           await parser.pause();
-          lineInserted += await insertInElastic(client, tab, index);
+          const dataToInsert = tab.slice();
+          lineInserted += await insertInElastic(client, dataToInsert);
           tab = [];
           bar.update(results.meta.cursor);
           await parser.resume();
@@ -155,7 +174,8 @@ const insertFile = async (filePath, index) => {
     });
   });
   if (tab.length !== 0) {
-    lineInserted += await insertInElastic(client, tab, index);
+    const dataToInsert = tab.slice();
+    lineInserted += await insertInElastic(client, dataToInsert);
     tab = [];
   }
   bar.update(stat.size);
@@ -175,7 +195,7 @@ const insertFromHLM = async (args) => {
   } = args;
 
   if (!index) {
-    index = `ezHLM-${new Date().getFullYear()}`;
+    index = `ezhlm-${new Date().getFullYear()}`;
   }
 
   if (!date) {
@@ -198,7 +218,7 @@ const insertFromHLM = async (args) => {
   const files = await fs.readdir(folderPath);
 
   for await (const file of files) {
-    await insertFile(path.resolve(folderPath, file), index);
+    await insertFile(path.resolve(folderPath, file), index, date);
   }
 };
 

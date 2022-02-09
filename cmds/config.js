@@ -7,17 +7,22 @@ const has = require('lodash.has');
 const logger = require('../lib/logger');
 
 /**
- * create a config file in /$HOME/.config/.ezhlmrc
+ * create a config file in /$HOME/.config/ezhlm.json
  * which contains the information to request on ezhlm
  */
 const setConfig = async () => {
-  const pathConfig = path.resolve(os.homedir(), '.config', '.ezhlmrc');
+  const pathConfig = path.resolve(os.homedir(), '.config', 'ezhlm.json');
 
   const config = {
-    baseURL: 'http://localhost:9200',
-    user: 'elastic',
-    password: 'changeme',
-    institutes: '{}',
+    elastic: {
+      baseURL: 'http://localhost:9200',
+      username: 'elastic',
+      password: 'changeme',
+    },
+    holdingsiq: {
+      baseURL: 'http://localhost:8080',
+      institutes: [],
+    },
   };
 
   try {
@@ -28,6 +33,26 @@ const setConfig = async () => {
     process.exit(1);
   }
   logger.info(`configuration has been initialized in ${pathConfig}`);
+};
+
+const getConfig = async (customPath) => {
+  let configPath = path.resolve(os.homedir(), '.config', 'ezhlm.json');
+  if (customPath) {
+    if (!await fs.pathExists(customPath)) {
+      logger.error(`${customPath} doesn't exist`);
+      process.exit(1);
+    } else {
+      configPath = customPath;
+    }
+  }
+  let config;
+  try {
+    config = await fs.readFile(configPath, 'utf-8');
+    config = JSON.parse(config);
+  } catch (err) {
+    logger.error(err);
+  }
+  return config;
 };
 
 /**
@@ -41,13 +66,13 @@ const manageConfig = async (args) => {
   if (args.list) {
     console.log(`
       baseURL
-      user
+      username
       password
       institutes`.trim().replace(/^\s*/gm, ''));
     process.exit(0);
   }
 
-  const configPath = path.resolve(os.homedir(), '.config', '.ezhlmrc');
+  const configPath = path.resolve(os.homedir(), '.config', 'ezhlm.json');
 
   if (!await fs.pathExists(configPath)) {
     await setConfig();
@@ -91,5 +116,6 @@ const manageConfig = async (args) => {
 
 module.exports = {
   manageConfig,
+  getConfig,
   setConfig,
 };

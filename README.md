@@ -43,12 +43,12 @@ The module provides an `ezhlm` command (aliased `hlm`).
 - [reset](#ezhlm-reset)
 ### ezhlm config
 Update config to fetch ez-meta.
-The default configuration is saved in a file at $HOME/.config/.ezhlmrc
+The default configuration is saved in a file at $HOME/.config/ezhlm.json
 #### parameters
 | Name | Description |
 | --- | --- |
-| -g --get | display the configuration of $HOME/.config/.ezhlmrc |
-| -s --set | initiate a configuration file at $HOME/.config/.ezhlmrc  |
+| -g --get | display the configuration of $HOME/.config/ezhlm.json |
+| -s --set | initiate a configuration file at $HOME/.config/ezhlm.json  |
 | --url | elastic url |
 | --port | elastic port |
 | --user | elastic user |
@@ -73,7 +73,7 @@ info: {
   "password": "changeme",
   "institutes": "{\"INSTITUTE\": {\"custid\":\"customerID\", \"apikey\": \"x-api-key\"}}"
 }
-info: from /home/.config/.ezhlmrc
+info: from /home/.config/ezhlm.json
 ```
 ### ezhlm ping
 Check if service is available.
