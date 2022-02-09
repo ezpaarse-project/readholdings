@@ -1,6 +1,6 @@
 const { elasticClient } = require('../lib/client');
 const logger = require('../lib/logger');
-const ezhlmIndex = require('../index/ezhlm.json');
+const ezhlmIndex = require('../mapping/ezhlm.json');
 
 /**
  * check if index exist
