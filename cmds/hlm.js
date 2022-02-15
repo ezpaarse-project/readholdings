@@ -7,42 +7,9 @@ const Papa = require('papaparse');
 const cliProgress = require('cli-progress');
 const { exec } = require('child_process');
 const { format } = require('date-fns');
-const { elasticClient } = require('../lib/client');
+const elastic = require('../lib/elastic');
 
 const logger = require('../lib/logger');
-
-/**
- * insert by packet of 1000, parsed data to elastic (ez-meta)
- * @param {Object} client elastic client
- * @param {Array} data array of HLM datas
- */
-const insertInElastic = async (client, data) => {
-  let res;
-  try {
-    res = await client.bulk({ body: data });
-  } catch (err) {
-    logger.error(`insertInElastic: ${err}`);
-    process.exit(1);
-  }
-  const errors = [];
-  const items = Array.isArray(res?.body?.items) ? res?.body?.items : [];
-
-  items.forEach((i) => {
-    if (i?.index?.result === 'created') {
-      return;
-    }
-    if (i?.index?.result === 'updated') {
-      console.error('DOMMAGE');
-      return;
-    }
-
-    if (i?.index?.error !== undefined) {
-      console.error(i?.index?.error);
-      process.exit(1);
-    }
-  });
-  return res.body.items.length;
-};
 
 /**
  * parse csv data to json
@@ -89,7 +56,7 @@ const transformEmbargo = (data, embargo) => {
  * @param {String} filePath filepath
  */
 const insertFile = async (filePath, index, date) => {
-  const client = await elasticClient();
+  const client = await elastic.connection();
 
   logger.info(`insert ${filePath}`);
 
@@ -162,7 +129,7 @@ const insertFile = async (filePath, index, date) => {
         if (tab.length === 1000) {
           await parser.pause();
           const dataToInsert = tab.slice();
-          lineInserted += await insertInElastic(client, dataToInsert);
+          lineInserted += await elastic.bulk(client, dataToInsert);
           tab = [];
           bar.update(results.meta.cursor);
           await parser.resume();
@@ -175,7 +142,7 @@ const insertFile = async (filePath, index, date) => {
   });
   if (tab.length !== 0) {
     const dataToInsert = tab.slice();
-    lineInserted += await insertInElastic(client, dataToInsert);
+    lineInserted += await elastic.bulk(client, dataToInsert);
     tab = [];
   }
   bar.update(stat.size);

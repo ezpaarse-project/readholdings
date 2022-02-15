@@ -1,23 +1,5 @@
-const { connection } = require('../lib/client');
+const elastic = require('../lib/elastic');
 const logger = require('../lib/logger');
-
-/**
- * Count number of documents in index
- * @param {String} name name of index
- * @param {Object} client elastic client
- * @returns {Int} number of documents
- */
-const countDocuments = async (name, client) => {
-  let data;
-  try {
-    data = await client.count({
-      index: name,
-    });
-  } catch (err) {
-    logger.error(`countDocuments: ${err}`);
-  }
-  return data.body.count ? data.body.count : 0;
-};
 
 /**
  * Count number of documents for one institute
@@ -26,7 +8,7 @@ const countDocuments = async (name, client) => {
  * @returns {Int} number of documents
  * @returns number of documents for one institute
  */
-const countInstitutes = async (name, institute, client) => {
+const countInstitutes = async (client, index, institute) => {
   let data;
   const query = {
     bool: {
@@ -39,7 +21,7 @@ const countInstitutes = async (name, institute, client) => {
   };
   try {
     data = await client.count({
-      index: name,
+      index,
       body: {
         query,
       },
@@ -55,18 +37,18 @@ const countInstitutes = async (name, institute, client) => {
  * @param {Object} args object from commander
  */
 const info = async (args) => {
-  const client = await connection(args.use);
-  const documents = await countDocuments('ezhlm', client);
-  const IN2P3 = await countInstitutes('ezhlm', 'IN2P3', client);
-  const INC = await countInstitutes('ezhlm', 'INC', client);
-  const INEE = await countInstitutes('ezhlm', 'INEE', client);
-  const INP = await countInstitutes('ezhlm', 'INP', client);
-  const INS2I = await countInstitutes('ezhlm', 'INS2I', client);
-  const INSB = await countInstitutes('ezhlm', 'INSB', client);
-  const INSHS = await countInstitutes('ezhlm', 'INSHS', client);
-  const INSIS = await countInstitutes('ezhlm', 'INSIS', client);
-  const INSMI = await countInstitutes('ezhlm', 'INSMI', client);
-  const INSU = await countInstitutes('ezhlm', 'INSU', client);
+  const client = await elastic.connection(args.use);
+  const documents = await elastic.countDocuments(client, 'ezhlm');
+  const IN2P3 = await countInstitutes(client, 'ezhlm', 'IN2P3');
+  const INC = await countInstitutes(client, 'ezhlm', 'INC');
+  const INEE = await countInstitutes(client, 'ezhlm', 'INEE');
+  const INP = await countInstitutes(client, 'ezhlm', 'INP');
+  const INS2I = await countInstitutes(client, 'ezhlm', 'INS2I');
+  const INSB = await countInstitutes(client, 'ezhlm', 'INSB');
+  const INSHS = await countInstitutes(client, 'ezhlm', 'INSHS');
+  const INSIS = await countInstitutes(client, 'ezhlm', 'INSIS');
+  const INSMI = await countInstitutes(client, 'ezhlm', 'INSMI');
+  const INSU = await countInstitutes(client, 'ezhlm', 'INSU');
 
   logger.info(`Number total documents in index ezhlm: ${documents}`);
   logger.info(`IN2P3: ${IN2P3}`);

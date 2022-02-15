@@ -1,11 +1,11 @@
-const { elasticClient } = require('../lib/client');
+const elastic = require('../lib/elastic');
 const logger = require('../lib/logger');
 
 /**
  * check if elastic
  */
 const ping = async () => {
-  const client = elasticClient();
+  const client = elastic.connection();
   let res;
   try {
     res = await client.ping();
@@ -13,7 +13,7 @@ const ping = async () => {
     logger.error(`Service unavailable ${client.baseURL}`);
     process.exit(1);
   }
-  if (res?.statusCode !== 200 && res?.statusCode !== 302) {
+  if (res?.statusCode !== 200) {
     logger.error(`Cannot request ${client.baseURL}`);
     process.exit(1);
   }

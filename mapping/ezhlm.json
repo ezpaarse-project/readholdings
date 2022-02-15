@@ -24,6 +24,7 @@
       "Title": { "type": "keyword" },
       "AccessType": { "type": "keyword" },
       "PackageType": { "type": "keyword" },
+      "PackageName": { "type": "keyword" },
       "PackageContentType": { "type": "keyword" },
       "PublicationType": { "type": "keyword" },
       "ResourceType": { "type": "keyword" },

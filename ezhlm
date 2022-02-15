@@ -7,10 +7,9 @@ const logger = require('./lib/logger');
 
 const { manageConfig } = require('./cmds/config');
 const { ping } = require('./cmds/ping');
-const insertFromHLM = require('./cmds/insertFromHLM');
-const enrichFromHolding = require('./cmds/enrichFromHoldings');
+const insertFromHLM = require('./cmds/hlm');
+const { enrichFromHoldings, updateFromMarc } = require('./cmds/ebsco');
 const { resetIndex, createIndex } = require('./cmds/elastic');
-const { info } = require('./cmds/info');
 const { download } = require('./cmds/download');
 
 program.on('command:*', () => {
@@ -40,11 +39,6 @@ program
   .action((options) => createIndex(options));
 
 program
-  .command('info')
-  .description('Info of elastic index')
-  .action((options) => info(options));
-
-program
   .command('reset')
   .description('Empty elastic index')
   .option('-i --index <index>', 'index')
@@ -59,9 +53,15 @@ program
   .action((options) => insertFromHLM(options));
 
 program
+  .command('updateFromMarc')
+  .description('tt')
+  .option('-f --file <file>', 'xml file')
+  .action((options) => updateFromMarc(options));
+
+program
   .command('enrichFromHoldings')
   .description('tt')
-  .action((options) => enrichFromHolding(options));
+  .action((options) => enrichFromHoldings(options));
 
 program
   .command('download')
