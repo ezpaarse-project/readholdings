@@ -63,15 +63,6 @@ const getConfig = async (customPath) => {
  * @param {boolean} args.list -l --list - list of attributes required for configuration
  */
 const manageConfig = async (args) => {
-  if (args.list) {
-    console.log(`
-      baseURL
-      username
-      password
-      institutes`.trim().replace(/^\s*/gm, ''));
-    process.exit(0);
-  }
-
   const configPath = path.resolve(os.homedir(), '.config', 'ezhlm.json');
 
   if (!await fs.pathExists(configPath)) {
