@@ -8,7 +8,7 @@ const logger = require('./lib/logger');
 const { manageConfig } = require('./cmds/config');
 const { ping } = require('./cmds/ping');
 const insertFromHLM = require('./cmds/hlm');
-const { enrichFromHoldings, updateFromMarc } = require('./cmds/ebsco');
+const { enrichFromHoldings, updateFromHoldings } = require('./cmds/ebsco');
 const { resetIndex, createIndex } = require('./cmds/elastic');
 
 program.on('command:*', () => {
@@ -57,9 +57,9 @@ program
   .action((options) => enrichFromHoldings(options));
 
 program
-  .command('updateFromMarc')
+  .command('updateFromHoldings')
   .description('Enriches the ezhlm index data by creating ezhlm-id according to the XML file content (from Marc Update) and enriches these id with the holdingsIQ API')
   .option('-f --file <file>', 'xml file')
-  .action((options) => updateFromMarc(options));
+  .action((options) => updateFromHoldings(options));
 
 program.parse(process.argv);

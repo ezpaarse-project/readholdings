@@ -3,6 +3,7 @@ const { getConfig } = require('./config');
 const elastic = require('../lib/elastic');
 const getIDFromXML = require('../lib/marcupdate');
 const ezhlmMapping = require('../mapping/ezhlm.json');
+const logger = require('../lib/logger');
 
 const enrichFromHoldings = async (args) => {
   let {
@@ -31,10 +32,16 @@ const enrichFromHoldings = async (args) => {
 const updateFromHoldings = async (args) => {
   let {
     index,
+    file
   } = args;
 
   if (!index) {
     index = `ezhlm-${new Date().getFullYear()}`;
+  }
+
+  if (!file) {
+    logger.error('file expected');
+    process.exit(1);
   }
 
   const client = elastic.connection();
@@ -49,15 +56,16 @@ const updateFromHoldings = async (args) => {
     } = institute;
 
     // TODO get files from marc
-    const file = '../example/ebz-ns253191-20210924-Add-1.xml';
+
     // const ids = await getIDFromXML(file, name, index);
     // TODO delete documents in ezhlm index
 
-    await elastic.createIndex('tmp', ezhlmMapping);
+    await elastic.createIndex(client, 'tmp', ezhlmMapping);
     const idsFromXML = await getIDFromXML(file, name, 'tmp');
     await elastic.bulk(client, idsFromXML);
     const count = elastic.countDocuments(client, 'tmp');
     const scroll = Math.ceil(count / 5000);
+    // FIXME
     for (let i = 1; i <= scroll; i += 1) {
       const ezhlmids = await elastic.getDocumentsFromIndex(client, 'tmp', i, 5000);
       for await (const ezhlmid of ezhlmids) {

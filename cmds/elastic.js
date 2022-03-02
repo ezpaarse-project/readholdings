@@ -29,7 +29,6 @@ const createIndex = async (args) => {
     process.exit(1);
   }
   const client = await elastic.connection();
-
   const isExist = await elastic.checkIfIndexExist(client, index);
   if (isExist) {
     logger.info(`index [${index}] already exist`);
