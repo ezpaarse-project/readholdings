@@ -19,10 +19,13 @@ const enrichFromHoldings = async (args) => {
   const { institutes } = config?.holdingsiq;
 
   for await (const institute of institutes) {
-    const count = await holdingsAPI.getHoldingsStatus(institute);
-    const page = Math.ceil(count / 5000);
-
+    // FIXME, count not working now
+    //const count = await holdingsAPI.getHoldingsStatus(institute);
+    //logger.info(`${institute.name}: ${count} lines from holdings`);
+    //const page = Math.ceil(count / 5000);
+    const page = 10;
     for (let i = 1; i <= page; i += 1) {
+      // here, we got error 500
       const holdings = await holdingsAPI.getHoldings(institute, 5000, i, index);
       await elastic.bulk(client, holdings);
     }
