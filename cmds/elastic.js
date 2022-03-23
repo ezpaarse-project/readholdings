@@ -29,12 +29,13 @@ const createIndex = async (args) => {
     process.exit(1);
   }
   const client = await elastic.connection();
+
   const isExist = await elastic.checkIfIndexExist(client, index);
   if (isExist) {
     logger.info(`index [${index}] already exist`);
     process.exit(0);
   }
-  elastic.createIndexInElastic(index, ezhlmMapping, client);
+  elastic.createIndex(client, index, ezhlmMapping);
   logger.info(`[${index}] index has created`);
   process.exit(0);
 };

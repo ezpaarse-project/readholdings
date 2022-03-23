@@ -19,23 +19,25 @@ const enrichFromHoldings = async (args) => {
   const { institutes } = config?.holdingsiq;
 
   for await (const institute of institutes) {
-    // FIXME, count not working now
-    //const count = await holdingsAPI.getHoldingsStatus(institute);
-    //logger.info(`${institute.name}: ${count} lines from holdings`);
-    //const page = Math.ceil(count / 5000);
-    const page = 10;
-    for (let i = 1; i <= page; i += 1) {
-      // here, we got error 500
-      const holdings = await holdingsAPI.getHoldings(institute, 5000, i, index);
+    const count = await holdingsAPI.getHoldingsStatus(institute);
+    const page = Math.ceil(count / 2000);
+    logger.info(`${institute.name}: ${count} lines from holdings`);
+    logger.info(`estimate API call ${page}`);
+    let holdings;
+    let i = 1;
+    do {
+      logger.info(`${i} API call: ${(i - 1) * 2000} to ${(i) * 2000}`);
+      holdings = await holdingsAPI.getHoldings(institute, 2000, i, index);
       await elastic.bulk(client, holdings);
-    }
+      i += 1;
+    } while (holdings.length >= 2000);
   }
 };
 
 const updateFromHoldings = async (args) => {
   let {
     index,
-    file
+    file,
   } = args;
 
   if (!index) {
@@ -65,26 +67,30 @@ const updateFromHoldings = async (args) => {
 
     await elastic.createIndex(client, 'tmp', ezhlmMapping);
     const idsFromXML = await getIDFromXML(file, name, 'tmp');
-    await elastic.bulk(client, idsFromXML);
-    const count = elastic.countDocuments(client, 'tmp');
+    // TODO sort ids
+
+    await elastic.bulk(client, idsFromXML, 'update');
+    await elastic.refresh(client, 'tmp');
+    const count = await elastic.countDocuments(client, 'tmp');
     const scroll = Math.ceil(count / 5000);
-    // FIXME
     for (let i = 1; i <= scroll; i += 1) {
       const ezhlmids = await elastic.getDocumentsFromIndex(client, 'tmp', i, 5000);
-      for await (const ezhlmid of ezhlmids) {
-        const ids = ezhlmid.split('-');
-        const vendorID = ids[1];
-        const packageID = ids[2];
-        const kbID = ids[3];
+      for await (let ezhlmid of ezhlmids) {
+        ezhlmid = ezhlmid['_id'];
+        const id = ezhlmid.split('-');
+        const vendorID = id[1];
+        const packageID = id[2];
+        const kbID = id[3];
 
         const holdings1 = await holdingsAPI.getVendorsPackagesTitles(institute, vendorID, packageID, kbID, 'tmp');
-        await elastic.update(holdings1);
+        console.log(holdings1);
+        await elastic.update(client, 'tmp', ezhlmid, holdings1);
+
         const holdings2 = await holdingsAPI.getVendorsPackages(institute, vendorID, packageID, 'tmp');
-        await elastic.update(holdings2);
+        await elastic.update(client, 'tmp', ezhlmid, holdings2);
       }
     }
-    // TODO update ezhlm index with tmp index
-    await elastic.deleteIndex('tmp');
+    // await elastic.deleteIndex(client, 'tmp');
   }
 };
 

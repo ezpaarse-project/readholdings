@@ -1,7 +1,6 @@
 node_modules/
 log/
 examples/
-download/
-.config*
-202*
+2020/
 example/
+data/

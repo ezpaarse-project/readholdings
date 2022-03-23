@@ -164,3 +164,21 @@ to the XML file content (from Marc Update) and enriches these id with the holdin
 | Name | Description |
 | --- | --- |
 | -f --file | xml file |
+
+
+## dev
+
+
+```bash
+# Execute this one time
+docker-compose -f docker-compose.debug.yml run --rm elastic chown -R elasticsearch /usr/share/elasticsearch/ 
+
+# Start ezunpaywall as daemon
+docker-compose -f docker-compose.debug.yml up -d
+
+# Stop ezunpaywall
+docker-compose -f docker-compose.debug.yml stop
+
+# Get the status of ezunpaywall services
+docker-compose -f docker-compose.debug.yml ps
+```
