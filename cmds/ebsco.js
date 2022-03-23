@@ -20,17 +20,18 @@ const enrichFromHoldings = async (args) => {
 
   for await (const institute of institutes) {
     const count = await holdingsAPI.getHoldingsStatus(institute);
-    const page = Math.ceil(count / 2000);
+    const size = 2000;
+    const page = Math.ceil(count / size);
     logger.info(`${institute.name}: ${count} lines from holdings`);
     logger.info(`estimate API call ${page}`);
     let holdings;
     let i = 1;
     do {
-      logger.info(`${i} API call: ${(i - 1) * 2000} to ${(i) * 2000}`);
-      holdings = await holdingsAPI.getHoldings(institute, 2000, i, index);
+      logger.info(`${i} API call: ${(i - 1) * size} to ${(i) * size}`);
+      holdings = await holdingsAPI.getHoldings(institute, size, i, index);
       await elastic.bulk(client, holdings);
       i += 1;
-    } while (holdings.length >= 2 * 2000);
+    } while (holdings.length >= 2 * size);
   }
 };
 
@@ -83,7 +84,6 @@ const updateFromHoldings = async (args) => {
         const kbID = id[3];
 
         const holdings1 = await holdingsAPI.getVendorsPackagesTitles(institute, vendorID, packageID, kbID, 'tmp');
-        console.log(holdings1);
         await elastic.update(client, 'tmp', ezhlmid, holdings1);
 
         const holdings2 = await holdingsAPI.getVendorsPackages(institute, vendorID, packageID, 'tmp');
