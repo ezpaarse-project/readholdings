@@ -30,7 +30,7 @@ const enrichFromHoldings = async (args) => {
       holdings = await holdingsAPI.getHoldings(institute, 2000, i, index);
       await elastic.bulk(client, holdings);
       i += 1;
-    } while (holdings.length >= 2000);
+    } while (holdings.length >= 2 * 2000);
   }
 };
 
