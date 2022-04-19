@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable guard-for-in */
-
-const path = require('path');
 const fs = require('fs-extra');
 const Papa = require('papaparse');
 const cliProgress = require('cli-progress');
@@ -148,6 +146,8 @@ const insertFile = async (filePath, index, date) => {
   bar.update(stat.size);
   bar.stop();
   logger.info(`${lineInserted}/${lineInFile - 1} lines inserted`);
+
+  await elastic.refresh();
 };
 
 /**
@@ -155,7 +155,8 @@ const insertFile = async (filePath, index, date) => {
  * @param {Object} args object from commander
  */
 const insertFromHLM = async (args) => {
-  const { folder } = args;
+  const { file } = args;
+
   let {
     index,
     date,
@@ -169,24 +170,12 @@ const insertFromHLM = async (args) => {
     date = format(new Date(), 'yyyy-MM-dd');
   }
 
-  if (!args.folder || args.folder === '') {
-    logger.error('folder expected');
+  if (!args.file || args.file === '') {
+    logger.error('file expected');
     process.exit(1);
   }
 
-  const folderPath = path.resolve(folder);
-
-  const folderExist = await fs.pathExists(folderPath);
-  if (!folderExist) {
-    logger.error('folder not found');
-    process.exit(1);
-  }
-
-  const files = await fs.readdir(folderPath);
-
-  for await (const file of files) {
-    await insertFile(path.resolve(folderPath, file), index, date);
-  }
+  await insertFile(file, index, date);
 };
 
 module.exports = insertFromHLM;

@@ -35,7 +35,7 @@ const createIndex = async (args) => {
     logger.info(`index [${index}] already exist`);
     process.exit(0);
   }
-  elastic.createIndex(client, index, ezhlmMapping);
+  await elastic.createIndex(client, index, ezhlmMapping);
   logger.info(`[${index}] index has created`);
   process.exit(0);
 };

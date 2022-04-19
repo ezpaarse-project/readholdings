@@ -21,7 +21,12 @@ const setConfig = async () => {
     },
     holdingsiq: {
       baseURL: 'http://localhost:8080',
-      institutes: [],
+      customers: [],
+    },
+    fdp: {
+      host: 'http://localhost:21',
+      user: 'username',
+      password: 'changeme',
     },
   };
 
@@ -33,26 +38,6 @@ const setConfig = async () => {
     process.exit(1);
   }
   logger.info(`configuration has been initialized in ${pathConfig}`);
-};
-
-const getConfig = async (customPath) => {
-  let configPath = path.resolve(os.homedir(), '.config', 'ezhlm.json');
-  if (customPath) {
-    if (!await fs.pathExists(customPath)) {
-      logger.error(`${customPath} doesn't exist`);
-      process.exit(1);
-    } else {
-      configPath = customPath;
-    }
-  }
-  let config;
-  try {
-    config = await fs.readFile(configPath, 'utf-8');
-    config = JSON.parse(config);
-  } catch (err) {
-    logger.error(err);
-  }
-  return config;
 };
 
 /**
@@ -107,6 +92,5 @@ const manageConfig = async (args) => {
 
 module.exports = {
   manageConfig,
-  getConfig,
   setConfig,
 };
