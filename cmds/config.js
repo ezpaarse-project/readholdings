@@ -28,6 +28,7 @@ const setConfig = async () => {
       user: 'username',
       password: 'changeme',
     },
+    log: '/home/var/log/report',
   };
 
   try {

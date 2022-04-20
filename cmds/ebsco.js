@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 
 const getSnapshot = require('../bin/snapshot');
 const holdingsAPI = require('../lib/holdingsiq');
-const { getConfig, getCustomer } = require('../lib/config');
+const { getCustomer } = require('../lib/config');
 const elastic = require('../lib/elastic');
 const marc = require('../lib/marc');
 const ezhlmMapping = require('../mapping/ezhlm.json');
@@ -11,35 +11,45 @@ const logger = require('../lib/logger');
 
 const downloadDir = path.resolve(__dirname, '..', 'download');
 
-const sleep = (waitTimeInMs) => new Promise((resolve) => setTimeout(resolve, waitTimeInMs));
+function sleep(waitTimeInMs) { return new Promise((resolve) => setTimeout(resolve, waitTimeInMs)); }
 
-const initEnrich = async (args) => {
+async function checkArgs(args) {
   let { index, customer } = args;
+
+  if (!customer) {
+    logger.error('Customer required');
+    process.exit(1);
+  }
+
+  customer = await getCustomer(customer);
 
   if (!index) {
     index = `ezhlm-${new Date().getFullYear()}`;
   }
 
-  if (!customer) {
-    logger.error('Customer required');
-    process.exit(1);
-  }
+  return {
+    index, customer,
+  };
+}
 
-  customer = await getCustomer(customer);
-
+async function initEnrich(args) {
+  const { index, customer } = await checkArgs(args);
   await getSnapshot(customer, index, true);
-};
+}
 
-const updateSnapshot = async (args) => {
-  let { customer } = args;
+async function updateSnapshot(args) {
+  const { customer } = await checkArgs(args);
 
-  if (!customer) {
-    logger.error('Customer required');
-    process.exit(1);
+  const { state } = args;
+
+  let step;
+
+  if (state) {
+    state.addStepUpdateSnapshot();
+    step = state.getLatestStep();
   }
 
-  customer = await getCustomer(customer);
-  // holdingsAPI.postHoldings(customer);
+  holdingsAPI.postHoldings(customer);
 
   let res;
 
@@ -48,30 +58,36 @@ const updateSnapshot = async (args) => {
     await sleep(120 * 1000);
   } while (res.status.toLowerCase() !== 'completed');
 
-  logger.info(`[${customer?.name}] snapshot updated`);
-};
-
-const downloadMarc = async (args) => {
-  let { index, customer } = args;
-
-  if (!customer) {
-    logger.error('Customer required');
-    process.exit(1);
+  if (state) {
+    step.endAt = new Date();
+    step.totalLine = res.totalCount;
+    step.status = 'success';
+    state.setLatestStep(step);
   }
 
-  customer = await getCustomer(customer);
+  logger.info(`[${customer?.name}] snapshot updated`);
+}
 
+async function downloadMarc(args) {
+  const { customer } = await checkArgs(args);
   const { name } = customer;
 
-  if (!index) {
-    index = `ezhlm-${new Date().getFullYear()}`;
+  const { state } = args;
+
+  let step;
+
+  if (state) {
+    state.addStepDownloadMarc();
+    step = state.getLatestStep();
   }
 
   logger.info(`[${name}] Download files on Marc service`);
+
   try {
     await marc.getMarcFiles(customer);
   } catch (err) {
     logger.error(err);
+    if (state) state.fail();
   }
 
   const files = await fs.readdir(path.resolve(downloadDir, name));
@@ -80,55 +96,65 @@ const downloadMarc = async (args) => {
     try {
       logger.info(`[${name}] file [${file}]`);
       await marc.unzipMarcFile(name, path.resolve(downloadDir, name, file));
+      step.files.push(file);
     } catch (err) {
+      if (state) state.fail();
       logger.error(err);
+      process.exit(1);
     }
   }
-};
 
-const fillTmpSnapshot = async (args) => {
-  let { index, customer } = args;
-
-  if (!customer) {
-    logger.error('Customer required');
-    process.exit(1);
+  if (state) {
+    step.endAt = new Date();
+    step.status = 'success';
+    state.setLatestStep(step);
   }
+}
 
-  customer = await getCustomer(customer);
-
+async function fillTmpSnapshot(args) {
+  const { customer } = await checkArgs(args);
   const { name } = customer;
 
-  if (!index) {
-    index = `ezhlm-${new Date().getFullYear()}`;
+  const { state } = args;
+
+  let step;
+
+  if (state) {
+    state.addStepSnapshotIndex();
+    step = state.getLatestStep();
   }
 
   const client = elastic.connection();
-
   const indexSnapshot = `${name}-snapshot`.toLowerCase();
 
   await elastic.createIndex(client, indexSnapshot, ezhlmMapping);
   await getSnapshot(customer, indexSnapshot);
-};
 
-const update = async (args) => {
-  let { index, customer } = args;
-
-  if (!customer) {
-    logger.error('Customer required');
-    process.exit(1);
+  if (state) {
+    step.endAt = new Date();
+    step.status = 'success';
+    state.setLatestStep(step);
   }
+}
 
-  customer = await getCustomer(customer);
-
+async function update(args) {
+  const { customer } = await checkArgs(args);
   const { name } = customer;
 
-  if (!index) {
-    index = `ezhlm-${new Date().getFullYear()}`;
+  const { state } = args;
+
+  let step;
+
+  if (state) {
+    state.addStepMarcIndex();
+    step = state.getLatestStep();
   }
 
   const client = elastic.connection();
 
   const matchUpsert = /(Add|Chg)/i;
+  const matchCreate = /(Add)/i;
+  const matchUpdate = /(Chg)/i;
 
   const customerDir = path.resolve(downloadDir, name);
   let files = await fs.readdir(customerDir);
@@ -145,6 +171,9 @@ const update = async (args) => {
     const filePath = path.resolve(downloadDir, name, filename);
     const idsFromXML = await marc.getIDFromXML(filePath, name, indexMarc, 'upsert');
 
+    if (matchCreate.test(path)) step.linesCreated += idsFromXML.length;
+    if (matchUpdate.test(path)) step.linesUpdated += idsFromXML.length;
+
     // TODO sort ids
     await elastic.bulk(client, idsFromXML, 'update');
     await elastic.refresh(client, indexMarc);
@@ -155,6 +184,7 @@ const update = async (args) => {
     for (let i = 1; i <= scroll; i += 1) {
       const ezhlmids = await elastic.getDocumentsFromIndex(client, indexMarc, i, 5000);
       for await (let ezhlmid of ezhlmids) {
+        step.ezhlmids.push({ id: ezhlmid, file: filename });
         ezhlmid = ezhlmid._id;
         const id = ezhlmid.split('-');
         const vendorID = id[1];
@@ -162,6 +192,7 @@ const update = async (args) => {
         const kbID = id[3];
 
         const snapshot = await elastic.search(client, indexSnapshot, ezhlmid);
+
         if (snapshot) {
           await elastic.update(client, indexMarc, ezhlmid, snapshot);
         }
@@ -179,22 +210,24 @@ const update = async (args) => {
       }
     }
   }
-};
 
-const deleteFromMarc = async (args) => {
-  let { index, customer } = args;
-
-  if (!customer) {
-    logger.error('Customer required');
-    process.exit(1);
+  if (state) {
+    step.endAt = new Date();
+    step.status = 'success';
+    state.setLatestStep(step);
   }
+}
 
-  customer = await getCustomer(customer);
-
+async function deleteFromMarc(args) {
+  const { index, customer } = await checkArgs(args);
   const { name } = customer;
+  const { state } = args;
 
-  if (!index) {
-    index = `ezhlm-${new Date().getFullYear()}`;
+  let step;
+
+  if (state) {
+    state.addStepDelete();
+    step = state.getLatestStep();
   }
 
   const client = elastic.connection();
@@ -211,38 +244,51 @@ const deleteFromMarc = async (args) => {
     const filePath = path.resolve(downloadDir, name, filename);
     const idsFromXML = await marc.getIDFromXML(filePath, name, index, 'delete');
     await elastic.bulk(client, idsFromXML, 'delete');
-  }
-};
-
-const mergeMarcIndex = async (args) => {
-  let { index, customer } = args;
-
-  if (!customer) {
-    logger.error('Customer required');
-    process.exit(1);
+    if (state) {
+      step.linesDeleted += idsFromXML.length;
+    }
   }
 
-  customer = await getCustomer(customer);
+  if (state) {
+    step.endAt = new Date();
+    step.status = 'success';
+    state.setLatestStep(step);
+  }
+}
 
+async function mergeMarcIndex(args) {
+  const { index, customer } = await checkArgs(args);
   const { name } = customer;
+  const { state } = args;
 
-  if (!index) {
-    index = `ezhlm-${new Date().getFullYear()}`;
+  let step;
+
+  if (state) {
+    state.addStepMerge();
+    step = state.getLatestStep();
   }
 
   const indexMarc = `${name}-marc`.toLowerCase();
-
   const client = elastic.connection();
   const marcs = await elastic.getAll(client, indexMarc);
   const results = [];
+
   for (let i = 0; i < marcs.length; i += 1) {
     const result = marcs[i];
     results.push({ index: { _index: index, _id: result?.index._id } });
     results.push(result);
   }
+
   results.slice();
+
   await elastic.bulk(client, results, 'index');
-};
+
+  if (state) {
+    step.endAt = new Date();
+    step.status = 'success';
+    state.setLatestStep(step);
+  }
+}
 
 module.exports = {
   initEnrich,

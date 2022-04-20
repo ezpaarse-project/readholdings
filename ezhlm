@@ -19,6 +19,9 @@ const {
   mergeMarcIndex,
 } = require('./cmds/ebsco');
 
+const clean = require('./cmds/clean');
+const auto = require('./cmds/auto');
+
 const { resetIndex, createIndex } = require('./cmds/elastic');
 
 program.on('command:*', () => {
@@ -81,24 +84,38 @@ program
 
 program
   .command('update')
-  .description('Enriches the ezhlm index data by creating ezhlm-id according to the XML file content (from Marc Update) and enriches these id with the holdingsIQ API')
+  .description('Enriches the marc index by creating ezhlm-id according to the XML file content and enriches these with the holdingsIQ API')
   .option('-i --index <index>', 'index')
   .option('-c --customer <customer>', 'customer')
   .action((options) => update(options));
 
 program
   .command('merge')
-  .description('merge the Marc index in the current index')
+  .description('Merge the Marc index in the current index')
   .option('-i --index <index>', 'index')
   .option('-c --customer <customer>', 'customer')
   .action((options) => mergeMarcIndex(options));
 
 program
   .command('delete')
-  .description('delete data from current snapshots with ezhlmid from Marc delete files')
+  .description('Delete data from current snapshots with ezhlmid from Marc delete files')
   .option('-i --index <index>', 'index')
   .option('-c --customer <customer>', 'customer')
   .action((options) => deleteFromMarc(options));
+
+program
+  .command('clean')
+  .description('Clean files')
+  .option('-i --index <index>', 'index')
+  .option('-c --customer <customer>', 'customer')
+  .action((options) => clean(options));
+
+program
+  .command('auto')
+  .description('Weekly update')
+  .option('-i --index <index>', 'index')
+  .option('-c --customer <customer>', 'customer')
+  .action((options) => auto(options));
 
 program
   .command('reset')

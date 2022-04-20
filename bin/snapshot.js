@@ -18,7 +18,7 @@ const getSnapshot = async (customer, index, update) => {
   let holdings;
   let i = 1;
   do {
-    logger.info(`${i} API call: ${(i - 1) * size} to ${(i) * size}`);
+    logger.info(`API call ${i}: ${(i) * size}/${totalCount} lines inserted`);
     holdings = await holdingsAPI.getHoldings(customer, size, i, index, update);
     await elastic.bulk(client, holdings);
     i += 1;
