@@ -98,9 +98,8 @@ async function downloadMarc(args) {
       await marc.unzipMarcFile(name, path.resolve(downloadDir, name, file));
       step.files.push(file);
     } catch (err) {
-      if (state) state.fail();
       logger.error(err);
-      process.exit(1);
+      if (state) state.fail();
     }
   }
 
@@ -180,6 +179,10 @@ async function update(args) {
 
     const count = await elastic.countDocuments(client, indexMarc);
 
+    let holdings2;
+    let vendorIDCache;
+    let packageIDCache;
+
     const scroll = Math.ceil(count / 5000);
     for (let i = 1; i <= scroll; i += 1) {
       const ezhlmids = await elastic.getDocumentsFromIndex(client, indexMarc, i, 5000);
@@ -197,15 +200,19 @@ async function update(args) {
           await elastic.update(client, indexMarc, ezhlmid, snapshot);
         }
 
-        const holdings1 = await holdingsAPI
-          .getVendorsPackagesTitles(customer, vendorID, packageID, kbID, indexMarc);
+        const holdings1 = await elastic.search(client, indexSnapshot, ezhlmid);
+        holdings1.updatedAt = new Date();
         await elastic.update(client, indexMarc, ezhlmid, holdings1);
 
-        const holdings2 = await holdingsAPI
-          .getVendorsPackages(customer, vendorID, packageID, indexMarc);
+        if (vendorID !== vendorIDCache || packageID !== packageIDCache) {
+          holdings2 = await holdingsAPI
+            .getVendorsPackages(customer, vendorID, packageID, indexMarc);
+        }
         await elastic.update(client, indexMarc, ezhlmid, holdings2);
 
-        const holdings3 = await elastic.search(client, indexSnapshot, ezhlmid);
+        const holdings3 = await holdingsAPI
+          .getVendorsPackagesTitles(customer, vendorID, packageID, kbID, indexMarc);
+
         await elastic.update(client, indexMarc, ezhlmid, holdings3);
       }
     }

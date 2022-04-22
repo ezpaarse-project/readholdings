@@ -33,7 +33,6 @@ async function auto(args) {
   // } catch (err) {
   //   logger.error(err);
   //   state.fail();
-  //   process.exit(1);
   // }
 
   try {
@@ -41,23 +40,20 @@ async function auto(args) {
   } catch (err) {
     logger.error(err);
     state.fail();
-    process.exit(1);
   }
 
-  try {
-    await fillTmpSnapshot(args);
-  } catch (err) {
-    logger.error(err);
-    state.fail();
-    process.exit(1);
-  }
+  // try {
+  //   await fillTmpSnapshot(args);
+  // } catch (err) {
+  //   logger.error(err);
+  //   state.fail();
+  // }
 
   try {
     await update(args);
   } catch (err) {
     logger.error(err);
     state.fail();
-    process.exit(1);
   }
 
   try {
@@ -65,7 +61,6 @@ async function auto(args) {
   } catch (err) {
     logger.error(err);
     state.fail();
-    process.exit(1);
   }
 
   try {
@@ -73,16 +68,14 @@ async function auto(args) {
   } catch (err) {
     logger.error(err);
     state.fail();
-    process.exit(1);
   }
 
-  try {
-    await clean(args);
-  } catch (err) {
-    logger.error(err);
-    state.fail();
-    process.exit(1);
-  }
+  // try {
+  //   await clean(args);
+  // } catch (err) {
+  //   logger.error(err);
+  //   state.fail();
+  // }
 }
 
 module.exports = auto;
