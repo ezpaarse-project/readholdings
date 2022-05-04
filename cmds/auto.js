@@ -28,12 +28,19 @@ async function auto(args) {
 
   args.state = state;
 
-  // try {
-  //   await updateSnapshot(args);
-  // } catch (err) {
-  //   logger.error(err);
-  //   state.fail();
-  // }
+  try {
+    await updateSnapshot(args);
+  } catch (err) {
+    logger.error(err);
+    state.fail();
+  }
+
+  try {
+    await fillTmpSnapshot(args);
+  } catch (err) {
+    logger.error(err);
+    state.fail();
+  }
 
   try {
     await downloadMarc(args);
@@ -41,13 +48,6 @@ async function auto(args) {
     logger.error(err);
     state.fail();
   }
-
-  // try {
-  //   await fillTmpSnapshot(args);
-  // } catch (err) {
-  //   logger.error(err);
-  //   state.fail();
-  // }
 
   try {
     await update(args);
@@ -70,12 +70,12 @@ async function auto(args) {
     state.fail();
   }
 
-  // try {
-  //   await clean(args);
-  // } catch (err) {
-  //   logger.error(err);
-  //   state.fail();
-  // }
+  try {
+    await clean(args);
+  } catch (err) {
+    logger.error(err);
+    state.fail();
+  }
 }
 
 module.exports = auto;

@@ -96,7 +96,7 @@ async function downloadMarc(args) {
     try {
       logger.info(`[${name}] file [${file}]`);
       await marc.unzipMarcFile(name, path.resolve(downloadDir, name, file));
-      step.files.push(file);
+      if (state) step.files.push(file);
     } catch (err) {
       logger.error(err);
       if (state) state.fail();
@@ -174,47 +174,46 @@ async function update(args) {
     if (matchUpdate.test(path)) step.linesUpdated += idsFromXML.length;
 
     // TODO sort ids
-    await elastic.bulk(client, idsFromXML, 'update');
+    await elastic.bulk(client, idsFromXML);
     await elastic.refresh(client, indexMarc);
-
-    const count = await elastic.countDocuments(client, indexMarc);
 
     let holdings2;
     let vendorIDCache;
     let packageIDCache;
 
-    const scroll = Math.ceil(count / 5000);
-    for (let i = 1; i <= scroll; i += 1) {
-      const ezhlmids = await elastic.getDocumentsFromIndex(client, indexMarc, i, 5000);
-      for await (let ezhlmid of ezhlmids) {
-        step.ezhlmids.push({ id: ezhlmid, file: filename });
-        ezhlmid = ezhlmid._id;
-        const id = ezhlmid.split('-');
-        const vendorID = id[1];
-        const packageID = id[2];
-        const kbID = id[3];
+    for (let i = 0; i < idsFromXML.length; i += 2) {
+      let ezhlmid = idsFromXML[i];
+      ezhlmid = ezhlmid?.index?._id;
 
-        const snapshot = await elastic.search(client, indexSnapshot, ezhlmid);
+      if (state) step.ezhlmids.push({ id: ezhlmid, file: filename });
 
-        if (snapshot) {
-          await elastic.update(client, indexMarc, ezhlmid, snapshot);
-        }
+      const id = ezhlmid.split('-');
+      const vendorID = id[1];
+      const packageID = id[2];
+      const kbID = id[3];
 
-        const holdings1 = await elastic.search(client, indexSnapshot, ezhlmid);
+      const snapshot = await elastic.search(client, indexSnapshot, ezhlmid);
+
+      if (snapshot) {
+        await elastic.update(client, indexMarc, ezhlmid, snapshot);
+      }
+
+      const holdings1 = await elastic.search(client, indexSnapshot, ezhlmid);
+      if (holdings1) {
         holdings1.updatedAt = new Date();
         await elastic.update(client, indexMarc, ezhlmid, holdings1);
-
-        if (vendorID !== vendorIDCache || packageID !== packageIDCache) {
-          holdings2 = await holdingsAPI
-            .getVendorsPackages(customer, vendorID, packageID, indexMarc);
-        }
-        await elastic.update(client, indexMarc, ezhlmid, holdings2);
-
-        const holdings3 = await holdingsAPI
-          .getVendorsPackagesTitles(customer, vendorID, packageID, kbID, indexMarc);
-
-        await elastic.update(client, indexMarc, ezhlmid, holdings3);
       }
+
+      if (vendorID !== vendorIDCache || packageID !== packageIDCache) {
+        holdings2 = await holdingsAPI
+          .getVendorsPackages(customer, vendorID, packageID, indexMarc);
+      }
+      await elastic.update(client, indexMarc, ezhlmid, holdings2);
+
+      const holdings3 = await holdingsAPI
+        .getVendorsPackagesTitles(customer, vendorID, packageID, kbID, indexMarc);
+
+      await elastic.update(client, indexMarc, ezhlmid, holdings3);
     }
   }
 
