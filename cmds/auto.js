@@ -1,15 +1,12 @@
-const {
-  updateSnapshot,
-  downloadMarc,
-  fillTmpSnapshot,
-  update,
-  mergeMarcIndex,
-  deleteFromMarc,
-} = require('./ebsco');
+const { updateSnapshot, fillTmpSnapshot } = require('./holdings/snapshot');
+const update = require('./holdings/delta');
+const mergeMarcIndex = require('./holdings/merge');
+
+const deleteFromMarc = require('./holdings/delete');
 
 const clean = require('./clean');
 
-const State = require('../lib/state');
+const State = require('../models/state');
 const logger = require('../lib/logger');
 
 const { getCustomer } = require('../lib/config');
@@ -28,12 +25,12 @@ async function auto(args) {
 
   args.state = state;
 
-  try {
-    await updateSnapshot(args);
-  } catch (err) {
-    logger.error(err);
-    state.fail();
-  }
+  // try {
+  //   await updateSnapshot(args);
+  // } catch (err) {
+  //   logger.error(err);
+  //   state.fail();
+  // }
 
   try {
     await fillTmpSnapshot(args);
@@ -42,12 +39,12 @@ async function auto(args) {
     state.fail();
   }
 
-  try {
-    await downloadMarc(args);
-  } catch (err) {
-    logger.error(err);
-    state.fail();
-  }
+  // try {
+  //   await downloadMarc(args);
+  // } catch (err) {
+  //   logger.error(err);
+  //   state.fail();
+  // }
 
   try {
     await update(args);
@@ -70,12 +67,15 @@ async function auto(args) {
     state.fail();
   }
 
-  try {
-    await clean(args);
-  } catch (err) {
-    logger.error(err);
-    state.fail();
-  }
+  // try {
+  //   await clean(args);
+  // } catch (err) {
+  //   logger.error(err);
+  //   state.fail();
+  // }
+
+  await state.endState();
+  await state.saveInFile();
 }
 
 module.exports = auto;

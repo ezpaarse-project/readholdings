@@ -7,20 +7,19 @@ const logger = require('./lib/logger');
 
 const { manageConfig } = require('./cmds/config');
 const { ping } = require('./cmds/ping');
-const insertFromHLM = require('./cmds/hlm');
-
-const {
-  initEnrich,
-  updateSnapshot,
-  downloadMarc,
-  fillTmpSnapshot,
-  update,
-  deleteFromMarc,
-  mergeMarcIndex,
-} = require('./cmds/ebsco');
 
 const clean = require('./cmds/clean');
 const auto = require('./cmds/auto');
+
+const insertFromHLM = require('./cmds/hlm/insert');
+const initEnrich = require('./cmds/hlm/enrich');
+
+const { updateSnapshot, fillTmpSnapshot } = require('./cmds/holdings/snapshot');
+const update = require('./cmds/holdings/delta');
+const deleteFromMarc = require('./cmds/holdings/delete');
+const mergeMarcIndex = require('./cmds/holdings/merge');
+
+const downloadMarc = require('./cmds/marc/download');
 
 const { resetIndex, createIndex } = require('./cmds/elastic');
 

@@ -26,7 +26,7 @@ async function clean(args) {
   let step;
 
   if (state) {
-    state.addStepSnapshotIndex();
+    state.addStepClean();
     step = state.getLatestStep();
   }
 

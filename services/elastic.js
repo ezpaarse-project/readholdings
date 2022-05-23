@@ -3,7 +3,7 @@ const path = require('path');
 const os = require('os');
 const { Client } = require('@elastic/elasticsearch');
 const { URL } = require('url');
-const logger = require('./logger');
+const logger = require('../lib/logger');
 
 /**
  * create elastic client with config in $HOME/.config/ezhlm.json
@@ -90,14 +90,48 @@ const bulk = async (client, data) => {
     logger.error('Error in bulk');
   }
 
+  const errors = [];
+
+  let insertedDocs = 0;
+  let updatedDocs = 0;
+  let deletedDocs = 0;
+
   items.forEach((i) => {
-    if (i?.index?.status !== 200 && i?.index?.status !== 201) {
-      logger.error(`[${i?.index?._index} ${i?.index?._id}]: ${i?.index?.status}`);
+    if (i?.index?.result === 'created') {
+      insertedDocs += 1;
+      return;
     }
-    logger.info(`[${i?.index?._index} ${i?.index?._id}]: ${i?.index?.result}`);
+    if (i?.index?.result === 'updated') {
+      updatedDocs += 1;
+      return;
+    }
+    if (i?.index?.result === 'deleted') {
+      deletedDocs += 1;
+      return;
+    }
+
+    if (i?.index?.error !== undefined) {
+      errors.push(i?.index?.error);
+      logger.error(JSON.stringify(i?.index?.error, null, 2));
+      process.exit(1);
+    }
   });
 
-  return items.length;
+  items.forEach((i) => {
+    if (i?.index?.status !== 200 && i?.index?.status !== 201) {
+      if (i?.delete === undefined) {
+        logger.error(JSON.stringify(i?.index, null, 2));
+        process.exit(1);
+      }
+    }
+  });
+
+  return {
+    insertedDocs,
+    updatedDocs,
+    deletedDocs,
+    errors,
+  };
 };
 
 /**
@@ -274,6 +308,7 @@ const search = async (client, index, id) => {
     });
   } catch (err) {
     logger.error(`Cannot search in index ${index} - ${err.message}`);
+    logger.error(err);
     process.exit(1);
   }
 

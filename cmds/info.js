@@ -1,4 +1,4 @@
-const elastic = require('../lib/elastic');
+const elastic = require('../services/elastic');
 const logger = require('../lib/logger');
 
 /**

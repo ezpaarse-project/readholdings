@@ -3,8 +3,8 @@ const path = require('path');
 const jsZip = require('jszip');
 const { XMLParser } = require('fast-xml-parser');
 
-const logger = require('./logger');
-const connection = require('./ftp');
+const logger = require('../lib/logger');
+const connection = require('../lib/ftp');
 
 const downloadDir = path.resolve(__dirname, '..', 'download');
 
@@ -120,7 +120,7 @@ async function unzipMarcFile(portal, file) {
   }
 }
 
-async function getIDFromXML(source, institute, index, type) {
+async function getIDFromXML(source, institute) {
   const results = [];
   const res = await fs.readFile(source);
 
@@ -146,13 +146,7 @@ async function getIDFromXML(source, institute, index, type) {
 
           if (KBID && PackageID && VendorID) {
             const ezhlmid = `${institute}-${VendorID}-${PackageID}-${KBID}`;
-            if (type === 'delete') {
-              results.push({ delete: { _index: index, _id: ezhlmid } });
-            }
-            if (type === 'upsert') {
-              results.push({ index: { _index: index, _id: ezhlmid } });
-              results.push({ ezhlmid });
-            }
+            results.push(ezhlmid);
 
             KBID = '';
             PackageID = '';

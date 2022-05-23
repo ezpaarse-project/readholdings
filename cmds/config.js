@@ -81,7 +81,7 @@ const manageConfig = async (args) => {
   try {
     await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
   } catch (err) {
-    logger.error(`Cannot write ${JSON.stringify(config, null, 2)} in ${config}`);
+    logger.error(`Cannot write ${JSON.stringify(config, null, 2)} in ${configPath}`);
     logger.error(err);
     process.exit(1);
   }

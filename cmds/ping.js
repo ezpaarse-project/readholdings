@@ -1,10 +1,10 @@
-const elastic = require('../lib/elastic');
+const elastic = require('../services/elastic');
 const logger = require('../lib/logger');
 
 /**
  * check if elastic
  */
-const ping = async () => {
+async function ping() {
   const client = elastic.connection();
   let res;
   try {
@@ -18,8 +18,6 @@ const ping = async () => {
     process.exit(1);
   }
   logger.info(`${client.baseURL} ping: OK`);
-};
+}
 
-module.exports = {
-  ping,
-};
+module.exports = ping;

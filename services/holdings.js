@@ -7,7 +7,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const os = require('os');
 
-const logger = require('./logger');
+const logger = require('../lib/logger');
 
 const configPath = path.resolve(os.homedir(), '.config', 'ezhlm.json');
 const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
@@ -40,7 +40,7 @@ const postHoldings = async (conf) => {
 
   let i = 1;
 
-  do {
+  for (i; i < 5; i += 1) {
     try {
       res = await holdings({
         method: 'post',
@@ -56,15 +56,12 @@ const postHoldings = async (conf) => {
       await sleep(1000 * 2 ** i);
       i += 1;
     }
-    if (res) break;
-  } while (i <= 4);
 
-  if (i >= 4) {
-    logger.error(`Cannot request /${custid}/holdings - Fail 4 times`);
-    process.exit(1);
+    if (res) return { request: i, result: res?.data?.totalCount };
   }
 
-  return res?.data?.totalCount;
+  logger.error(`Cannot request /${custid}/holdings - Fail 4 times`);
+  process.exit(1);
 };
 
 /**
@@ -96,7 +93,7 @@ const getHoldingsStatus = async (conf) => {
       logger.error(`${i} try, wait ${2 ** i} seconds for the next try`);
       await sleep(1000 * 2 ** i);
     }
-    if (res) return res?.data;
+    if (res) return { request: i, result: res?.data };
   }
 
   logger.error(`Cannot request /${custid}/holdings/status - Fail 4 times`);
@@ -111,7 +108,7 @@ const getHoldingsStatus = async (conf) => {
  * @param {boolean} update Type of bulk, if true: update bulk, else create
  * @returns {Object} Data ready to be inserted in elastic
  */
-const parseGetHoldings = (data, institute, index, update) => {
+const parseGetHoldings = (data, institute, index) => {
   const results = [];
   data.forEach((e) => {
     const result = {
@@ -138,11 +135,7 @@ const parseGetHoldings = (data, institute, index, update) => {
       OnlineIdentifier: e?.online_identifier,
       PrintIdentifier: e?.print_identifier,
     };
-    if (update) {
-      results.push({ update: { _index: index, _id: result.ezhlmid } });
-    } else {
-      results.push({ index: { _index: index, _id: result.ezhlmid } });
-    }
+    results.push({ index: { _index: index, _id: result.ezhlmid } });
     results.push({ doc: result });
   });
   return results.slice();
@@ -186,7 +179,7 @@ const getHoldings = async (conf, count, offset, index, update) => {
     }
     if (res) {
       const result = parseGetHoldings(res?.data?.holdings, name, index, update);
-      return result;
+      return { request: i, result };
     }
   }
 
@@ -219,12 +212,12 @@ const getContributor = (contributors, type) => {
  * @returns {String} name of contributor
  */
 const getIdentifier = (identifiers, type, subtype) => {
-  const tt = identifiers.filter((identifier) => {
+  const id = identifiers.filter((identifier) => {
     if (identifier?.type === type && identifier?.subtype === subtype) {
       return identifier?.id;
     }
   });
-  return tt[0]?.id;
+  return id[0]?.id;
 };
 
 /**
@@ -346,7 +339,7 @@ const getVendorsPackagesTitles = async (conf, vendorID, packageID, kbID) => {
 
     if (res) {
       const result = parseGetVendorsPackagesTitles(res?.data);
-      return result;
+      return { request: i, result };
     }
   }
 
@@ -414,7 +407,7 @@ const getVendorsPackages = async (conf, vendorID, packageID, index) => {
     }
     if (res) {
       const result = parseGetVendorsPackages(res?.data, index);
-      return result;
+      return { request: i, result };
     }
   }
   logger.error(`Cannot request /${custid}/vendors/${vendorID}/packages/${packageID} - Fail 4 times`);

@@ -1,5 +1,5 @@
-const elastic = require('../lib/elastic');
-const holdingsAPI = require('../lib/holdingsiq');
+const elastic = require('../services/elastic');
+const holdingsAPI = require('../services/holdings');
 const logger = require('../lib/logger');
 
 /**
@@ -7,24 +7,39 @@ const logger = require('../lib/logger');
  * @param {String} index Index where the values will be inserted
  * @param {boolean} update Type of bulk, if true: update bulk, else create
  */
-const getSnapshot = async (customer, index, update) => {
+const getSnapshot = async (customer, index) => {
   const client = elastic.connection();
+  let request = 0;
+  let linesInserted = 0;
+  let linesUpdated = 0;
 
-  const { totalCount } = await holdingsAPI.getHoldingsStatus(customer);
+  const res = await holdingsAPI.getHoldingsStatus(customer);
+  const { totalCount } = res?.result;
+  request += res?.request;
   const size = 4000;
   const page = Math.ceil(totalCount / size);
   logger.info(`${customer.name}: ${totalCount} lines from holdings`);
   logger.info(`estimate API call ${page}`);
   let holdings;
   let i = 1;
+
   do {
-    logger.info(`API call ${i}: ${(i) * size}/${totalCount} lines inserted`);
-    holdings = await holdingsAPI.getHoldings(customer, size, i, index, update);
-    await elastic.bulk(client, holdings);
+    holdings = await holdingsAPI.getHoldings(customer, size, i, index);
+    request += holdings.request;
+    const { insertedDocs, updatedDocs } = await elastic.bulk(client, holdings?.result);
+    linesInserted += insertedDocs;
+    linesUpdated += updatedDocs;
+    logger.info(`API call ${i}: ${linesInserted + linesUpdated}/${totalCount} lines inserted`);
     i += 1;
-  } while (holdings.length >= 2 * size);
+  } while (holdings?.result?.length >= 2 * size);
 
   await elastic.refresh(client, index);
+
+  return {
+    request,
+    linesInserted,
+    linesUpdated,
+  };
 };
 
 module.exports = getSnapshot;
