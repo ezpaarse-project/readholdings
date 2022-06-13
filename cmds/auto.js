@@ -1,6 +1,7 @@
 const { updateSnapshot, fillTmpSnapshot } = require('./holdings/snapshot');
 const update = require('./holdings/delta');
 const mergeMarcIndex = require('./holdings/merge');
+const downloadMarc = require('./marc/download');
 
 const deleteFromMarc = require('./holdings/delete');
 
@@ -13,6 +14,7 @@ const { getCustomer } = require('../lib/config');
 
 async function auto(args) {
   let { customer } = args;
+  const config = args;
 
   if (!customer) {
     logger.error('Customer required');
@@ -23,56 +25,56 @@ async function auto(args) {
 
   const state = new State(customer?.name);
 
-  args.state = state;
-
-  // try {
-  //   await updateSnapshot(args);
-  // } catch (err) {
-  //   logger.error(err);
-  //   state.fail();
-  // }
+  config.state = state;
 
   try {
-    await fillTmpSnapshot(args);
-  } catch (err) {
-    logger.error(err);
-    state.fail();
-  }
-
-  // try {
-  //   await downloadMarc(args);
-  // } catch (err) {
-  //   logger.error(err);
-  //   state.fail();
-  // }
-
-  try {
-    await update(args);
+    await updateSnapshot(config);
   } catch (err) {
     logger.error(err);
     state.fail();
   }
 
   try {
-    await mergeMarcIndex(args);
+    await fillTmpSnapshot(config);
   } catch (err) {
     logger.error(err);
     state.fail();
   }
 
   try {
-    await deleteFromMarc(args);
+    await downloadMarc(config);
   } catch (err) {
     logger.error(err);
     state.fail();
   }
 
-  // try {
-  //   await clean(args);
-  // } catch (err) {
-  //   logger.error(err);
-  //   state.fail();
-  // }
+  try {
+    await update(config);
+  } catch (err) {
+    logger.error(err);
+    state.fail();
+  }
+
+  try {
+    await mergeMarcIndex(config);
+  } catch (err) {
+    logger.error(err);
+    state.fail();
+  }
+
+  try {
+    await deleteFromMarc(config);
+  } catch (err) {
+    logger.error(err);
+    state.fail();
+  }
+
+  try {
+    await clean(config);
+  } catch (err) {
+    logger.error(err);
+    state.fail();
+  }
 
   await state.endState();
   await state.saveInFile();

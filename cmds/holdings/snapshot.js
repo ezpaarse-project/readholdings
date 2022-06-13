@@ -1,6 +1,6 @@
 const { checkArgs, sleep } = require('../../bin/utils');
 const getSnapshot = require('../../bin/snapshot');
-const { logger } = require('../../lib/logger');
+const logger = require('../../lib/logger');
 const holdingsAPI = require('../../services/holdings');
 const elastic = require('../../services/elastic');
 

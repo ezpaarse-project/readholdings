@@ -3,7 +3,8 @@ const path = require('path');
 
 const { checkArgs } = require('../../bin/utils');
 const logger = require('../../lib/logger');
-const marc = require('../../services/marc');
+const getMarcFiles = require('../../services/marc');
+const { unzipMarcFile } = require('../../bin/marc');
 
 const downloadDir = path.resolve(__dirname, '..', '..', 'download');
 
@@ -23,7 +24,7 @@ async function downloadMarc(args) {
   logger.info(`[${name}] Download files on Marc service`);
 
   try {
-    await marc.getMarcFiles(customer);
+    await getMarcFiles(customer);
   } catch (err) {
     logger.error(err);
     if (state) state.fail();
@@ -34,7 +35,7 @@ async function downloadMarc(args) {
   for await (const file of files) {
     try {
       logger.info(`[${name}] file [${file}]`);
-      await marc.unzipMarcFile(name, path.resolve(downloadDir, name, file));
+      await unzipMarcFile(name, path.resolve(downloadDir, name, file));
       if (state) step.files.push(file);
     } catch (err) {
       logger.error(err);
