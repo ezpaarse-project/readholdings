@@ -1,3 +1,7 @@
-node_modules
+node_modules/
 log/
 examples/
+download/
+.config*
+202*
+example/
