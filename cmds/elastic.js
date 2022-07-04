@@ -1,4 +1,4 @@
-const elastic = require('../lib/elastic');
+const elastic = require('../services/elastic');
 const logger = require('../lib/logger');
 const ezhlmMapping = require('../mapping/ezhlm.json');
 
@@ -35,7 +35,7 @@ const createIndex = async (args) => {
     logger.info(`index [${index}] already exist`);
     process.exit(0);
   }
-  elastic.createIndexInElastic(index, ezhlmMapping, client);
+  await elastic.createIndex(client, index, ezhlmMapping);
   logger.info(`[${index}] index has created`);
   process.exit(0);
 };

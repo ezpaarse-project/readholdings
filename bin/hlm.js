@@ -1,13 +1,11 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable guard-for-in */
-
-const path = require('path');
 const fs = require('fs-extra');
 const Papa = require('papaparse');
 const cliProgress = require('cli-progress');
 const { exec } = require('child_process');
-const { format } = require('date-fns');
-const elastic = require('../lib/elastic');
+
+const elastic = require('../services/elastic');
 
 const logger = require('../lib/logger');
 
@@ -17,14 +15,14 @@ const logger = require('../lib/logger');
  * @param {String} name key of data need to be parsed
  * @returns {Object} parsed data
  */
-const transformStringToArray = (data, name) => {
+function transformStringToArray(data, name) {
   if (data[name]) {
     if (data[name].includes('|')) {
       data[name] = data[name].split('|');
     }
   }
   return data;
-};
+}
 
 /**
  * parse embargo data for json format
@@ -32,7 +30,7 @@ const transformStringToArray = (data, name) => {
  * @param {String} embargo type of embargo
  * @returns {Object} parsed data
  */
-const transformEmbargo = (data, embargo) => {
+function transformEmbargo(data, embargo) {
   if (!data[embargo]) {
     return data;
   }
@@ -49,19 +47,19 @@ const transformEmbargo = (data, embargo) => {
   }
   data[embargo] = `${number * multiplicator} mois`;
   return data;
-};
+}
 
 /**
  * insert the content of file in elastic
  * @param {String} filePath filepath
  */
-const insertFile = async (filePath, index, date) => {
+async function insertFile(filePath, index, date) {
   const client = await elastic.connection();
 
   logger.info(`insert ${filePath}`);
 
   let lineInFile = 0;
-  let lineInserted = 0;
+  let lineUpserted = 0;
 
   await new Promise((resolve) => {
     exec(`wc -l < ${filePath}`, (error, results) => {
@@ -129,7 +127,8 @@ const insertFile = async (filePath, index, date) => {
         if (tab.length === 1000) {
           await parser.pause();
           const dataToInsert = tab.slice();
-          lineInserted += await elastic.bulk(client, dataToInsert);
+          const res = await elastic.bulk(client, dataToInsert);
+          lineUpserted += res.insertedDocs + res.updatedDocs;
           tab = [];
           bar.update(results.meta.cursor);
           await parser.resume();
@@ -142,51 +141,15 @@ const insertFile = async (filePath, index, date) => {
   });
   if (tab.length !== 0) {
     const dataToInsert = tab.slice();
-    lineInserted += await elastic.bulk(client, dataToInsert);
+    const res = await elastic.bulk(client, dataToInsert);
+    lineUpserted += res.insertedDocs + res.updatedDocs;
     tab = [];
   }
   bar.update(stat.size);
   bar.stop();
-  logger.info(`${lineInserted}/${lineInFile - 1} lines inserted`);
-};
+  logger.info(`${lineUpserted}/${lineInFile - 1} lines updated`);
 
-/**
- * insert the content of file into elastic (ez-meta)
- * @param {Object} args object from commander
- */
-const insertFromHLM = async (args) => {
-  const { folder } = args;
-  let {
-    index,
-    date,
-  } = args;
+  await elastic.refresh(client, index);
+}
 
-  if (!index) {
-    index = `ezhlm-${new Date().getFullYear()}`;
-  }
-
-  if (!date) {
-    date = format(new Date(), 'yyyy-MM-dd');
-  }
-
-  if (!args.folder || args.folder === '') {
-    logger.error('folder expected');
-    process.exit(1);
-  }
-
-  const folderPath = path.resolve(folder);
-
-  const folderExist = await fs.pathExists(folderPath);
-  if (!folderExist) {
-    logger.error('folder not found');
-    process.exit(1);
-  }
-
-  const files = await fs.readdir(folderPath);
-
-  for await (const file of files) {
-    await insertFile(path.resolve(folderPath, file), index, date);
-  }
-};
-
-module.exports = insertFromHLM;
+module.exports = insertFile;

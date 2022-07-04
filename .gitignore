@@ -1,7 +1,7 @@
 node_modules/
 log/
+sources/
 examples/
+data/
 download/
-.config*
-202*
-example/
+report/

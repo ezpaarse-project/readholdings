@@ -66,7 +66,8 @@
       "IsPackageSelected": { "type": "keyword" },
       "ProxyID": { "type": "keyword" },
       "IsTitleSelected": { "type": "keyword" },
-      "createdAt": { "type": "date" }
+      "createdAt": { "type": "date" },
+      "updatedAt": { "type": "date" }
     }
   }
 }

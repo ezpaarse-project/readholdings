@@ -1,4 +1,4 @@
-const elastic = require('../lib/elastic');
+const elastic = require('../services/elastic');
 const logger = require('../lib/logger');
 
 /**
@@ -37,7 +37,7 @@ const countInstitutes = async (client, index, institute) => {
  * @param {Object} args object from commander
  */
 const info = async (args) => {
-  const client = await elastic.connection(args.use);
+  const client = await elastic.connection();
   const documents = await elastic.countDocuments(client, 'ezhlm');
   const IN2P3 = await countInstitutes(client, 'ezhlm', 'IN2P3');
   const INC = await countInstitutes(client, 'ezhlm', 'INC');
