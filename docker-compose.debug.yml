@@ -1,0 +1,90 @@
+version: "3.3" 
+
+services:
+  update:
+    image: node:16.15.1
+    environment:
+      - NODE_ENV=development
+      # elastic
+      - ELASTICSEARCH_HOST=http://elastic
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+      # database
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      # holdingsAPI
+      - HOLDINGS_BASEURL
+      - INSHS_CUSTID
+      - INSHS_APIKEY
+      # proxy
+      - http_proxy
+      - https_proxy
+    working_dir: /update
+    volumes:
+      - ./src/update:/update
+    command: "npm run dev"
+    ports:
+      - 3000:3000
+    depends_on:
+      - elastic
+    restart: unless-stopped
+
+  database:
+    image: postgres:14.4
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/database:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB="database"
+      - POSTGRES_USER="user"
+      - POSTGRES_PASSWORD="changeme"
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: changeme
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=changeme
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - "./data/elastic:/usr/share/elasticsearch/data"
+    ports:
+      - 9200:9200
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.10.2
+    ports:
+      - 5601:5601
+    environment:
+      - ELASTICSEARCH_HOSTS="http://elastic:9200"
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+      - xpack.security.enabled=true
+    depends_on:
+      - "elastic"
+    restart: unless-stopped
+
+  maildev:
+    image: djfarrelly/maildev
+    ports:
+      - 1080:80

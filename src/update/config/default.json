@@ -1,0 +1,20 @@
+{
+  "elasticsearch": {
+    "host": "http://elastic",
+    "port": 9200,
+    "user": "elastic",
+    "password": "changeme"
+  },
+  "database": {
+    "database": "database",
+    "user": "user",
+    "password": "changeme"
+  },
+  "holdings": {
+    "baseURL": "http://localhost:8080",
+    "INSHS": {
+      "custid": "custid",
+      "apikey": "apikey"
+    }
+  }
+}
