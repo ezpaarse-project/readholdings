@@ -213,7 +213,7 @@ function parseCacheForElastic(data, index) {
   const results = [];
   data.forEach((e) => {
     const result = {
-      rhID: { value: e.rHID, tag: 'meta' },
+      rhID: { value: e.rhID, tag: 'meta' },
       Customer: { value: e?.Customer, tag: 'meta' },
       CustomerID: { value: e?.CustomerID, tag: 'meta' },
       updatedAt: { value: e?.updatedAt, tag: 'meta' },
@@ -303,7 +303,7 @@ function parseCacheForElastic(data, index) {
       VendorID: { value: e?.ProxyID, tag: 'proprietary' },
       VendorName: { value: e?.ProxyID, tag: 'proprietary' },
     };
-    results.push({ index: { _index: index, _id: result.rhID.value } });
+    results.push({ index: { _index: index, _id: e.rhID } });
     results.push({ doc: result });
   });
   return results.slice();

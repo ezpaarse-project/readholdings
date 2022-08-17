@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs-extra');
-const os = require('os');
 const { differenceInSeconds } = require('date-fns');
 const logger = require('../lib/logger');
 
@@ -12,11 +11,11 @@ class State {
     this.steps = [];
     this.endAt = null;
     this.error = false;
-    this.totalRequest = 0;
-    this.totalTime = 0;
-    this.totalLineDeleted = 0;
-    this.totalLineUpdated = 0;
-    this.totalLineAdded = 0;
+    this.nbRequest = 0;
+    this.time = 0;
+    this.nbDeletedLines = 0;
+    this.nbUpdatedLines = 0;
+    this.nbInsertedLines = 0;
   }
 
   increment(key, value) {
@@ -32,18 +31,20 @@ class State {
   }
 
   async setLatestStep(step) {
+    if (!step.endAt) step.endAt = new Date();
     step.time = Math.abs(differenceInSeconds(step.createdAt, step.endAt));
     this.steps[this.steps.length - 1] = step;
     await this.saveInFile();
   }
 
   stepUpdateSnapshot() {
-    logger.info('step - update snapshot on holdingsIQ');
+    logger.info('step - update snapshot on holdings API');
     const step = {
       name: 'updateSnapshot',
       createdAt: new Date(),
-      nbRequest: 0,
       endAt: null,
+      time: 0,
+      nbRequest: 0,
       status: 'inProgress',
     };
     this.steps.push(step);
@@ -56,6 +57,8 @@ class State {
       name: 'saveCache',
       createdAt: new Date(),
       nbRequest: 0,
+      nbCacheLine: 0,
+      nbLine: 0,
       endAt: null,
       status: 'inProgress',
     };
@@ -63,12 +66,13 @@ class State {
     return step;
   }
 
-  createStepUpdateCache() {
+  createStepEnrichCache() {
     logger.info('step - enrich cache with api holding');
     const step = {
       name: 'enrichCache',
       createdAt: new Date(),
       nbRequest: 0,
+      nbLine: 0,
       endAt: null,
       status: 'inProgress',
     };
@@ -82,13 +86,28 @@ class State {
       name: 'mergeCache',
       createdAt: new Date(),
       endAt: null,
+      time: 0,
       status: 'inProgress',
     };
     this.steps.push(step);
     return step;
   }
 
-  stepInterchangeTableName() {
+  createStepDeleteLines() {
+    logger.info('step - delete line on elastic');
+    const step = {
+      name: 'deleteLines',
+      createdAt: new Date(),
+      endAt: null,
+      time: 0,
+      nbLine: 0,
+      status: 'inProgress',
+    };
+    this.steps.push(step);
+    return step;
+  }
+
+  stepSwapTableNames() {
     logger.info('step - Save current Table Holding for tomorrow');
     const step = {
       name: 'swapTableNames',
@@ -106,6 +125,7 @@ class State {
       name: 'clean',
       createdAt: new Date(),
       endAt: null,
+      time: 0,
       status: 'inProgress',
     };
     this.steps.push(step);
@@ -117,28 +137,28 @@ class State {
     this.endAt = new Date();
     this.totalTime = Math.abs(differenceInSeconds(this.createdAt, this.endAt));
 
-    this.steps.forEach((step) => {
-      if (step?.nbRequest) {
-        this.totalRequest += step.totalRequest;
-      }
-      if (step?.deletedLines) {
-        this.nbDeletedLines += step.deletedLines;
-      }
-      if (step?.cacheUpdatedLines) {
-        this.nbUpdatedLines += step.cacheUpdatedLines;
-      }
-      if (step?.cacheInsertedLines) {
-        this.nbAddedLines += step.cacheInsertedLines;
-      }
+    const [stepMergeCache] = this.steps.filter((e) => e.name === 'mergeCache');
+    const [stepDeleteLines] = this.steps.filter((e) => e.name === 'deleteLines');
+
+    if (stepMergeCache) {
+      this.nbUpdatedLines += stepMergeCache.updatedLines;
+      this.nbInsertedLines += stepMergeCache.insertedLines;
+    }
+
+    if (stepDeleteLines) this.nbDeletedLines += stepDeleteLines.nbLine;
+
+    this.steps.forEach((e) => {
+      if (e.time) this.time += e.time;
+      if (e.nbRequest) this.nbRequest += e.nbRequest;
     });
 
     return this;
   }
 
-  fail() {
+  async fail() {
     const step = this.getLatestStep();
     step.status = 'error';
-    this.setLatestStep(step);
+    await this.setLatestStep(step);
     this.done = true;
     this.endAt = new Date();
     this.error = true;

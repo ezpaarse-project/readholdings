@@ -13,6 +13,8 @@ async function updateCache(custid, customerName, apikey, step) {
   let ids = await database.selectAll(CacheModel);
   ids = ids.map((e) => e.rhID);
 
+  step.nbLine = ids.length;
+
   let holdings1;
   let vendorIDCache;
   let packageIDCache;
@@ -60,8 +62,8 @@ async function updateCache(custid, customerName, apikey, step) {
 async function mergeCache(customerName, index, step) {
   const CacheModel = await createModelHoldings(`${customerName}-caches`);
 
-  let cacheInsertedLines = 0;
-  let cacheUpdatedLines = 0;
+  let insertedLines = 0;
+  let updatedLines = 0;
 
   const readHoldingsLength = await database.count(CacheModel);
 
@@ -72,17 +74,22 @@ async function mergeCache(customerName, index, step) {
   for (let currentPage = 0; currentPage < pages; currentPage += 1) {
     let holdings = await database.selectByPage(CacheModel, size, size * currentPage);
     holdings = parseCacheForElastic(holdings, index);
-    // TODO timeout
-    const { insertedDocs, updatedDocs } = await elastic.bulk(holdings);
-    cacheInsertedLines += insertedDocs;
-    cacheUpdatedLines += updatedDocs;
+    let res;
+    try {
+      res = await elastic.bulk(holdings);
+    } catch (err) {
+      logger.err(err);
+      throw err;
+    }
+    insertedLines += res.insertedDocs;
+    updatedLines += res.updatedDocs;
   }
 
   await elastic.refresh(index);
 
   step.endAt = new Date();
-  step.cacheInsertedLines = cacheInsertedLines;
-  step.cacheUpdatedLines = cacheUpdatedLines;
+  step.insertedLines = insertedLines;
+  step.updatedLines = updatedLines;
   step.status = 'success';
 
   logger.info(`[${customerName}-caches] is merged on elastic`);

@@ -158,7 +158,7 @@ institution to enrich the existing
 (beta)
 
 Enriches the ezhlm index data by creating ezhlm-id according 
-to the XML file content (from Marc Update) and enriches these id with the holdingsIQ AP
+to the XML file content (from Marc Update) and enriches these id with the holdingsIQ API
 #### Parameters
 
 | Name | Description |

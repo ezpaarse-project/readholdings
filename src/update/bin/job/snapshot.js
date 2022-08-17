@@ -15,7 +15,7 @@ async function saveSnapshot(customerName, index, date) {
     await updateSnapshot(customerName, custid, apikey, state);
   } catch (err) {
     logger.error(err);
-    state.fail();
+    await state.fail();
     return;
   }
 
@@ -23,7 +23,7 @@ async function saveSnapshot(customerName, index, date) {
     await getSnapshotForDatabase(customerName, custid, apikey);
   } catch (err) {
     logger.error(err);
-    state.fail();
+    await state.fail();
     return;
   }
 

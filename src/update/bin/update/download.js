@@ -67,10 +67,10 @@ async function getSnapshotAndSaveCacheInDatabase(customerName, custid, apikey, s
   const pages = Math.ceil(totalCount / size);
 
   logger.info(`${customerName}: ${totalCount} lines from holdings`);
-  logger.info(`Need ${pages} request to Holdings API`);
+  logger.info(`Need ${pages} requests to Holdings API`);
 
   let holdings;
-  let cacheLines = 0;
+  let nbCacheLine = 0;
 
   for (let currentPage = 1; currentPage < pages; currentPage += 1) {
     holdings = await holdingsAPI.getHoldings(custid, apikey, size, currentPage);
@@ -86,7 +86,6 @@ async function getSnapshotAndSaveCacheInDatabase(customerName, custid, apikey, s
 
     insertedLines += sizeBulk;
     logger.info(`API call ${currentPage}/${pages}: ${currentPage * size}/${totalCount} lines inserted`);
-    currentPage += 1;
 
     for (let j = 0; j < holdings.length; j += 1) {
       const holding = holdings[j];
@@ -102,7 +101,7 @@ async function getSnapshotAndSaveCacheInDatabase(customerName, custid, apikey, s
             console.log('EBSCO: ', value);
             console.log('POSTGRES: ', oldValue);
 
-            cacheLines += 1;
+            nbCacheLine += 1;
             await database.upsert(CacheModel, holding);
             break;
           }
@@ -118,7 +117,7 @@ async function getSnapshotAndSaveCacheInDatabase(customerName, custid, apikey, s
   step.nbRequest = nbRequest;
   step.totalCount = totalCount;
   step.insertedLines = insertedLines;
-  step.cacheLines = cacheLines;
+  step.nbCacheLine = nbCacheLine;
   step.status = 'success';
 
   logger.info(`[${customerName}] snapshot is inserted`);

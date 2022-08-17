@@ -32,7 +32,7 @@ async function update(customerName, index) {
   //   step = await updateSnapshot(customerName, custid, apikey, step);
   // } catch (err) {
   //   logger.error(err);
-  //   state.fail();
+  //   await state.fail();
   //   return;
   // }
 
@@ -44,21 +44,21 @@ async function update(customerName, index) {
   //   step = await getSnapshotAndSaveCacheInDatabase(customerName, custid, apikey, step);
   // } catch (err) {
   //   logger.error(err);
-  //   state.fail();
+  //   await state.fail();
   //   return;
   // }
 
   await state.setLatestStep(step);
 
-  step = state.createStepUpdateCache();
+  step = state.createStepEnrichCache();
 
-  // try {
-  //   step = await updateCache(custid, customerName, apikey, step);
-  // } catch (err) {
-  //   logger.error(err);
-  //   state.fail();
-  //   return;
-  // }
+  try {
+    step = await updateCache(custid, customerName, apikey, step);
+  } catch (err) {
+    logger.error(err);
+    await state.fail();
+    return;
+  }
 
   await state.setLatestStep(step);
 
@@ -66,13 +66,13 @@ async function update(customerName, index) {
 
   step = state.createStepMergeCache();
 
-  // try {
-  //   step = await mergeCache(customerName, index, step);
-  // } catch (err) {
-  //   logger.error(err);
-  //   state.fail();
-  //   return;
-  // }
+  try {
+    step = await mergeCache(customerName, index, step);
+  } catch (err) {
+    logger.error(err);
+    await state.fail();
+    return;
+  }
 
   await state.setLatestStep(step);
 
@@ -80,7 +80,7 @@ async function update(customerName, index) {
   //   await flush(SaveHoldingsModel);
   // } catch (err) {
   //   logger.error(err);
-  //   state.fail();
+  //   await state.fail();
   //   return;
   // }
 
@@ -88,7 +88,7 @@ async function update(customerName, index) {
   //   await swapTableName(`${customerName}-holdings`, `${customerName}-saveholdings`);
   // } catch (err) {
   //   logger.error(err);
-  //   state.fail();
+  //   await state.fail();
   //   return;
   // }
 
@@ -96,7 +96,7 @@ async function update(customerName, index) {
   //   await flush(CacheModel);
   // } catch (err) {
   //   logger.error(err);
-  //   state.fail();
+  //   await state.fail();
   //   return;
   // }
 

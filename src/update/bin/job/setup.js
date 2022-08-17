@@ -23,7 +23,7 @@ async function initiate(customerName, index, date) {
     await insertFile(filepath, index, date);
   } catch (err) {
     logger.error(err);
-    state.fail();
+    await state.fail();
     return;
   }
 
@@ -31,7 +31,7 @@ async function initiate(customerName, index, date) {
     await getSnapshotForElastic(customerName, custid, apikey, index);
   } catch (err) {
     logger.error(err);
-    state.fail();
+    await state.fail();
     return;
   }
 

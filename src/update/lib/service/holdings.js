@@ -51,7 +51,7 @@ const postHoldings = async (custid, apikey) => {
       i += 1;
     }
 
-    if (res) return { request: i, data: res?.data?.totalCount };
+    if (res) return { nbRequest: i, data: res?.data?.totalCount };
   }
 
   logger.error(`Cannot request POST /${custid}/holdings - Fail 4 times`);
@@ -83,7 +83,7 @@ const getHoldingsStatus = async (custid, apikey) => {
       logger.error(`${i} try, wait ${2 ** i} seconds for the next try`);
       await sleep(1000 * 2 ** i);
     }
-    if (res) return { request: i, data: res?.data };
+    if (res) return { nbRequest: i, data: res?.data };
   }
 
   logger.error(`Cannot request GET /${custid}/holdings/status - Fail 4 times`);
@@ -212,7 +212,7 @@ const getVendorsPackagesTitles = async (custid, apikey, vendorID, packageID, kbI
     }
 
     if (res) {
-      return { request: i, data: res?.data };
+      return { nbRequest: i, data: res?.data };
     }
   }
 
@@ -251,7 +251,7 @@ const getVendorsPackages = async (custid, apikey, vendorID, packageID) => {
       await sleep(1000 * 2 ** i);
     }
     if (res) {
-      return { request: i, data: res?.data };
+      return { nbRequest: i, data: res?.data };
     }
   }
   logger.error(`Cannot request GET /${custid}/vendors/${vendorID}/packages/${packageID} - Fail 4 times`);
