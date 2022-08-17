@@ -28,25 +28,25 @@ async function update(customerName, index) {
 
   step = state.stepUpdateSnapshot();
 
-  // try {
-  //   step = await updateSnapshot(customerName, custid, apikey, step);
-  // } catch (err) {
-  //   logger.error(err);
-  //   await state.fail();
-  //   return;
-  // }
+  try {
+    step = await updateSnapshot(customerName, custid, apikey, step);
+  } catch (err) {
+    logger.error(err);
+    await state.fail();
+    return;
+  }
 
   await state.setLatestStep(step);
 
   step = state.createStepSaveCache();
 
-  // try {
-  //   step = await getSnapshotAndSaveCacheInDatabase(customerName, custid, apikey, step);
-  // } catch (err) {
-  //   logger.error(err);
-  //   await state.fail();
-  //   return;
-  // }
+  try {
+    step = await getSnapshotAndSaveCacheInDatabase(customerName, custid, apikey, step);
+  } catch (err) {
+    logger.error(err);
+    await state.fail();
+    return;
+  }
 
   await state.setLatestStep(step);
 
@@ -76,29 +76,29 @@ async function update(customerName, index) {
 
   await state.setLatestStep(step);
 
-  // try {
-  //   await flush(SaveHoldingsModel);
-  // } catch (err) {
-  //   logger.error(err);
-  //   await state.fail();
-  //   return;
-  // }
+  try {
+    await flush(SaveHoldingsModel);
+  } catch (err) {
+    logger.error(err);
+    await state.fail();
+    return;
+  }
 
-  // try {
-  //   await swapTableName(`${customerName}-holdings`, `${customerName}-saveholdings`);
-  // } catch (err) {
-  //   logger.error(err);
-  //   await state.fail();
-  //   return;
-  // }
+  try {
+    await swapTableName(`${customerName}-holdings`, `${customerName}-saveholdings`);
+  } catch (err) {
+    logger.error(err);
+    await state.fail();
+    return;
+  }
 
-  // try {
-  //   await flush(CacheModel);
-  // } catch (err) {
-  //   logger.error(err);
-  //   await state.fail();
-  //   return;
-  // }
+  try {
+    await flush(CacheModel);
+  } catch (err) {
+    logger.error(err);
+    await state.fail();
+    return;
+  }
 
   state.endState(step);
 
