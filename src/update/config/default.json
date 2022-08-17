@@ -10,6 +10,10 @@
     "user": "user",
     "password": "changeme"
   },
+  "mail": {
+    "baseURL": "http://mail:8000",
+    "apikey": "changeme"
+  },
   "holdings": {
     "baseURL": "http://localhost:8080",
     "INSHS": {

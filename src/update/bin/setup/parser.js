@@ -146,7 +146,7 @@ const parseGetHoldings = (data, institute, index) => {
   const results = [];
   data.forEach((e) => {
     const result = {
-      rh: { value: `${institute}-${e?.vendor_id}-${e?.package_id}-${e?.title_id}`, tag: 'meta' },
+      rhID: { value: `${institute}-${e?.vendor_id}-${e?.package_id}-${e?.title_id}`, tag: 'meta' },
 
       access_type: { value: e?.access_type, tag: 'kbart' },
       coverage_depth: { value: e?.coverage_depth, tag: 'kbart' },

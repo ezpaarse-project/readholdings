@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const elasticClient = require('../service/elastic');
+const elasticClient = require('../lib/service/elastic');
 const sequelize = require('../lib/sequelize/client');
 
 router.get('/', async (req, res) => res.status(200).json('update service'));

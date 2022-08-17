@@ -1,3 +1,5 @@
+/* eslint-disable no-loop-func */
+/* eslint-disable no-unreachable-loop */
 /* eslint-disable array-callback-return */
 /* eslint-disable consistent-return */
 
@@ -5,8 +7,10 @@ const HttpsProxyAgent = require('https-proxy-agent');
 const axios = require('axios');
 const { holdings } = require('config');
 
-const sleep = require('../bin/utils');
-const logger = require('../lib/logger');
+const { sleep } = require('../../bin/utils');
+const logger = require('../logger');
+
+const { args } = require('../../bin/utils');
 
 const httpsAgent = process.env.https_proxy && new HttpsProxyAgent(process.env.https_proxy);
 
@@ -41,13 +45,13 @@ const postHoldings = async (custid, apikey) => {
       });
     } catch (err) {
       logger.errorRequest(err);
-      logger.error(`POST /${custid}/holdings - Fail ${i} times`);
+      logger.error(`POST /${custid}/holdings - Fail ${i} times - HTTP code: ${err.response.status}`);
       logger.error(`${i} try, wait ${2 ** i} seconds for the next try`);
       await sleep(1000 * 2 ** i);
       i += 1;
     }
 
-    if (res) return { nbRequest: i, data: res?.data?.totalCount };
+    if (res) return { request: i, data: res?.data?.totalCount };
   }
 
   logger.error(`Cannot request POST /${custid}/holdings - Fail 4 times`);
@@ -75,11 +79,11 @@ const getHoldingsStatus = async (custid, apikey) => {
       });
     } catch (err) {
       logger.errorRequest(err);
-      logger.error(`GET /${custid}/holdings/status - Fail ${i} times`);
+      logger.error(`GET /${custid}/holdings/status - Fail ${i} times - HTTP code: ${err.response.status}`);
       logger.error(`${i} try, wait ${2 ** i} seconds for the next try`);
       await sleep(1000 * 2 ** i);
     }
-    if (res) return { nbRequest: i, data: res?.data };
+    if (res) return { request: i, data: res?.data };
   }
 
   logger.error(`Cannot request GET /${custid}/holdings/status - Fail 4 times`);
@@ -98,7 +102,14 @@ const getHoldings = async (custid, apikey, count, offset) => {
 
   let i = 1;
 
-  for (i; i < 5; i += 1) {
+  const idsSave = new Set();
+  const badlyFormatted = new Set();
+
+  const filtered = [];
+
+  let nbRequest = 0;
+
+  do {
     try {
       res = await holdingsAPI({
         method: 'get',
@@ -106,22 +117,67 @@ const getHoldings = async (custid, apikey, count, offset) => {
         params: { count, offset, format },
         headers: {
           'x-api-key': apikey,
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
         },
       });
     } catch (err) {
       logger.errorRequest(err);
-      logger.error(`GET /${custid}/holdings - Fail ${i} times`);
+      logger.error(`GET /${custid}/holdings - Fail ${i} times - HTTP code: ${err?.response?.status}`);
       logger.error(`${i} try, wait ${2 ** i} seconds for the next try`);
+      i += 1;
+      nbRequest += 1;
       await sleep(1000 * 2 ** i);
     }
     if (res) {
-      return { nbRequest: i, data: res?.data?.holdings };
+      if (badlyFormatted.size !== 0) {
+        const idsBadlyFormatted = [...badlyFormatted];
+        idsBadlyFormatted.forEach((id) => {
+          const [packageId, vendorId, titleId] = id.split('-');
+
+          const newHolding = res?.data?.holdings?.find((e) => e.package_id === packageId
+            && e.vendor_id === vendorId && e.title_id === titleId);
+
+          const hasInvalidArg = args.some((arg) => newHolding[arg]?.includes('�'));
+
+          if (!hasInvalidArg) {
+            filtered.push(newHolding);
+            badlyFormatted.delete(id);
+          }
+        });
+      } else {
+        res?.data?.holdings?.forEach((holding) => {
+          // create id to save holding in interne cache
+          const id = `${holding.package_id}-${holding.vendor_id}-${holding.title_id}`;
+
+          if (idsSave.has(id)) {
+            return;
+          }
+
+          idsSave.add(id);
+
+          const hasInvalidArg = args.some((arg) => holding[arg]?.includes('�'));
+
+          if (hasInvalidArg) {
+            badlyFormatted.add(id);
+          } else {
+            filtered.push(holding);
+          }
+        });
+
+        if (badlyFormatted.size !== 0) {
+          logger.info(`${badlyFormatted.size} data are not formatted correctly, retry a other time`);
+        }
+        nbRequest += 1;
+      }
     }
+  } while (badlyFormatted.size !== 0);
+
+  if (i === 4) {
+    logger.error(`Cannot request GET /${custid}/holdings - Fail 4 times`);
+    return false;
   }
 
-  logger.error(`Cannot request GET /${custid}/holdings - Fail 4 times`);
-  return false;
+  return { nbRequest, data: filtered };
 };
 
 /**
@@ -141,7 +197,7 @@ const getVendorsPackagesTitles = async (custid, apikey, vendorID, packageID, kbI
     try {
       res = await holdingsAPI({
         method: 'get',
-        url: `GET /${custid}/vendors/${vendorID}/packages/${packageID}/titles/${kbID}`,
+        url: `/${custid}/vendors/${vendorID}/packages/${packageID}/titles/${kbID}`,
         headers: {
           'x-api-key': apikey,
           'Content-Type': 'application/json',
@@ -150,13 +206,13 @@ const getVendorsPackagesTitles = async (custid, apikey, vendorID, packageID, kbI
     } catch (err) {
       logger.errorRequest(err);
       logger.error(err?.response?.data?.Errors[0]?.Message);
-      logger.error(`GET /${custid}/vendors/${vendorID}/packages/${packageID}/titles/${kbID} - Fail ${i} times`);
+      logger.error(`GET /${custid}/vendors/${vendorID}/packages/${packageID}/titles/${kbID} - Fail ${i} times - HTTP code: ${err.response.status}`);
       logger.error(`${i} try, wait ${2 ** i} seconds for the next try`);
       await sleep(1000 * 2 ** i);
     }
 
     if (res) {
-      return { nbRequest: i, data: res?.data };
+      return { request: i, data: res?.data };
     }
   }
 
@@ -182,7 +238,7 @@ const getVendorsPackages = async (custid, apikey, vendorID, packageID) => {
     try {
       res = await holdingsAPI({
         method: 'get',
-        url: `GET /${custid}/vendors/${vendorID}/packages/${packageID}`,
+        url: `/${custid}/vendors/${vendorID}/packages/${packageID}`,
         headers: {
           'x-api-key': apikey,
           'Content-Type': 'application/json',
@@ -190,12 +246,12 @@ const getVendorsPackages = async (custid, apikey, vendorID, packageID) => {
       });
     } catch (err) {
       logger.errorRequest(err);
-      logger.error(`GET /${custid}/vendors/${vendorID}/packages/${packageID} - Fail ${i} times`);
+      logger.error(`GET /${custid}/vendors/${vendorID}/packages/${packageID} - Fail ${i} times - HTTP code: ${err.response.status}`);
       logger.error(`${i} try, wait ${2 ** i} seconds for the next try`);
       await sleep(1000 * 2 ** i);
     }
     if (res) {
-      return { nbRequest: i, data: res?.data };
+      return { request: i, data: res?.data };
     }
   }
   logger.error(`Cannot request GET /${custid}/vendors/${vendorID}/packages/${packageID} - Fail 4 times`);

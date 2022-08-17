@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const joi = require('joi');
 const logger = require('../lib/logger');
-const { diffID, diffChg, selectFirst } = require('../service/database');
+const { diffID, diffChg, selectFirst } = require('../lib/service/database');
 
 router.get('/difference/id', async (req, res, next) => {
   let { table1, table2 } = req.query;

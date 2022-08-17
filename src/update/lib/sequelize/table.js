@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const { client } = require('./client');
 
 async function createTableHoldings(name) {
-  const Holdings = client.define(name, {
+  const Holdings = client.define(name.toLowerCase(), {
     // Model attributes are defined here
     rhID: {
       type: DataTypes.TEXT,
@@ -434,7 +434,7 @@ async function createTableHoldings(name) {
   }, {
     sequelize: client,
     logging: false,
-    modelName: 'Holdings',
+    modelName: 'holdings',
     charset: 'utf8',
     collate: 'utf8_general_ci',
     timestamps: true,

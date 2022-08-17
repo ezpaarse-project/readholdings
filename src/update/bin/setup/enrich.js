@@ -1,5 +1,5 @@
-const elastic = require('../../service/elastic');
-const holdingsAPI = require('../../service/holdings');
+const elastic = require('../../lib/service/elastic');
+const holdingsAPI = require('../../lib/service/holdings');
 
 const { parseGetHoldings } = require('./parser');
 
@@ -10,12 +10,12 @@ const logger = require('../../lib/logger');
  */
 async function getSnapshotForElastic(name, custid, apikey, index) {
   let request = 0;
-  let linesInserted = 0;
-  let linesUpdated = 0;
+  let insertedLines = 0;
+  let updatedLines = 0;
 
   const res = await holdingsAPI.getHoldingsStatus(custid, apikey);
   const { totalCount } = res.data;
-  request += res.request;
+  request += res.nbRequest;
   const size = 4000;
   const page = Math.ceil(totalCount / size);
   logger.info(`${name}: ${totalCount} lines from holdings`);
@@ -28,9 +28,9 @@ async function getSnapshotForElastic(name, custid, apikey, index) {
     request += holdings.nbRequest;
     holdings = parseGetHoldings(holdings.data, name, index);
     const { insertedDocs, updatedDocs } = await elastic.bulk(holdings);
-    linesInserted += insertedDocs;
-    linesUpdated += updatedDocs;
-    logger.info(`API call ${i}/${page}: ${linesInserted + linesUpdated}/${totalCount} lines inserted`);
+    insertedLines += insertedDocs;
+    updatedLines += updatedDocs;
+    logger.info(`API call ${i}/${page}: ${insertedLines + updatedLines}/${totalCount} lines inserted`);
     i += 1;
   } while (holdings?.length >= 2 * size);
 
@@ -38,8 +38,8 @@ async function getSnapshotForElastic(name, custid, apikey, index) {
 
   return {
     request,
-    linesInserted,
-    linesUpdated,
+    insertedLines,
+    updatedLines,
   };
 }
 

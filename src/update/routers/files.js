@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const path = require('path');
 const multer = require('multer');
-const joi = require('joi');
 
 const uploadDir = path.resolve(__dirname, '..', 'out', 'upload');
 

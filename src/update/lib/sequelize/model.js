@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const { client } = require('./client');
 
 async function createModelHoldings(name) {
-  const Holdings = client.define(name, {
+  const Holdings = client.define(name.toLowerCase(), {
     rhID: {
       type: DataTypes.TEXT,
       allowNull: false,

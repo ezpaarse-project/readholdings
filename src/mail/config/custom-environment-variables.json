@@ -1,0 +1,12 @@
+{
+  "smtp": {
+    "host": "READHOLDINGS_SMTP_HOST",
+    "port": "READHOLDINGS_SMTP_PORT"
+  },
+  "notifications": {
+    "sender": "READHOLDINGS_NOTIFICATIONS_SENDER",
+    "receivers": "READHOLDINGS_NOTIFICATIONS_RECEIVERS",
+    "machine": "READHOLDINGS_NOTIFICATIONS_MACHINE"
+  },
+  "apikey": "READHOLDINGS_MAIL_APIKEY"
+}

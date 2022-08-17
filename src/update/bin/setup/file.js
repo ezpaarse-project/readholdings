@@ -5,7 +5,7 @@ const { exec } = require('child_process');
 const fs = require('fs-extra');
 const Papa = require('papaparse');
 
-const elastic = require('../../service/elastic');
+const elastic = require('../../lib/service/elastic');
 
 const logger = require('../../lib/logger');
 

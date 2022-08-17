@@ -1,7 +1,7 @@
 const { Client } = require('@elastic/elasticsearch');
 const { URL } = require('url');
 const { elasticsearch } = require('config');
-const logger = require('../lib/logger');
+const logger = require('../logger');
 
 const elasticClient = new Client({
   node: {
@@ -23,9 +23,6 @@ const ping = async () => {
       logger.error(`Cannot ping ${elasticsearch.host}:${elasticsearch.port}`);
       logger.error(err);
     }
-    if (elasticStatus?.statusCode !== 200) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
   } while (elasticStatus?.statusCode !== 200);
   logger.info(`ping: ${elasticsearch.host}:${elasticsearch.port} ok`);
   return true;
@@ -41,7 +38,8 @@ const bulk = async (data) => {
   try {
     res = await elasticClient.bulk({ body: data });
   } catch (err) {
-    logger.error(`Cannot bulk: ${err}`);
+    logger.error('Cannot bulk on elastic');
+    logger.error(err);
     console.log(err?.meta?.body?.error);
     process.exit(1);
   }

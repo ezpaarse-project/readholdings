@@ -6,17 +6,21 @@ const path = require('path');
 const { format } = require('date-fns');
 
 const initiate = require('../bin/job/setup');
-const saveSnapshot = require('../bin/job/snapshot');
 const update = require('../bin/job/update');
+
+const createModelHoldings = require('../lib/sequelize/model');
+
+const { flush } = require('../lib/service/database');
 
 const uploadDir = path.resolve(__dirname, '..', 'out', 'upload');
 
-router.post('/job/:custid/setup', async (req, res, next) => {
-  const { custid } = req.params;
-  let { index, date } = req.query;
+router.post('/job/setup/:customerName', async (req, res, next) => {
+  let { customerName } = req.params;
 
-  const checkParams = joi.string().trim().required().validate(custid);
-  if (checkParams?.error) return next('custid are required');
+  const checkParams = joi.string().trim().required().validate(customerName);
+  if (checkParams?.error) return next('customerName are required');
+
+  customerName = checkParams.value;
 
   const checkQuery = joi.object({
     index: joi.string().trim().default(`${new Date().getFullYear()}-holdings`),
@@ -25,66 +29,55 @@ router.post('/job/:custid/setup', async (req, res, next) => {
 
   if (checkQuery?.error) return next('index must be a string');
 
-  index = checkQuery.value.index;
-  date = checkQuery.value.date;
+  const { index, date } = checkQuery.value;
 
-  if (!await fs.pathExists(path.resolve(uploadDir, `${custid}.csv`))) {
-    return next(`[${`${custid}.csv`}] file not found`);
+  if (!await fs.pathExists(path.resolve(uploadDir, `${customerName}.csv`))) {
+    return next(`[${`${customerName}.csv`}] file not found`);
   }
 
   const id = uuid.v4();
-  initiate(custid, index, date);
+  initiate(customerName, index, date);
   return res.status(200).json({ id });
 });
 
-router.post('/job/:custid/snapshot', async (req, res, next) => {
-  const { custid } = req.params;
-  let { index, date } = req.query;
+router.post('/job/update/:customerName', async (req, res, next) => {
+  let { customerName } = req.params;
 
-  const checkParams = joi.string().trim().required().validate(custid);
-  if (checkParams?.error) return next('custid are required');
+  const checkParams = joi.string().trim().required().validate(customerName);
+  if (checkParams?.error) return next('customerName are required');
+
+  customerName = checkParams.value;
 
   const checkQuery = joi.object({
     index: joi.string().trim().default(`${new Date().getFullYear()}-holdings`),
-    date: joi.string().trim().default(format(new Date(), 'yyyy-MM-dd')),
   }).validate(req.query);
 
   if (checkQuery?.error) return next('index must be a string');
 
-  index = checkQuery.value.index;
-  date = checkQuery.value.date;
+  const { index } = checkQuery.value;
 
   const id = uuid.v4();
-  saveSnapshot(custid, index, date);
+  update(customerName.toLowerCase(), index);
   return res.status(200).json({ id });
 });
 
-router.post('/job/:custid/update', async (req, res, next) => {
-  const { custid } = req.params;
-  let { index, date } = req.query;
+router.post('/job/reset/:customerName', async (req, res, next) => {
+  let { customerName } = req.params;
 
-  const checkParams = joi.string().trim().required().validate(custid);
-  if (checkParams?.error) return next('custid are required');
+  const checkParams = joi.string().trim().required().validate(customerName);
+  if (checkParams?.error) return next('customerName are required');
 
-  const checkQuery = joi.object({
-    index: joi.string().trim().default(`${new Date().getFullYear()}-holdings`),
-    date: joi.string().trim().default(format(new Date(), 'yyyy-MM-dd')),
-  }).validate(req.query);
+  customerName = checkParams.value;
 
-  if (checkQuery?.error) return next('index must be a string');
+  const CacheModel = await createModelHoldings(`${customerName}-caches`);
+  const HoldingsModel = await createModelHoldings(`${customerName}-holdings`);
+  const saveholdingsModel = await createModelHoldings(`${customerName}-saveholdings`);
 
-  index = checkQuery.value.index;
-  date = checkQuery.value.date;
+  flush(CacheModel);
+  flush(HoldingsModel);
+  flush(saveholdingsModel);
 
-  const id = uuid.v4();
-  update(custid, index, date);
-  return res.status(200).json({ id });
-});
-
-router.post('/job/:custid/reset', async (req, res, next) => {
-  const id = uuid.v4();
-  // TODO reset
-  return res.status(200).json({ id });
+  return res.status(200).json(true);
 });
 
 module.exports = router;

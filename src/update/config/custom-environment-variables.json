@@ -10,6 +10,10 @@
     "user": "POSTGRES_USER",
     "password": "POSTGRES_PASSWORD"
   },
+  "mail": {
+    "baseURL": "READHOLDINGS_MAIL_BASEURL",
+    "apikey": "READHOLDINGS_MAIL_APIKEY"
+  },
   "holdings": {
     "baseURL": "HOLDINGS_BASEURL",
     "INSHS": {

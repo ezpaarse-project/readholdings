@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const os = require('os');
+const { differenceInSeconds } = require('date-fns');
 const logger = require('../lib/logger');
 
 class State {
@@ -11,8 +12,11 @@ class State {
     this.steps = [];
     this.endAt = null;
     this.error = false;
-    this.ezhlmid = 0;
-    this.request = 0;
+    this.totalRequest = 0;
+    this.totalTime = 0;
+    this.totalLineDeleted = 0;
+    this.totalLineUpdated = 0;
+    this.totalLineAdded = 0;
   }
 
   increment(key, value) {
@@ -27,100 +31,81 @@ class State {
     return this.steps[this.steps.length - 1];
   }
 
-  setLatestStep(step) {
+  async setLatestStep(step) {
+    step.time = Math.abs(differenceInSeconds(step.createdAt, step.endAt));
     this.steps[this.steps.length - 1] = step;
+    await this.saveInFile();
   }
 
-  addStepUpdateSnapshot() {
+  stepUpdateSnapshot() {
     logger.info('step - update snapshot on holdingsIQ');
     const step = {
-      name: 'Update snapshot on Holdings',
+      name: 'updateSnapshot',
       createdAt: new Date(),
+      nbRequest: 0,
       endAt: null,
-      totalLine: 0,
       status: 'inProgress',
     };
     this.steps.push(step);
     return step;
   }
 
-  addStepSnapshotIndex() {
-    logger.info('step - generate snapshot index that content the snapshot of holdingsIQ');
+  createStepSaveCache() {
+    logger.info('step - save cache');
     const step = {
-      name: 'Create snapshot index on elastic',
+      name: 'saveCache',
       createdAt: new Date(),
+      nbRequest: 0,
       endAt: null,
-      insertedLine: 0,
       status: 'inProgress',
     };
     this.steps.push(step);
     return step;
   }
 
-  addStepDownloadMarc() {
-    logger.info('step - download marc files from FTP server');
+  createStepUpdateCache() {
+    logger.info('step - enrich cache with api holding');
     const step = {
-      name: 'Download xml delta file from Marc',
+      name: 'enrichCache',
       createdAt: new Date(),
+      nbRequest: 0,
       endAt: null,
-      files: [],
       status: 'inProgress',
     };
     this.steps.push(step);
     return step;
   }
 
-  addStepMarcIndex() {
-    logger.info('step - Enriches the marc index by creating ezhlm-id according to the XML file content and enriches these with the holdingsIQ API');
+  createStepMergeCache() {
+    logger.info('step - merge the content of Cache table in elastic');
     const step = {
-      name: 'Create delta index on elastic',
+      name: 'mergeCache',
       createdAt: new Date(),
       endAt: null,
-      errors: [],
-      ezhlmids: [],
-      request: 0,
       status: 'inProgress',
     };
     this.steps.push(step);
     return step;
   }
 
-  addStepMerge() {
-    logger.info('step - Merge the Marc index in the current index');
+  stepInterchangeTableName() {
+    logger.info('step - Save current Table Holding for tomorrow');
     const step = {
-      name: 'Merge delta index on current index',
+      name: 'swapTableNames',
       createdAt: new Date(),
       endAt: null,
-      linesCreated: 0,
-      linesUpdated: 0,
-      errors: [],
       status: 'inProgress',
     };
     this.steps.push(step);
     return step;
   }
 
-  addStepDelete() {
-    logger.info('step - Delete data from current snapshots with ezhlmid from Marc delete files');
+  stepClean() {
+    logger.info('step - Clean Cache and Holdings');
     const step = {
-      name: 'Delete holdings with delta',
+      name: 'clean',
       createdAt: new Date(),
       endAt: null,
-      linesDeleted: 0,
-      errors: [],
-      status: 'inProgress',
-    };
-    this.steps.push(step);
-    return step;
-  }
-
-  addStepClean() {
-    logger.info('step - Clean files');
-    const step = {
-      name: 'clean indices and files',
-      createdAt: new Date(),
-      endAt: null,
-      files: [],
       status: 'inProgress',
     };
     this.steps.push(step);
@@ -130,6 +115,24 @@ class State {
   endState() {
     this.done = true;
     this.endAt = new Date();
+    this.totalTime = Math.abs(differenceInSeconds(this.createdAt, this.endAt));
+
+    this.steps.forEach((step) => {
+      if (step?.nbRequest) {
+        this.totalRequest += step.totalRequest;
+      }
+      if (step?.deletedLines) {
+        this.nbDeletedLines += step.deletedLines;
+      }
+      if (step?.cacheUpdatedLines) {
+        this.nbUpdatedLines += step.cacheUpdatedLines;
+      }
+      if (step?.cacheInsertedLines) {
+        this.nbAddedLines += step.cacheInsertedLines;
+      }
+    });
+
+    return this;
   }
 
   fail() {
@@ -139,29 +142,17 @@ class State {
     this.done = true;
     this.endAt = new Date();
     this.error = true;
+    // TODO send error mail
   }
 
   async saveInFile() {
-    const configPath = path.resolve(os.homedir(), '.config', 'ezhlm.json');
-    const config = JSON.parse(await fs.readFile(configPath, 'utf-8'));
-    const reportPath = config?.report;
+    const reportName = `${this.createdAt.toISOString()}.json`;
+    const reportPath = path.resolve(__dirname, '..', 'out', 'report', this.customer, reportName);
 
-    if (!fs.stat(reportPath)) {
-      try {
-        await fs.mkdir(reportPath);
-      } catch (err) {
-        logger.error(`Cannot create reportDir in ${path.resolve(reportPath)}`);
-        return false;
-      }
-    }
-
-    await fs.ensureDir(path.resolve(reportPath, this.customer));
-
-    const reportName = `${new Date().toISOString()}.json`;
     try {
-      await fs.writeFile(path.resolve(reportPath, this.customer, reportName), JSON.stringify(this, null, 2), 'utf8');
+      await fs.writeFile(reportPath, JSON.stringify(this, null, 2), 'utf8');
     } catch (err) {
-      logger.error(`Cannot write ${JSON.stringify(config, null, 2)} in ${path.resolve(reportPath, this.customer, reportName)}`);
+      logger.error(`Cannot write ${JSON.stringify(this, null, 2)} in ${reportPath}`);
       logger.error(err);
       return false;
     }

@@ -1,9 +1,5 @@
 node_modules/
 log/
-sources/
-examples/
 data/
-download/
-report/
 readholdings.local.env.sh
 save/

@@ -10,6 +10,8 @@ services:
       - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_USERNAME=elastic
       - ELASTICSEARCH_PASSWORD=changeme
+      # mail
+      - READHOLDINGS_MAIL_APIKEY
       # database
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -29,6 +31,24 @@ services:
       - 3000:3000
     depends_on:
       - elastic
+    restart: unless-stopped
+
+  mail:
+    image: node:16.15.1
+    environment:
+      # mail
+      - NODE_CONFIG
+      - READHOLDINGS_SMTP_HOST=maildev
+      - READHOLDINGS_SMTP_PORT
+      - READHOLDINGS_NOTIFICATIONS_SENDER
+      - READHOLDINGS_NOTIFICATIONS_RECEIVERS
+      - READHOLDINGS_NOTIFICATIONS_MACHINE
+    working_dir: /mail
+    volumes:
+      - ./src/mail:/mail
+    command: "npm run dev"
+    ports:
+      - 8000:8000
     restart: unless-stopped
 
   database:
