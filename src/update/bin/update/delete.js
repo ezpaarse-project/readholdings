@@ -19,7 +19,7 @@ async function deleteLines(saveHoldingTable, holdingTable, step) {
   await refresh(index);
 
   step.endAt = new Date();
-  step.deletedLines = ids.length;
+  step.nbLine = ids.length;
   step.status = 'success';
 }
 

@@ -6,7 +6,7 @@ const { format } = require('date-fns');
 const createModelHoldings = require('../lib/sequelize/model');
 const { flush, swapTableName } = require('../lib/service/database');
 const saveSnapshot = require('../bin/job/snapshot');
-const { updateCache, mergeCache } = require('../bin/update/cache');
+const { enrichCache, mergeCache } = require('../bin/update/cache');
 
 router.post('/step/snapshot/:customerName', async (req, res, next) => {
   let { customerName } = req.params;
@@ -45,7 +45,7 @@ router.post('/step/cache/update/:customerName', async (req, res, next) => {
   const { custid, apikey } = config.get(`holdings.${customerName}`);
 
   try {
-    await updateCache(custid, customerName, apikey);
+    await enrichCache(custid, customerName, apikey);
   } catch (err) {
     return next(err);
   }

@@ -1,5 +1,7 @@
 const config = require('config');
 
+const { sleep } = require('../utils');
+
 const logger = require('../../lib/logger');
 const createModelHoldings = require('../../lib/sequelize/model');
 
@@ -11,7 +13,7 @@ const updateSnapshot = require('../update/snapshot');
 
 const { createReport } = require('../update/report');
 
-const { updateCache, mergeCache } = require('../update/cache');
+const { enrichCache, mergeCache } = require('../update/cache');
 const deleteLines = require('../update/delete');
 
 const { flush, swapTableName } = require('../../lib/service/database');
@@ -29,13 +31,13 @@ async function update(customerName, index) {
 
   step = state.stepUpdateSnapshot();
 
-  try {
-    step = await updateSnapshot(customerName, custid, apikey, step);
-  } catch (err) {
-    logger.error(err);
-    await state.fail();
-    return;
-  }
+  // try {
+  //   step = await updateSnapshot(customerName, custid, apikey, step);
+  // } catch (err) {
+  //   logger.error(err);
+  //   await state.fail();
+  //   return;
+  // }
 
   await state.setLatestStep(step);
 
@@ -49,17 +51,25 @@ async function update(customerName, index) {
     return;
   }
 
+  console.log(state);
+  logger.warn('slep');
+  await sleep(60000);
+
   await state.setLatestStep(step);
 
   step = state.createStepEnrichCache();
 
   try {
-    step = await updateCache(custid, customerName, apikey, step);
+    step = await enrichCache(custid, customerName, apikey, step);
   } catch (err) {
     logger.error(err);
     await state.fail();
     return;
   }
+
+  console.log(state);
+  logger.warn('slep');
+  await sleep(60000);
 
   await state.setLatestStep(step);
 

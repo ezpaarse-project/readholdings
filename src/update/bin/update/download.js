@@ -107,6 +107,7 @@ async function getSnapshotAndSaveCacheInDatabase(customerName, custid, apikey, s
           }
         }
       } else {
+        nbCacheLine += 1;
         await database.upsert(CacheModel, holding);
       }
     }

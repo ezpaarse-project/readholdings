@@ -7,7 +7,7 @@ const holdingsAPI = require('../../lib/service/holdings');
 const database = require('../../lib/service/database');
 const elastic = require('../../lib/service/elastic');
 
-async function updateCache(custid, customerName, apikey, step) {
+async function enrichCache(custid, customerName, apikey, step) {
   const CacheModel = await createModelHoldings(`${customerName}-caches`);
 
   let ids = await database.selectAll(CacheModel);
@@ -98,6 +98,6 @@ async function mergeCache(customerName, index, step) {
 }
 
 module.exports = {
-  updateCache,
+  enrichCache,
   mergeCache,
 };
