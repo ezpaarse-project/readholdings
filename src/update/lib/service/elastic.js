@@ -41,7 +41,7 @@ const bulk = async (data) => {
     logger.error('Cannot bulk on elastic');
     logger.error(err);
     console.log(err?.meta?.body?.error);
-    process.exit(1);
+    throw err;
   }
 
   const items = Array.isArray(res?.body?.items) ? res?.body?.items : [];
@@ -73,7 +73,7 @@ const bulk = async (data) => {
     if (i?.index?.error !== undefined) {
       errors.push(i?.index?.error);
       logger.error(JSON.stringify(i?.index?.error, null, 2));
-      process.exit(1);
+      throw err;
     }
   });
 
@@ -81,7 +81,7 @@ const bulk = async (data) => {
     if (i?.index?.status !== 200 && i?.index?.status !== 201) {
       if (i?.delete === undefined) {
         logger.error(JSON.stringify(i?.index, null, 2));
-        process.exit(1);
+        throw err;
       }
     }
   });
@@ -104,9 +104,9 @@ const update = async (index, id, data) => {
   try {
     res = await elasticClient.update({ index, id, body: { doc: data } });
   } catch (err) {
-    logger.error(`Cannot update [${index} ${id}]: ${err}`);
+    logger.error(`Cannot update [${id}] on index [${index}]: ${err}`);
     console.error(err?.body?.error);
-    process.exit(1);
+    throw err;
   }
   return res;
 };
@@ -114,19 +114,19 @@ const update = async (index, id, data) => {
 /**
  * return number of document of index
  * @param {Object} client elastic client
- * @param {String} name name of index
+ * @param {String} index name of index
  * @returns {Int} number of document
  */
-const countDocuments = async (name) => {
+const countDocuments = async (index) => {
   let data;
   try {
     data = await elasticClient.count({
-      index: name,
+      index,
     });
   } catch (err) {
-    logger.error(`Cannot count documents on index [${name}]`);
+    logger.error(`Cannot count documents on index [${index}]`);
     console.error(err);
-    process.exit(1);
+    throw err;
   }
   return data.body.count ? data.body.count : 0;
 };
@@ -145,7 +145,7 @@ const checkIfIndexExist = async (index) => {
     });
   } catch (err) {
     logger.error(`Cannot check if index [${index}] exist : ${err}`);
-    process.exit(1);
+    throw err;
   }
   return res.body;
 };
@@ -164,7 +164,7 @@ const deleteIndex = async (name) => {
       });
     } catch (err) {
       logger.error(`Cannot delete index [${name}]: ${err}`);
-      process.exit(1);
+      throw err;
     }
   }
 };
@@ -185,7 +185,7 @@ const createIndex = async (name, mapping) => {
       });
     } catch (err) {
       logger.error(`Cannot create index [${name}]: ${err}`);
-      process.exit(1);
+      throw err;
     }
   }
 };
@@ -206,7 +206,7 @@ const resetIndex = async (name, mapping) => {
   } catch (err) {
     logger.error(`Cannot create index [${name}]`);
     console.error(err);
-    process.exit(1);
+    throw err;
   }
 };
 
@@ -229,7 +229,7 @@ const getDocumentsFromIndex = async (index, from, size) => {
   } catch (err) {
     logger.error(`Cannot search on index [${index}]`);
     console.error(err?.meta?.body);
-    process.exit(1);
+    throw err;
   }
   return res.body?.hits?.hits;
 };
@@ -243,8 +243,8 @@ const refresh = async (index) => {
   try {
     await elasticClient.indices.refresh({ index });
   } catch (e) {
-    logger.error(`Cannot refresh index ${index} - ${e.message}`);
-    process.exit(1);
+    logger.error(`Cannot refresh index [${index}] - ${e.message}`);
+    throw err;
   }
 };
 
@@ -267,9 +267,9 @@ const search = async (index, id) => {
       },
     });
   } catch (err) {
-    logger.error(`Cannot search in index ${index} - ${err.message}`);
+    logger.error(`Cannot search in index [${index}] - ${err.message}`);
     logger.error(err);
-    process.exit(1);
+    throw err;
   }
 
   // eslint-disable-next-line no-underscore-dangle
@@ -284,12 +284,27 @@ const getAll = async (index) => {
       size: 100,
     });
   } catch (err) {
-    logger.error(`Cannot search in index ${index} - ${err.message}`);
-    process.exit(1);
+    logger.error(`Cannot search by size 100 in index [${index}] - ${err.message}`);
+    throw err;
   }
 
   // eslint-disable-next-line no-underscore-dangle
   return res?.body?.hits?.hits?.map((hit) => hit?._source);
+};
+
+const bulkRemove = async (data, index) => {
+  let res;
+  try {
+    res = await elasticClient.bulk({
+      body: data,
+    });
+  } catch (err) {
+    logger.error(`Cannot delete in bulk in index [${index}]- ${err.message}`);
+    throw err;
+  }
+
+  // eslint-disable-next-line no-underscore-dangle
+  return res?.body;
 };
 
 module.exports = {
@@ -301,6 +316,7 @@ module.exports = {
   countDocuments,
   resetIndex,
   getDocumentsFromIndex,
+  bulkRemove,
   checkIfIndexExist,
   refresh,
   search,

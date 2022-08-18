@@ -12,6 +12,7 @@ const updateSnapshot = require('../update/snapshot');
 const { createReport } = require('../update/report');
 
 const { updateCache, mergeCache } = require('../update/cache');
+const deleteLines = require('../update/delete');
 
 const { flush, swapTableName } = require('../../lib/service/database');
 
@@ -62,7 +63,15 @@ async function update(customerName, index) {
 
   await state.setLatestStep(step);
 
-  // TODO DEL
+  step = state.createStepDeleteLines();
+
+  try {
+    step = await deleteLines(`${customerName}-saveholdings`, `${customerName}-holdings`, step);
+  } catch (err) {
+    logger.error(err);
+    await state.fail();
+    return;
+  }
 
   step = state.createStepMergeCache();
 
@@ -85,7 +94,7 @@ async function update(customerName, index) {
   }
 
   try {
-    await swapTableName(`${customerName}-holdings`, `${customerName}-saveholdings`);
+    await swapTableName(`${customerName}-saveholdings`, `${customerName}-holdings`);
   } catch (err) {
     logger.error(err);
     await state.fail();

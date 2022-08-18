@@ -17,22 +17,20 @@ async function getSnapshotForElastic(name, custid, apikey, index) {
   const { totalCount } = res.data;
   request += res.nbRequest;
   const size = 4000;
-  const page = Math.ceil(totalCount / size);
+  const nbPage = Math.ceil(totalCount / size);
   logger.info(`${name}: ${totalCount} lines from holdings`);
-  logger.info(`Need ${page} request to Holdings API`);
+  logger.info(`Need ${nbPage} request to Holdings API`);
   let holdings;
-  let i = 1;
 
-  do {
-    holdings = await holdingsAPI.getHoldings(custid, apikey, size, i);
+  for (let currentPage = 1; currentPage < nbPage; currentPage += 1) {
+    holdings = await holdingsAPI.getHoldings(custid, apikey, size, currentPage);
     request += holdings.nbRequest;
     holdings = parseGetHoldings(holdings.data, name, index);
     const { insertedDocs, updatedDocs } = await elastic.bulk(holdings);
     insertedLines += insertedDocs;
     updatedLines += updatedDocs;
-    logger.info(`API call ${i}/${page}: ${insertedLines + updatedLines}/${totalCount} lines inserted`);
-    i += 1;
-  } while (holdings?.length >= 2 * size);
+    logger.info(`API call ${currentPage}/${nbPage}: ${insertedLines + updatedLines}/${totalCount} lines inserted`);
+  }
 
   await elastic.refresh(index);
 

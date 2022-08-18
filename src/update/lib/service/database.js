@@ -30,16 +30,15 @@ async function upsert(model, data) {
   return holdings[0]?.dataValues;
 }
 
-async function diffID(table1, table2) {
+async function diffID(oldTable, currentTable) {
   let ids;
 
-  const sql = `SELECT "rhID" FROM "${table1}" AS n
-  FULL OUTER JOIN "${table2}" AS o USING ("rhID") WHERE n."rhID" IS NULL OR o."rhID" IS NULL`;
+  const sql = `SELECT "rhID" FROM "${oldTable}" AS o WHERE NOT EXISTS (SELECT "rhID" from "${currentTable}" WHERE "rhID" = o."rhID")`;
 
   try {
     ids = await client.query(sql);
   } catch (err) {
-    logger.error(`Cannot query get difference ID between tables [${table1}] and [${table2}]`);
+    logger.error(`Cannot query get difference ID between tables [${oldTable}] and [${currentTable}]`);
     console.log(err);
   }
 

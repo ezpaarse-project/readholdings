@@ -146,6 +146,33 @@
 
         {% endif %}
 
+        {% if item.name == 'deleteLines' %}
+
+        <mj-section>
+          <mj-text>
+            <table style="border-collapse: collapse; width: 100%; margin-bottom: 20px">
+              <thead>
+                <tr style="border: 1px solid #ddd; padding: 8px;">
+                  <th style="border: 1px solid #ddd; padding: 12px; text-align: left; background-color: #4D4D4D; color: white;">étape: {{ item.name }}</th>
+                </tr>
+              </thead> 
+            </table>
+          </mj-text>
+          <mj-text>
+            <table style="border-collapse: collapse; width: 100%; margin-bottom: 20px">
+              <tbody>
+                <tr style="border: 1px solid #ddd; padding: 8px;">
+                  <td style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">lignes supprimés: {{ item.nbLine }}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">temps: {{ item.time }} seconde(s)</td>
+                  <td style="color:{{ "#4CAF50" if status == 'success' else "#d11b1b" }} border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">status: {{ item.status }}</td>
+                </tr>
+              </tbody> 
+            </table>
+          </mj-text>
+        </mj-section>
+
+        {% endif %}
+
         {% if item.name == 'mergeCache' %}
           <mj-section>
             <mj-text>

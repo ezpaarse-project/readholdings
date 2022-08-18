@@ -80,6 +80,20 @@ class State {
     return step;
   }
 
+  createStepDeleteLines() {
+    logger.info('step - delete lines that should be deleted');
+    const step = {
+      name: 'deleteLines',
+      createdAt: new Date(),
+      endAt: null,
+      time: 0,
+      nbLine: 0,
+      status: 'inProgress',
+    };
+    this.steps.push(step);
+    return step;
+  }
+
   createStepMergeCache() {
     logger.info('step - merge the content of Cache table in elastic');
     const step = {
@@ -87,20 +101,6 @@ class State {
       createdAt: new Date(),
       endAt: null,
       time: 0,
-      status: 'inProgress',
-    };
-    this.steps.push(step);
-    return step;
-  }
-
-  createStepDeleteLines() {
-    logger.info('step - delete line on elastic');
-    const step = {
-      name: 'deleteLines',
-      createdAt: new Date(),
-      endAt: null,
-      time: 0,
-      nbLine: 0,
       status: 'inProgress',
     };
     this.steps.push(step);

@@ -64,15 +64,15 @@ async function getSnapshotAndSaveCacheInDatabase(customerName, custid, apikey, s
   const { totalCount } = res.data;
   nbRequest += res.nbRequest;
   const size = 4000;
-  const pages = Math.ceil(totalCount / size);
+  const nbPage = Math.ceil(totalCount / size);
 
   logger.info(`${customerName}: ${totalCount} lines from holdings`);
-  logger.info(`Need ${pages} requests to Holdings API`);
+  logger.info(`Need ${nbPage} requests to Holdings API`);
 
   let holdings;
   let nbCacheLine = 0;
 
-  for (let currentPage = 1; currentPage < pages; currentPage += 1) {
+  for (let currentPage = 1; currentPage < nbPage; currentPage += 1) {
     holdings = await holdingsAPI.getHoldings(custid, apikey, size, currentPage);
     nbRequest += holdings.nbRequest;
     holdings = parseGetHoldings(holdings.data, customerName);
@@ -85,7 +85,7 @@ async function getSnapshotAndSaveCacheInDatabase(customerName, custid, apikey, s
     }
 
     insertedLines += sizeBulk;
-    logger.info(`API call ${currentPage}/${pages}: ${currentPage * size}/${totalCount} lines inserted`);
+    logger.info(`API call ${currentPage}/${nbPage}: ${currentPage * size}/${totalCount} lines inserted`);
 
     for (let j = 0; j < holdings.length; j += 1) {
       const holding = holdings[j];
