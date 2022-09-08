@@ -3,21 +3,25 @@ version: "3.3"
 services:
   update:
     image: node:16.15.1
+    container_name: readholdings-update-dev
     environment:
       - NODE_ENV=development
       # elastic
-      - ELASTICSEARCH_HOST=http://elastic
-      - ELASTICSEARCH_PORT=9200
-      - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=changeme
+      - ELASTICSEARCH_HOST
+      - ELASTICSEARCH_PORT
+      - ELASTICSEARCH_USERNAME
+      - ELASTICSEARCH_PASSWORD
       # mail
       - READHOLDINGS_MAIL_APIKEY
       # database
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
+      - READHOLDINGS_POSTGRES_USER
+      - READHOLDINGS_POSTGRES_PASSWORD
+      - READHOLDINGS_POSTGRES_DB
       # holdingsAPI
-      - HOLDINGS_BASEURL
+      - READHOLDINGS_EBSO_API_BASEURL
+      # TODO
+      - READHOLDINGS_CONFIG_PATH
+      # FIXME
       - INSHS_CUSTID
       - INSHS_APIKEY
       # proxy
@@ -28,13 +32,14 @@ services:
       - ./src/update:/update
     command: "npm run dev"
     ports:
-      - 3000:3000
+      - ${READHOLDINGS_UPDATE_PORT:-3000}:3000
     depends_on:
       - elastic
     restart: unless-stopped
 
   mail:
     image: node:16.15.1
+    container_name: readholdings-mail-dev
     environment:
       # mail
       - NODE_CONFIG
@@ -48,32 +53,35 @@ services:
       - ./src/mail:/mail
     command: "npm run dev"
     ports:
-      - 8000:8000
+      - ${READHOLDINGS_MAIL_PORT:-8000}:8000
     restart: unless-stopped
 
   database:
     image: postgres:14.4
+    container_name: database-dev
     ports:
-      - 5432:5432
+      - ${READHOLDINGS_PGADIN_EMAIL:-5432}:5432
     volumes:
       - ./data/database:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB="database"
-      - POSTGRES_USER="user"
-      - POSTGRES_PASSWORD="changeme"
+      - POSTGRES_DB=${READHOLDINGS_POSTGRES_DB:-database}
+      - POSTGRES_USER=${READHOLDINGS_POSTGRES_USER:-user}
+      - POSTGRES_PASSWORD=${READHOLDINGS_POSTGRES_PASSWORD:-changeme}
     restart: unless-stopped
 
   pgadmin:
     image: dpage/pgadmin4
+    container_name: pgadmin-dev
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: changeme
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-changeme}
     ports:
-      - "5050:80"
+      - ${READHOLDINGS_PGADIN_PORT:-5050}:80
     restart: unless-stopped
 
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    container_name: elastic-dev
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
@@ -93,6 +101,7 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.10.2
+    container_name: kibana-dev
     ports:
       - 5601:5601
     environment:
@@ -106,5 +115,6 @@ services:
 
   maildev:
     image: djfarrelly/maildev
+    container_name: mail-dev
     ports:
       - 1080:80

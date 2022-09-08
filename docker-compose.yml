@@ -1,0 +1,91 @@
+version: "3.3" 
+
+services:
+  update:
+    build:
+      context: ./src/update
+      args:
+        - http_proxy
+        - https_proxy
+    container_name: readholdings-update-prod
+    environment:
+      - NODE_ENV
+      # elastic
+      - ELASTICSEARCH_HOSTS=${EZMETA_ELASTICSEARCH_HOSTS}
+      - ELASTICSEARCH_PORT=${EZMETA_ELASTICSEARCH_PORT}
+      - ELASTICSEARCH_USERNAME=${EZMETA_ELASTICSEARCH_USERNAME}
+      - ELASTICSEARCH_PASSWORD==${EZMETA_ELASTICSEARCH_PASSWORD}
+      # mail
+      - READHOLDINGS_MAIL_APIKEY
+      # database
+      - READHOLDINGS_POSTGRES_USER
+      - READHOLDINGS_POSTGRES_PASSWORD
+      - POSTGRES_DB
+      # holdingsAPI
+      - READHOLDINGS_EBSO_API_BASEURL
+      # TODO
+      - READHOLDINGS_CONFIG_PATH
+      # FIXME
+      - INSHS_CUSTID
+      - INSHS_APIKEY
+      # proxy
+      - http_proxy
+      - https_proxy
+    volumes:
+      - ${READHOLDINGS_UPDATE_APPLICATION_LOG_PATH:-./src/update/log/application}:/update/log/application
+      - ${READHOLDINGS_UPDATE_ACCESS_LOG_PATH:-./src/update/log/access}:/update/log/access
+      - ${READHOLDINGS_UPDATE_DATA_PATH:-./src/update/data}:/update/data
+      - ${EZMETA_CERTS_PATH}:/update/certs
+    command: "npm run dev"
+    ports:
+      - ${READHOLDINGS_UPDATE_PORT:-3000}:3000
+    depends_on:
+      - elastic
+    restart: unless-stopped
+
+  mail:
+    build:
+      context: ./src/update
+      args:
+        - http_proxy
+        - https_proxy
+    container_name: readholdings-mail-prod
+    environment:
+      # mail
+      - NODE_CONFIG
+      - READHOLDINGS_SMTP_HOST
+      - READHOLDINGS_SMTP_PORT
+      - READHOLDINGS_NOTIFICATIONS_SENDER
+      - READHOLDINGS_NOTIFICATIONS_RECEIVERS
+      - READHOLDINGS_NOTIFICATIONS_MACHINE
+    working_dir: /mail
+    volumes:
+      - ${READHOLDINGS_MAIL_APPLICATION_LOG_PATH:-./src/mail/log/application}:/mail/log/application
+      - ${READHOLDINGS_MAIL_ACCESS_LOG_PATH:-./src/mail/log/access}:/mail/log/access
+    command: "npm run dev"
+    ports:
+      - ${READHOLDINGS_MAIL_PORT:-8000}:3000
+    restart: unless-stopped
+
+  database:
+    image: postgres:14.4
+    container_name: database-prod
+    ports:
+      - ${READHOLDINGS_PGADIN_EMAIL:-5432}:5432
+    volumes:
+      - ./data/database:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${READHOLDINGS_POSTGRES_DB}
+      - POSTGRES_USER=${READHOLDINGS_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${READHOLDINGS_POSTGRES_PASSWORD}
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin-dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${READHOLDINGS_PGADIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${READHOLDINGS_PGADIN_PASSWORD:-changeme}
+    ports:
+      - ${READHOLDINGS_PGADIN_PORT:-5050}:80
+    restart: unless-stopped

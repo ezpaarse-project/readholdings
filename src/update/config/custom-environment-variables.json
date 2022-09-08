@@ -6,16 +6,16 @@
     "password": "ELASTICSEARCH_PASSWORD"
   },
   "database": {
-    "database": "POSTGRES_DB",
-    "user": "POSTGRES_USER",
-    "password": "POSTGRES_PASSWORD"
+    "database": "READHOLDINGS_POSTGRES_DB",
+    "user": "READHOLDINGS_POSTGRES_USER",
+    "password": "READHOLDINGS_POSTGRES_PASSWORD"
   },
   "mail": {
     "baseURL": "READHOLDINGS_MAIL_BASEURL",
     "apikey": "READHOLDINGS_MAIL_APIKEY"
   },
   "holdings": {
-    "baseURL": "HOLDINGS_BASEURL",
+    "baseURL": "READHOLDINGS_EBSO_API_BASEURL",
     "INSHS": {
       "custid": "INSHS_CUSTID",
       "apikey": "INSHS_APIKEY"
