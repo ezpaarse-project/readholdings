@@ -62,7 +62,7 @@ services:
     ports:
       - ${READHOLDINGS_PGADIN_EMAIL:-5432}:5432
     volumes:
-      - ./data/database:/var/lib/postgresql/data
+      - ./data/database:/var/lib/postgresql/data/pgdata
     environment:
       - POSTGRES_DB=${READHOLDINGS_POSTGRES_DB:-database}
       - POSTGRES_USER=${READHOLDINGS_POSTGRES_USER:-user}
