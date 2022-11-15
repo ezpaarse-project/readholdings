@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   update:
-    image: node:16.15.1
+    image: node:16.18.0
     container_name: readholdings-update-dev
     environment:
       - NODE_ENV=development
@@ -12,15 +12,15 @@ services:
       - ELASTICSEARCH_USERNAME
       - ELASTICSEARCH_PASSWORD
       # mail
-      - READHOLDINGS_MAIL_APIKEY
+      - MAIL_APIKEY
       # database
-      - READHOLDINGS_POSTGRES_USER
-      - READHOLDINGS_POSTGRES_PASSWORD
-      - READHOLDINGS_POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
       # holdingsAPI
-      - READHOLDINGS_EBSO_API_BASEURL
+      - EBSO_API_BASEURL
       # TODO
-      - READHOLDINGS_CONFIG_PATH
+      - CONFIG_PATH
       # FIXME
       - INSHS_CUSTID
       - INSHS_APIKEY
@@ -32,56 +32,56 @@ services:
       - ./src/update:/update
     command: "npm run dev"
     ports:
-      - ${READHOLDINGS_UPDATE_PORT:-3000}:3000
+      - ${UPDATE_PORT:-3000}:3000
     depends_on:
       - elastic
     restart: unless-stopped
 
   mail:
-    image: node:16.15.1
+    image: node:16.18.0
     container_name: readholdings-mail-dev
     environment:
       # mail
       - NODE_CONFIG
-      - READHOLDINGS_SMTP_HOST=maildev
-      - READHOLDINGS_SMTP_PORT
-      - READHOLDINGS_NOTIFICATIONS_SENDER
-      - READHOLDINGS_NOTIFICATIONS_RECEIVERS
-      - READHOLDINGS_NOTIFICATIONS_MACHINE
+      - SMTP_HOST=maildev
+      - SMTP_PORT
+      - NOTIFICATIONS_SENDER
+      - NOTIFICATIONS_RECEIVERS
+      - NOTIFICATIONS_MACHINE
     working_dir: /mail
     volumes:
       - ./src/mail:/mail
     command: "npm run dev"
     ports:
-      - ${READHOLDINGS_MAIL_PORT:-8000}:8000
+      - ${MAIL_PORT:-8000}:8000
     restart: unless-stopped
 
   database:
     image: postgres:14.4
-    container_name: database-dev
+    container_name: readholdings-database-dev
     ports:
-      - ${READHOLDINGS_PGADIN_EMAIL:-5432}:5432
+      - ${PGADIN_EMAIL:-5432}:5432
     volumes:
       - ./data/database:/var/lib/postgresql/data/pgdata
     environment:
-      - POSTGRES_DB=${READHOLDINGS_POSTGRES_DB:-database}
-      - POSTGRES_USER=${READHOLDINGS_POSTGRES_USER:-user}
-      - POSTGRES_PASSWORD=${READHOLDINGS_POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_DB=${POSTGRES_DB:-database}
+      - POSTGRES_USER=${POSTGRES_USER:-user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
     restart: unless-stopped
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin-dev
+    container_name: readholdings-pgadmin-dev
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-changeme}
     ports:
-      - ${READHOLDINGS_PGADIN_PORT:-5050}:80
+      - ${PGADIN_PORT:-5050}:80
     restart: unless-stopped
 
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
-    container_name: elastic-dev
+    container_name: readholdings-elastic-dev
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
@@ -101,7 +101,7 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.10.2
-    container_name: kibana-dev
+    container_name: readholdings-kibana-dev
     ports:
       - 5601:5601
     environment:
@@ -115,6 +115,6 @@ services:
 
   maildev:
     image: djfarrelly/maildev
-    container_name: mail-dev
+    container_name: readholdings-maildev-dev
     ports:
       - 1080:80
