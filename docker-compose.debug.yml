@@ -62,7 +62,7 @@ services:
     ports:
       - ${PGADIN_EMAIL:-5432}:5432
     volumes:
-      - ./data/database:/var/lib/postgresql/data/pgdata
+      - ./data/database:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-database}
       - POSTGRES_USER=${POSTGRES_USER:-user}

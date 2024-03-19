@@ -59,27 +59,4 @@ app.listen(3000, async () => {
   } catch (err) {
     logger.error(err);
   }
-
-  try {
-    await createTableHoldings('inshs-holdings');
-    logger.info('Table [inshs-holdings] created');
-  } catch (err) {
-    logger.error(err);
-  }
-
-  try {
-    await createTableHoldings('inshs-saveholdings');
-    logger.info('Table [inshs-saveholdings] created');
-  } catch (err) {
-    logger.error(err);
-  }
-
-  try {
-    await createTableHoldings('inshs-caches');
-    logger.info('Table [inshs-caches] created');
-  } catch (err) {
-    logger.error(err);
-  }
-
-  elastic.createIndex(`${new Date().getFullYear()}-holdings`, mapping);
 });
