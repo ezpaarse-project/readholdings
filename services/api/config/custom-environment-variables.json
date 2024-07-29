@@ -1,0 +1,19 @@
+{
+  "nodeEnv": "NODE_ENV",
+  "timezone": "TIMEZONE",
+  "elasticsearch": {
+    "nodes": "ELASTICSEARCH_NODES",
+    "username": "ELASTICSEARCH_USERNAME",
+    "password": "ELASTICSEARCH_PASSWORD"
+  },
+  "cron": {
+    "cleanLog": {
+      "schedule": "CRON_CLEAN_LOG_SCHEDULE",
+      "active": "CRON_CLEAN_LOG_ACTIVE",
+      "applicationLogThreshold": "CRON_CLEAN_LOG_APPLICATION_THRESHOLD",
+      "accessLogThreshold": "CRON_CLEAN_LOG_ACCESS_THRESHOLD",
+      "healthcheckLogThreshold": "CRON_CLEAN_LOG_HEALTHCHECK_THRESHOLD"
+    }
+  },
+  "apikey": "ADMIN_APIKEY"
+}

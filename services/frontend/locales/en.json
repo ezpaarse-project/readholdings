@@ -1,0 +1,57 @@
+{
+  "language": "Language",
+  "menu": {
+    "home": "Home",
+    "administration": "Administration"
+  },
+  "theme": {
+    "dark": "Dark theme",
+    "light": "Light theme"
+  },
+  "administration": {
+    "title": "Administration",
+    "loginForm": "Login form",
+    "login": "Login",
+    "logout": "Logout",
+    "password": "Password",
+    "menu": {
+      "apikey": "API key",
+      "health": "Health",
+      "cron": "Cron",
+      "config": "Config"
+    },
+    "elastic": {
+      "title": "Information about elastic",
+      "noInfo": "No info about elastic",
+      "reload": "Reload elastic info",
+      "documents": "documents"
+    },
+    "health": {
+      "title": "Services status",
+      "reload": "Reload healths",
+      "noHealth": "No service status"
+    },
+    "config": {
+      "title": "API Config"
+    }
+  },
+  "checkAll": "Check all",
+  "uncheckAll": "Uncheck all",
+  "search": "Search",
+  "edit": "Edit",
+  "delete": "Delete",
+  "download": "Download",
+  "copy": "Copy",
+  "send": "Send",
+  "create": "Create",
+  "createdAt": "Created at",
+  "required": "Required",
+  "cancel": "Cancel",
+  "update": "Update",
+  "close": "Close",
+  "yes": "Yes",
+  "no": "No",
+  "detail": "Detail",
+  "development": "development",
+  "integration": "integration"
+}

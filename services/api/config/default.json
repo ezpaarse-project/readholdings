@@ -1,0 +1,26 @@
+{
+  "nodeEnv": "development",
+  "timezone": "Europe/Paris",
+  "elasticsearch": {
+    "nodes": "http://elastic:9200",
+    "username": "elastic",
+    "password": "changeme"
+  },
+  "cron": {
+    "cleanLog": {
+      "schedule": "0 0 0 * * *",
+      "active": true,
+      "applicationLogThreshold": 150,
+      "accessLogThreshold": 30,
+      "healthcheckLogThreshold": 30
+    }
+  },
+  "paths": {
+    "log": {
+      "applicationDir": "./log/application", 
+      "accessDir": "./log/access",
+      "healthCheckDir": "./log/healthcheck"
+    }
+  },
+  "apikey": "changeme"
+}

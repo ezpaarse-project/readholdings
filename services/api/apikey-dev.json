@@ -1,0 +1,24 @@
+[
+  {
+    "apikey": "user",
+    "config": {
+      "name": "user",
+      "owner": "dev",
+      "description": "user dev apikey",
+      "createdAt": "2021-06-01",
+      "attributes": ["*"],
+      "allowed": true
+    }
+  },
+  {
+    "apikey": "restrictedUser",
+    "config": {
+      "name": "restrictedUser",
+      "owner": "dev",
+      "description": "restrictedUser dev apikey",
+      "createdAt": "2021-06-01",
+      "attributes": ["*"],
+      "allowed": true
+    }
+  }
+]

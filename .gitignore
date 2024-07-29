@@ -1,5 +1,7 @@
+data/
+ssl/
 node_modules/
 log/
-data/
 readholdings.local.env.sh
-save/
+settings.json
+.vscode
