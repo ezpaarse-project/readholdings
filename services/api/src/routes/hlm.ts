@@ -1,34 +1,19 @@
 import type { FastifyPluginAsync } from 'fastify';
-
-import {
-  getIndicesController,
-  pingElasticController,
-  startConnectionElasticController,
-  deleteIndexController,
-} from '~/controllers/elastic';
-
 import admin from '~/plugins/admin';
-import all from '~/plugins/all';
+import {
+  uploadHLMFilesController,
+  insertHLMFilesController,
+  uploadAndInsertHLMFilesController,
+} from '~/controllers/hlm';
 
 const router: FastifyPluginAsync = async (fastify) => {
   /**
-   * Route to ping elastic.
-   */
-  fastify.route({
-    method: 'GET',
-    url: '/ping',
-    schema: {},
-    preHandler: all,
-    handler: pingElasticController,
-  });
-
-  /**
-   * Route to connect elastic client to elastic.
+   * Route to upload HLM Files
    * Admin only.
    */
   fastify.route({
     method: 'POST',
-    url: '/connect',
+    url: '/upload',
     schema: {},
     config: {
       rateLimit: {
@@ -37,16 +22,16 @@ const router: FastifyPluginAsync = async (fastify) => {
       },
     },
     preHandler: admin,
-    handler: startConnectionElasticController,
+    handler: uploadHLMFilesController,
   });
 
   /**
-   * Route to get indices.
+   * Route to insert HLM Files installed on API
    * Admin only.
    */
   fastify.route({
-    method: 'GET',
-    url: '/indices',
+    method: 'POST',
+    url: '/insert',
     schema: {},
     config: {
       rateLimit: {
@@ -55,16 +40,17 @@ const router: FastifyPluginAsync = async (fastify) => {
       },
     },
     preHandler: admin,
-    handler: getIndicesController,
+    handler: insertHLMFilesController,
   });
 
   /**
-   * Route to get indices.
+   * Route to import the content of file in elastic
    * Admin only.
    */
+  // TODO Check if csv file
   fastify.route({
-    method: 'DELETE',
-    url: '/indices/:indexName',
+    method: 'POST',
+    url: '/import',
     schema: {},
     config: {
       rateLimit: {
@@ -73,7 +59,7 @@ const router: FastifyPluginAsync = async (fastify) => {
       },
     },
     preHandler: admin,
-    handler: deleteIndexController,
+    handler: uploadAndInsertHLMFilesController,
   });
 };
 

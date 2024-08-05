@@ -6,6 +6,9 @@
     "username": "elastic",
     "password": "changeme"
   },
+  "holdingsIQ": {
+    "baseURL": "HOLDINGSIQ_BASEURL"
+  },
   "cron": {
     "cleanLog": {
       "schedule": "0 0 0 * * *",
@@ -20,6 +23,9 @@
       "applicationDir": "./log/application", 
       "accessDir": "./log/access",
       "healthCheckDir": "./log/healthcheck"
+    },
+    "data": {
+      "HLMDir": "./data/hlmDir"
     }
   },
   "apikey": "changeme"

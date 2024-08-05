@@ -1,6 +1,10 @@
 import { unlink, stat, readdir } from 'fs/promises';
-import { join } from 'path';
+import { createWriteStream } from 'fs';
+import { join, extname } from 'path';
 import appLogger from '~/lib/logger/appLogger';
+import { pipeline } from 'stream/promises';
+
+import { paths } from 'config';
 
 /**
  * Deletes files in a directory that are older than n time.
@@ -10,7 +14,7 @@ import appLogger from '~/lib/logger/appLogger';
  *
  * @returns List of deleted files.
  */
-export default async function deleteOldFiles(directory: string, age: number) {
+export async function deleteOldFiles(directory: string, age: number) {
   const time: number = age * 24 * 60 * 60 * 1000;
   const threshold: number = Date.now() - time;
 
@@ -36,4 +40,22 @@ export default async function deleteOldFiles(directory: string, age: number) {
   await Promise.all(promises);
 
   return deletedFiles;
+}
+
+/**
+ *
+ * @param parts
+ */
+export async function uploadFile(part) {
+  if (part) {
+    const fileType: string = part.mimetype;
+    const fileExtension: string = extname(part.filename).toLowerCase();
+
+    // Verify that the file is a CSV
+    if (fileType !== 'text/csv' || fileExtension !== '.csv') {
+      throw new Error(`Invalid file type: ${part.filename}`);
+    }
+
+    await pipeline(part.file, createWriteStream(`${paths.data.HLMDir}/${part.filename}`));
+  }
 }

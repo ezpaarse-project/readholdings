@@ -3,7 +3,7 @@ import { paths, cron } from 'config';
 import appLogger from '~/lib/logger/appLogger';
 import Cron from '~/cron/cron';
 
-import deleteOldFiles from '~/lib/file';
+import { deleteOldFiles } from '~/lib/file';
 
 const cronConfig = cron.cleanLog;
 

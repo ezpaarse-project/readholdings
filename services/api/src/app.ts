@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import multipart from '@fastify/multipart';
 import fastifyCors from '@fastify/cors';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { mkdir } from 'fs/promises';
@@ -19,6 +20,7 @@ import pingRouter from '~/routes/ping';
 import adminRouter from '~/routes/admin';
 import configRouter from '~/routes/config';
 import elasticRouter from '~/routes/elastic';
+import HLMRouter from '~/routes/hlm';
 
 import cleanLogFileCron from '~/cron/cleanLogFile';
 
@@ -28,11 +30,20 @@ const { paths } = config;
 
 const start = async () => {
   // create log directory
+  await mkdir(resolve(paths.data.HLMDir), { recursive: true });
   await mkdir(resolve(paths.log.applicationDir), { recursive: true });
   await mkdir(resolve(paths.log.accessDir), { recursive: true });
   await mkdir(resolve(paths.log.healthCheckDir), { recursive: true });
 
   const fastify = Fastify();
+
+  // Register the multipart plugin
+  fastify.register(multipart, {
+    addToBody: true,
+    limits: {
+      fileSize: 1000 * 1024 * 1024, // 1000 MB
+    },
+  });
 
   // Register cors
   await fastify.register(
@@ -66,7 +77,7 @@ const start = async () => {
       statusCode: reply.statusCode,
       contentLength: reply.getHeader('content-length') || 0,
       userAgent: request.headers['user-agent'] || '-',
-      responseTime: request.responseTime,
+      responseTime: request.responseTime ? `${request.responseTime}ms` : '-',
     });
   });
 
@@ -79,6 +90,7 @@ const start = async () => {
   await fastify.register(adminRouter, { prefix: '/login' });
   await fastify.register(configRouter, { prefix: '/config' });
   await fastify.register(elasticRouter, { prefix: '/elastic' });
+  await fastify.register(HLMRouter, { prefix: '/hlm' });
 
   const address = await fastify.listen({ port: 3000, host: '::' });
   appLogger.info(`[fastify]: listening at [${address}]`);
@@ -87,7 +99,6 @@ const start = async () => {
   logConfig();
 
   // ping
-
   try {
     await initClientElastic();
     await pingElastic();

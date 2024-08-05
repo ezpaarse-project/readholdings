@@ -3,12 +3,7 @@ import 'fastify';
 
 declare module 'fastify' {
   interface FastifyRequest {
-    data?: {
-      apiKeyConfig?: {
-        attributes: string[];
-      };
-      attributes?: string[];
-    };
+    data: any,
     startTime: number
     endTime: number
     responseTime: number
