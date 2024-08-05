@@ -51,8 +51,6 @@ async function update(customerName, index) {
     return;
   }
 
-  console.log(state);
-  logger.warn('slep');
   await sleep(60000);
 
   await state.setLatestStep(step);
@@ -67,8 +65,6 @@ async function update(customerName, index) {
     return;
   }
 
-  console.log(state);
-  logger.warn('slep');
   await sleep(60000);
 
   await state.setLatestStep(step);

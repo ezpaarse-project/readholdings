@@ -37,7 +37,6 @@ async function initiate(customerName, index, date) {
 
   // TODO end Report
   // TODO send Mail
-  console.log('tt');
 }
 
 module.exports = initiate;

@@ -27,7 +27,6 @@ async function saveSnapshot(customerName, index, date) {
     return;
   }
 
-  console.log('tt');
   // TODO
 }
 

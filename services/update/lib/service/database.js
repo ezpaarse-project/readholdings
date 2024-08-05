@@ -39,7 +39,6 @@ async function diffID(oldTable, currentTable) {
     ids = await client.query(sql);
   } catch (err) {
     logger.error(`Cannot query get difference ID between tables [${oldTable}] and [${currentTable}]`);
-    console.log(err);
   }
 
   return ids[0];

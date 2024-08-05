@@ -97,10 +97,6 @@ async function getSnapshotAndSaveCacheInDatabase(customerName, custid, apikey, s
           const oldValue = oldHolding?.[arg];
 
           if (value !== oldValue) {
-            console.log(arg);
-            console.log('EBSCO: ', value);
-            console.log('POSTGRES: ', oldValue);
-
             nbCacheLine += 1;
             await database.upsert(CacheModel, holding);
             break;

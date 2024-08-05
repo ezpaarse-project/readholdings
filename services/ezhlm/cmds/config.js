@@ -58,13 +58,11 @@ const manageConfig = async (args) => {
   const config = JSON.parse(await fs.readFile(configPath, 'utf-8'));
 
   if (args.get) {
-    console.log(JSON.stringify(config, null, 2));
     logger.info(`from ${configPath}`);
     process.exit(0);
   }
 
   if (args.set === 'default') {
-    console.log(JSON.stringify(config, null, 2));
     await setConfig();
     process.exit(0);
   }
@@ -86,7 +84,6 @@ const manageConfig = async (args) => {
     process.exit(1);
   }
 
-  console.log(JSON.stringify(config, null, 2));
   logger.info(`from ${configPath}`);
   process.exit(0);
 };

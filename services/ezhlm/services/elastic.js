@@ -80,7 +80,6 @@ const bulk = async (client, data) => {
     res = await client.bulk({ body: data });
   } catch (err) {
     logger.error(`Cannot bulk: ${err}`);
-    console.log(err?.meta?.body?.error);
     process.exit(1);
   }
 

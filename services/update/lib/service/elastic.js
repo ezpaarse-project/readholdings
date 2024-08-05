@@ -69,7 +69,6 @@ const bulk = async (data) => {
   } catch (err) {
     logger.error('Cannot bulk on elastic');
     logger.error(err);
-    console.log(err?.meta?.body?.error);
     throw err;
   }
 
