@@ -1,10 +1,17 @@
 <template>
   <v-list>
-    <v-list-item v-for="route in routers" link router :to="{ path: route.path }" ripple :title="route.text">
+    <v-list-item link router :to="{ path: '/administration/hlm' }" ripple title="HLM">
       <template v-slot:prepend>
-        <v-icon :icon="route.icon" />
+        <v-icon icon="mdi-upload" />
       </template>
     </v-list-item>
+
+    <v-list-item link router :to="{ path: '/administration/health' }" ripple :title="t('administration.menu.health')">
+      <template v-slot:prepend>
+        <v-icon icon="mdi-heart-pulse" />
+      </template>
+    </v-list-item>
+
     <v-list-item link router to="/administration/elastic" ripple>
       <template v-slot:prepend>
         <v-avatar rounded="0">
@@ -13,6 +20,7 @@
       </template>
       <v-list-item-title class=" ml-2">Elastic</v-list-item-title>
     </v-list-item>
+  
     <v-list-item link router :href="runtimeConfig.public.kibanaURL" target="_blank" ripple>
       <template v-slot:prepend>
         <v-avatar rounded="0">
@@ -21,7 +29,19 @@
       </template>
       <v-list-item-title class=" ml-2">Kibana</v-list-item-title>
     </v-list-item>
-    <v-list-item class="bg-red-lighten-4" ripple :title="t('administration.logout')" @click="logOut()">
+
+    <v-list-group value="Lang">
+      <template v-slot:activator="{ props }">
+        <v-list-item v-bind="props" title="config">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-code-json"></v-icon>
+          </template>
+        </v-list-item>
+      </template>
+      <SkeletonMenuAdminConfigList />
+    </v-list-group>
+  
+    <v-list-item class="bg-red-lighten-4" ripple :title="t('administration.logout')" @click="logout()">
       <template v-slot:prepend>
         <v-icon icon="mdi-logout" />
       </template>
@@ -38,14 +58,10 @@ const router = useRouter()
 
 const { t } = useI18n()
 
-const routers = computed(() => [
-  { text: 'HLM', icon: 'mdi-upload', path: '/administration/hlm', },
-  { text: t('administration.menu.health'), icon: 'mdi-heart-pulse', path: '/administration/health', },
-  // { text: t('administration.menu.cron'), icon: 'mdi-update', path: '/administration/cron', },
-  { text: t('administration.menu.config'), icon: 'mdi-code-json', path: '/administration/config', }
-]);
-
-function logOut() {
+/**
+ * Disconnect admin user and move him to administration.
+ */
+function logout() {
   adminStore.setIsAdmin(false);
   adminStore.setPassword('');
 

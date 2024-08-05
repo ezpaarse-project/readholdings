@@ -72,6 +72,9 @@ const services = [
   { name: 'elastic', url: '/elastic/ping' },
 ];
 
+/**
+ * Execute getHealth to every child
+ */
 function getHealths() {
   loading.value = true;
   if (healthCards.value) {

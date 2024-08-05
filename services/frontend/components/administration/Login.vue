@@ -9,7 +9,7 @@
     <v-card-text>
       <v-form
         v-model="valid"
-        @submit.prevent="tryLogin"
+        @submit.prevent="login"
       >
         <v-text-field
           v-model="password"
@@ -29,7 +29,7 @@
         :loading="loading"
         :disabled="!valid"
         color="primary"
-        @click="tryLogin()"
+        @click="login()"
       >
         {{ t("administration.login") }}
       </v-btn>
@@ -54,7 +54,10 @@ const passwordVisible = ref(false);
 
 const passwordRules = computed(() => (value) => !!value || t('required'));
 
-async function tryLogin() {
+/**
+ * Try login as admin.
+ */
+async function login() {
   loading.value = true;
 
   try {

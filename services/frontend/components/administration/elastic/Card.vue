@@ -46,6 +46,9 @@ const { password } = storeToRefs(adminStore);
 const loading = ref(false);
 const indices = ref([]);
 
+/**
+ * Get all indices in ezMETA
+ */
 async function getIndices() {
   loading.value = true;
   let indicesRes;
@@ -66,6 +69,11 @@ async function getIndices() {
   loading.value = false;
 }
 
+/**
+ * Delete elastic index.
+ * 
+ * @param indexName Index name.
+ */
 async function deleteIndex(indexName) {
   try {
     await $fetch(`/elastic/indices/${indexName}`, {
@@ -81,6 +89,11 @@ async function deleteIndex(indexName) {
   snackStore.info(t('success.index.deleted'));
 }
 
+/**
+ * Open dialog to delete index.
+ * 
+ * @param indexName Index name.
+ */
 async function openDeleteDialog(indexName) {
   openConfirm({
     title: t('administration.elastic.deleteIndex'),

@@ -37,7 +37,8 @@
       "noHealth": "Aucun état de service"
     },
     "config": {
-      "title": "API Config"
+      "frontend": "Configutation de l'interface web",
+      "api": "Configutation de l'API"
     }
   },
   "error": {

@@ -42,6 +42,9 @@ const dialogStore = useDialogStore();
 const disagreeLoading = ref(false);
 const agreeLoading = ref(false);
 
+/**
+ * Execute function on onDisagree and close the dialog.
+ */
 async function cancel() {
   disagreeLoading.value = true;
   await dialogStore.data.onDisagree?.();
@@ -49,6 +52,9 @@ async function cancel() {
   disagreeLoading.value = false;
 }
 
+/**
+ * Execute function on onAgree and close the dialog.
+ */
 async function agree() {
   agreeLoading.value = true;
   await dialogStore.data.onAgree?.();

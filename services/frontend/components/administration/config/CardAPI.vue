@@ -7,10 +7,10 @@
       dense
     >
       <v-toolbar-title>
-        {{ t("administration.config.title") }}
+        {{ t("administration.config.api") }}
       </v-toolbar-title>
     </v-toolbar>
-    <JSONView :code="config"/>
+    <JSONView :code="APIconfig"/>
   </v-card>
 </template>
 
@@ -24,9 +24,12 @@ const { $fetch } = useNuxtApp();
 const { t } = useI18n();
 
 const loading = ref(false);
-const config = ref("");
+const APIconfig = ref("");
 
-async function getConfig() {
+/**
+ * Get config of readholdingsv API
+ */
+async function getAPIConfig() {
   let appConfig;
   loading.value = true;
   try {
@@ -44,11 +47,12 @@ async function getConfig() {
   loading.value = false;
 
   const stringifiedConfig = JSON.stringify(appConfig, null, 2);
-  config.value = stringifiedConfig
+  APIconfig.value = stringifiedConfig
 }
 
+
 onMounted(() => {
-  getConfig();
+  getAPIConfig();
 });
 
 </script>

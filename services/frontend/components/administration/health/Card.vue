@@ -36,6 +36,10 @@ const props = defineProps({
   url: { type: String, default: '' },
 });
 
+/**
+ * Get all health.
+ * API and Elastic.
+ */
 async function getHealth() {
   let res;
   loading.value = true;
