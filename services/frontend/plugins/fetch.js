@@ -1,5 +1,5 @@
 export default defineNuxtPlugin(nuxtApp => {
-  const baseURL = nuxtApp.$config.public.APIHost; 
+  const baseURL = nuxtApp.$config.public.APIURL; 
 
   const customFetch = $fetch.create({
     baseURL

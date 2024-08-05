@@ -1,6 +1,6 @@
 <template>
   <div class="text-center ma-2">
-    <v-btn small :href="githubProfile" target="_blank" rel="noreferrer"
+    <v-btn small :href="gitHubRepo" target="_blank" rel="noreferrer"
       variant="outlined">
       Version: {{ version }}
       <v-icon right>
@@ -15,6 +15,6 @@
 const runtimeConfig = useRuntimeConfig()
 
 const version = ref(runtimeConfig.public.version);
-const githubProfile = ref(runtimeConfig.public.githubProfileURL);
+const gitHubRepo = ref(runtimeConfig.public.gitHubRepoURL);
 
 </script>

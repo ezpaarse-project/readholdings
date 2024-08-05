@@ -16,7 +16,8 @@ export default defineNuxtConfig({
     public: {
       environment: process.env.NODE_ENV || 'development',
       version: process.env.VERSION || 'development',
-      APIHost: process.env.API_HOST || 'http://localhost:59701',
+      gitHubRepoURL: process.env.GITHUB_REPO || 'https://github.com/ezpaarse-project/readholdings',
+      APIURL: process.env.API_URL || 'http://localhost:59701',
     }
   },
 

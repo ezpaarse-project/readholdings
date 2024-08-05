@@ -24,7 +24,7 @@ const { t } = useI18n()
 const routers = computed(() => [
   { text: t('administration.menu.hlm'), icon: 'mdi-upload', path: '/administration/elastic', },
   { text: t('administration.menu.health'), icon: 'mdi-heart-pulse', path: '/administration/health', },
-  { text: t('administration.menu.cron'), icon: 'mdi-update', path: '/administration/cron', },
+  // { text: t('administration.menu.cron'), icon: 'mdi-update', path: '/administration/cron', },
   { text: t('administration.menu.config'), icon: 'mdi-code-json', path: '/administration/config', }
 ]);
 
