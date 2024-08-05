@@ -1,7 +1,6 @@
 <template>
   <section v-if="isAdmin" class="ma-3">
-    <AdministrationElasticImportCard class="my-3" />
-    <AdministrationElasticIndexCard />
+    <AdministrationElasticCard s/>
   </section>
 </template>
 

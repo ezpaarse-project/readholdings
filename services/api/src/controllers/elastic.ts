@@ -1,4 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { elasticsearch } from 'config';
 
 import {
   ping as pingElastic,
@@ -22,7 +23,7 @@ export async function pingElasticController(
   const endTime = Date.now();
   const responseTime = endTime - request.startTime;
   reply.code(200)
-    .send({ message: 'Pong', responseTime })
+    .send({ message: 'Pong', responseTime, nodes: elasticsearch.nodes })
     .headers({ 'x-response-time': responseTime });
 }
 

@@ -7,7 +7,7 @@
     </v-toolbar>
     <v-card-actions>
       <v-spacer />
-      <AdministrationElasticImportButton
+      <AdministrationHlmImportButton
         :dataToImport="dataToImport"
         @import="handleImport()"
       />
@@ -33,7 +33,7 @@
       </template>
     </v-file-input>
     <v-list>
-      <AdministrationElasticFileItem
+      <AdministrationHlmFileItem
         v-for="(file, index) in files"
         :key="file.name"
         :file="file"

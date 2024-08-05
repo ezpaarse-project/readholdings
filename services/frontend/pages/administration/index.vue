@@ -7,7 +7,6 @@
 <script setup>
 
 const adminStore = useAdminStore();
-
 const isAdmin = computed(() => adminStore.isAdmin);
 
 </script>

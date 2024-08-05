@@ -75,7 +75,7 @@ async function tryLogin() {
   
   loading.value = false;
 
-  router.push('/administration/elastic')
+  router.push('/administration/hlm')
 }
 
 </script>

@@ -1,6 +1,6 @@
 <template>
   <section v-if="isAdmin" class="ma-3">
-    <AdministrationHealthTab/>
+    <AdministrationHlmCard />
   </section>
 </template>
 

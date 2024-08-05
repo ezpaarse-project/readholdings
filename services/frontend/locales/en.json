@@ -15,7 +15,6 @@
     "logout": "Logout",
     "password": "Password",
     "menu": {
-      "hlm": "HLM",
       "import": "Import",
       "health": "Health",
       "cron": "Cron",

@@ -15,7 +15,6 @@
     "logout": "Deconnexion",
     "password": "Mot de passe",
     "menu": {
-      "hlm": "HLM",
       "health": "État de santé",
       "cron": "Cron",
       "config": "Config"
