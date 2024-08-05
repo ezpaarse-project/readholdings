@@ -15,16 +15,23 @@
     "logout": "Logout",
     "password": "Password",
     "menu": {
-      "apikey": "API key",
+      "hlm": "HLM",
+      "import": "Import",
       "health": "Health",
       "cron": "Cron",
       "config": "Config"
     },
+    "hlm": {
+      "title": "HLM files import",
+      "fileInput": "Files input",
+      "portal": "Portal"
+    },
     "elastic": {
-      "title": "Information about elastic",
-      "noInfo": "No info about elastic",
-      "reload": "Reload elastic info",
-      "documents": "documents"
+      "title": "Information about indices",
+      "noIndex": "No index",
+      "documents": "documents",
+      "deleteIndex": "Delete index",
+      "deleteMessage": "Are you sure you want to delete this index: {indexName} ? (irreversible action)"
     },
     "health": {
       "title": "Services status",
@@ -35,6 +42,25 @@
       "title": "API Config"
     }
   },
+  "error": {
+    "hlm": {
+      "import": "Cannot import files"
+    },
+    "index": {
+      "delete": "Cannot delete index"
+    }
+  },
+  "info": {
+    "hlm": {
+      "imported": "Inserting data in progress"
+    }
+  },
+  "success": {
+    "index": {
+      "deleted": "Index deleted"
+    }
+  },
+  "import": "Import",
   "checkAll": "Check all",
   "uncheckAll": "Uncheck all",
   "search": "Search",

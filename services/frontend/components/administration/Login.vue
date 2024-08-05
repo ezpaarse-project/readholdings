@@ -47,7 +47,6 @@ const router = useRouter()
 const { t } = useI18n();
 const { $fetch } = useNuxtApp();
 
-
 const loading = ref(false);
 const valid = ref(false);
 const password = ref('changeme');
@@ -76,7 +75,7 @@ async function tryLogin() {
   
   loading.value = false;
 
-  router.push('/administration/config')
+  router.push('/administration/elastic')
 }
 
 </script>

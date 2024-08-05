@@ -43,8 +43,6 @@ async function getConfig() {
 
   loading.value = false;
 
-  console.log(appConfig)
-
   const stringifiedConfig = JSON.stringify(appConfig, null, 2);
   config.value = stringifiedConfig
 }
