@@ -2,7 +2,8 @@ version: "3.9"
 
 services:
   api:
-    image: node:22.4
+    build:
+      context: ./services/api
     container_name: readholdings-api-dev
     environment:
       - NODE_ENV
@@ -33,10 +34,6 @@ services:
       - IN2P3_CUSTID
       - CNRS_APIKEY
       - CNRS_CUSTID
-
-    working_dir: /usr/src/app
-    volumes:
-      - ./services/api:/usr/src/app
     command: "npm run dev"
     ports:
       - ${API_PORT:-59701}:3000
@@ -55,20 +52,18 @@ services:
       retries: 5
   
   frontend:
-    image: node:22.4
+    build:
+      context: ./services/frontend
     container_name: readholdings-frontend-dev
-    working_dir: /usr/src/app
-    volumes:
-      - ./services/frontend:/usr/src/app
     command: "npm run dev"
     ports:
       - ${FRONTEND_PORT:-59706}:3000
       - 24678:24678
     environment:
       - NODE_ENV
-      - NUXT_PUBLIC_ENVIRONMENT=development
-      - NUXT_PUBLIC_ELASTIC_ENV=development
-      - NUXT_PUBLIC_VERSION=development
+      - NUXT_PUBLIC_ENVIRONMENT
+      - NUXT_PUBLIC_ELASTIC_ENV
+      - NUXT_PUBLIC_VERSION
       - NUXT_PUBLIC_API_URL
     healthcheck:
       test:
