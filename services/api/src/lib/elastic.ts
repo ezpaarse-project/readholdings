@@ -14,8 +14,6 @@ import appLogger from '~/lib/logger/appLogger';
 
 const isProd: boolean = (nodeEnv === 'production');
 
-const elasticNodes: string[] = elasticsearch.nodes.split(',');
-
 let ssl: ClientOptions['ssl'] | undefined;
 if (isProd) {
   let ca: string | undefined;
@@ -39,7 +37,7 @@ let elasticClient: Client | undefined;
 export async function initClient(): Promise<void> {
   try {
     elasticClient = new Client({
-      nodes: elasticNodes,
+      nodes: elasticsearch.nodes.split(','),
       auth: {
         username: elasticsearch.username,
         password: elasticsearch.password,

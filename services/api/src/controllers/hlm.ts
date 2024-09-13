@@ -1,7 +1,6 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import type { fastifyMultipart } from '@fastify/multipart';
 import { uploadFile } from '~/lib/file';
-import readAndInsertCSVInElastic from '~/lib/csv';
+import insertCSVInElastic from '~/lib/insert';
 
 /**
  * Controller to upload HLM files.
@@ -33,7 +32,7 @@ export async function insertHLMFilesController(
 ):Promise<void> {
   // TODO get config
 
-  readAndInsertCSVInElastic();
+  insertCSVInElastic();
 
   // TODO return ID;
   reply.code(202);

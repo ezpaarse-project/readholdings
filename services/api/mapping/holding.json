@@ -1,7 +1,7 @@
 {
   "mappings": {
     "properties": {
-      "ezhlmid": { "type": "keyword" },
+      "holdingID": { "type": "keyword" },
       "KBID": { "type": "keyword" },
       "Title": { "type": "keyword" },
       "AlternateTitle": { "type": "keyword" },

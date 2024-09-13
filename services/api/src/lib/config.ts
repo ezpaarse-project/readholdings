@@ -21,6 +21,11 @@ function hideSecret(conf: Config): Config {
   const copyConfig = { ...conf };
   copyConfig.elasticsearch.password = '********';
   copyConfig.apikey = '********';
+  const portalsName = Object.keys(copyConfig.portals);
+  for (let i = 0; i < portalsName.length; i += 1) {
+    copyConfig.portals[portalsName[i]].apiKey = '********';
+  }
+
   return copyConfig;
 }
 
@@ -32,8 +37,12 @@ export function logConfig(): void {
     appLogger.warn('[config]: Elasticsearch password has the default value');
   }
 
-  if (appConfig.apikey === defaultConfig.apikey) {
-    appLogger.warn('[config]: ApiKey has the default value');
+  const portalsName = Object.keys(appConfig.portals);
+
+  for (let i = 0; i < portalsName.length; i += 1) {
+    if (appConfig.portals[portalsName[i]].apiKey === defaultConfig.portals[portalsName[i]].apiKey) {
+      appLogger.warn(`[config]: ${portalsName[i]} API key has the default value`);
+    }
   }
 
   const appConfigFiltered = hideSecret(appConfig);

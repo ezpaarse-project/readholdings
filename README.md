@@ -35,6 +35,8 @@ The tools you need to let readholdings run are :
 * docker
 * npm
 
+Ebsco docs: https://developer.ebsco.com/knowledge-services/reference/getcustidexports
+
 #### Commands 
 
 ```bash

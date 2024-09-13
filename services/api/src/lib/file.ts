@@ -1,10 +1,10 @@
 import { unlink, stat, readdir } from 'fs/promises';
 import { createWriteStream } from 'fs';
 import { join, extname } from 'path';
-import appLogger from '~/lib/logger/appLogger';
 import { pipeline } from 'stream/promises';
 
 import { paths } from 'config';
+import appLogger from '~/lib/logger/appLogger';
 
 /**
  * Deletes files in a directory that are older than n time.

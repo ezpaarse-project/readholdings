@@ -22,7 +22,7 @@ const router: FastifyPluginAsync = async (fastify) => {
           statusCode: reply.statusCode,
           contentLength: reply.getHeader('content-length') || 0,
           userAgent: request.headers['user-agent'] || '-',
-          responseTime: Date.now() - request.startTime,
+          responseTime: `${Date.now() - request.startTime}ms`,
         });
         done();
       }],

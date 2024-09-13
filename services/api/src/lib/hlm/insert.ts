@@ -4,10 +4,11 @@ import { parse } from 'csv-parse';
 import fs from 'fs';
 import path from 'path';
 import { paths } from 'config';
+import { format } from 'date-fns';
 import appLogger from '~/lib/logger/appLogger';
 import { bulk, refresh, createIndex } from '~/lib/elastic';
 
-import { transformStringToArray, transformEmbargo } from '~/lib/hlm';
+import { transformStringToArray, transformEmbargo } from '~/lib/hlm/transform';
 
 import holding from '~/../mapping/holding.json';
 
@@ -16,14 +17,13 @@ import holding from '~/../mapping/holding.json';
  * @param data
  */
 export default async function insertCSVInElastic(data) {
-  // date with format YYYY-mm-dd
-  const date = new Date().toISOString().slice(0, 10);
-  const index = `holding-${date}`;
+  const date = format(new Date(), 'yyyy-MM-dd');
+  const index = `holdings-${date}`;
 
   try {
     await createIndex(index, holding);
   } catch (err) {
-    appLogger.error(`[fastify]: Cannot create index [${index}]`);
+    appLogger.error(`[elastic]: Cannot create index [${index}]`);
     throw err;
   }
 
@@ -50,9 +50,9 @@ export default async function insertCSVInElastic(data) {
       record.Embargo = transformEmbargo(record.Embargo);
       record.CustomEmbargo = transformEmbargo(record.CustomEmbargo);
       record.createdAt = date;
-      record.ezhlmid = `${portal}-${record.VendorID}-${record.PackageID}-${record.KBID}`;
+      record.holdingID = `${portal}-${record.VendorID}-${record.PackageID}-${record.KBID}`;
 
-      records.push({ index: { _index: index, _id: record.ezhlmid } });
+      records.push({ index: { _index: index, _id: record.holdingID } });
       records.push(record);
 
       if (records.length === 1000 * 2) {

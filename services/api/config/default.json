@@ -7,7 +7,7 @@
     "password": "changeme"
   },
   "holdingsIQ": {
-    "baseURL": "HOLDINGSIQ_BASEURL"
+    "baseURL": "https://api.ebsco.io/rm/rmaccounts"
   },
   "cron": {
     "cleanLog": {
@@ -20,12 +20,59 @@
   },
   "paths": {
     "log": {
-      "applicationDir": "./log/application", 
+      "applicationDir": "./log/application",
       "accessDir": "./log/access",
       "healthCheckDir": "./log/healthcheck"
     },
     "data": {
-      "HLMDir": "./data/hlmDir"
+      "HLMDir": "./data/hlm",
+      "holdingsIQDir": "./data/holdings"
+    }
+  },
+  "portals": {
+    "INSU": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INSMI": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INSHS": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INS2I": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INSB": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INC": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INEE": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INSIS": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INP": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "IN2P3": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "CNRS": {
+      "apiKey": "changeme",
+      "custid": "changeme"
     }
   },
   "apikey": "changeme"

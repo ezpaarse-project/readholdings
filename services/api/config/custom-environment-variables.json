@@ -15,5 +15,51 @@
       "healthcheckLogThreshold": "CRON_CLEAN_LOG_HEALTHCHECK_THRESHOLD"
     }
   },
+  "portals": {
+    "INSU": {
+      "apiKey": "INSU_APIKEY",
+      "custid": "INSU_CUSTID"
+    },
+    "INSMI": {
+      "apiKey": "INSMI_APIKEY",
+      "custid": "INSMI_CUSTID"
+    },
+    "INSHS": {
+      "apiKey": "INSHS_APIKEY",
+      "custid": "INSHS_CUSTID"
+    },
+    "INS2I": {
+      "apiKey": "INS2I_APIKEY",
+      "custid": "INS2I_CUSTID"
+    },
+    "INSB": {
+      "apiKey": "INSB_APIKEY",
+      "custid": "INSB_CUSTID"
+    },
+    "INC": {
+      "apiKey": "INC_APIKEY",
+      "custid": "INC_CUSTID"
+    },
+    "INEE": {
+      "apiKey": "INEE_APIKEY",
+      "custid": "INEE_CUSTID"
+    },
+    "INSIS": {
+      "apiKey": "INSIS_APIKEY",
+      "custid": "INSIS_CUSTID"
+    },
+    "INP": {
+      "apiKey": "INP_APIKEY",
+      "custid": "INP_CUSTID"
+    },
+    "IN2P3": {
+      "apiKey": "IN2P3_APIKEY",
+      "custid": "IN2P3_CUSTID"
+    },
+    "CNRS": {
+      "apiKey": "CNRS_APIKEY",
+      "custid": "CNRS_CUSTID"
+    }
+  },
   "apikey": "ADMIN_APIKEY"
 }

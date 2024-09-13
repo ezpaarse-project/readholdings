@@ -21,6 +21,7 @@ import adminRouter from '~/routes/admin';
 import configRouter from '~/routes/config';
 import elasticRouter from '~/routes/elastic';
 import HLMRouter from '~/routes/hlm';
+import holdingsIQRouter from '~/routes/holdingsIQ';
 
 import cleanLogFileCron from '~/cron/cleanLogFile';
 
@@ -31,6 +32,7 @@ const { paths } = config;
 const start = async () => {
   // create log directory
   await mkdir(resolve(paths.data.HLMDir), { recursive: true });
+  await mkdir(resolve(paths.data.holdingsIQDir), { recursive: true });
   await mkdir(resolve(paths.log.applicationDir), { recursive: true });
   await mkdir(resolve(paths.log.accessDir), { recursive: true });
   await mkdir(resolve(paths.log.healthCheckDir), { recursive: true });
@@ -91,6 +93,7 @@ const start = async () => {
   await fastify.register(configRouter, { prefix: '/config' });
   await fastify.register(elasticRouter, { prefix: '/elastic' });
   await fastify.register(HLMRouter, { prefix: '/hlm' });
+  await fastify.register(holdingsIQRouter, { prefix: '/holdingsIQ' });
 
   const address = await fastify.listen({ port: 3000, host: '::' });
   appLogger.info(`[fastify]: listening at [${address}]`);
