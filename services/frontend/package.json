@@ -17,7 +17,8 @@
     "@vue/eslint-config-airbnb": "^8.0.0",
     "eslint": "8.57.0",
     "nuxt": "^3.12.3",
-    "vue-i18n": "^9.13.1"
+    "vue-i18n": "^9.13.1",
+    "typescript": "^5.6.2"
   },
   "dependencies": {
     "@highlightjs/vue-plugin": "^2.1.0",

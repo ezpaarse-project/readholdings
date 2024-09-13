@@ -69,7 +69,7 @@ services:
       - NUXT_PUBLIC_ENVIRONMENT=development
       - NUXT_PUBLIC_ELASTIC_ENV=development
       - NUXT_PUBLIC_VERSION=development
-      - NUXT_PUBLIC_API_URL
+      - NUXT_PUBLIC_API_HOST
     healthcheck:
       test:
         [

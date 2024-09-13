@@ -1,4 +1,4 @@
-FROM node:node:22.4
+FROM node:22.8.0-alpine3.20
 LABEL maintainer="ezTeam <ezteam@couperin.org>"
 
 EXPOSE 3000
