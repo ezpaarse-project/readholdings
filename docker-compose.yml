@@ -34,7 +34,7 @@ services:
       - IN2P3_CUSTID
       - CNRS_APIKEY
       - CNRS_CUSTID
-    command: "npm run dev"
+    command: "npm start"
     ports:
       - ${API_PORT:-59701}:3000
     depends_on:
@@ -55,7 +55,6 @@ services:
     build:
       context: ./services/frontend
     container_name: readholdings-frontend-dev
-    command: "npm run dev"
     ports:
       - ${FRONTEND_PORT:-59706}:3000
       - 24678:24678

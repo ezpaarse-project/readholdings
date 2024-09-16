@@ -9,7 +9,7 @@ ARG NUXT_PUBLIC_API_URL
 
 WORKDIR /usr/src/app
 
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
 RUN npm ci
 
