@@ -4,7 +4,8 @@
   "elasticsearch": {
     "nodes": "http://elastic:9200",
     "username": "elastic",
-    "password": "changeme"
+    "password": "changeme",
+    "timeout": "5000"
   },
   "holdingsIQ": {
     "baseURL": "https://api.ebsco.io/rm/rmaccounts"

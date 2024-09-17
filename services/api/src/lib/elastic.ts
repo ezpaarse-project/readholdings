@@ -43,7 +43,7 @@ export async function initClient(): Promise<void> {
         password: elasticsearch.password,
       },
       ssl,
-      requestTimeout: 5000,
+      requestTimeout: elasticsearch.timeout,
     });
     appLogger.info('[elastic]: client is created');
   } catch (err) {

@@ -4,7 +4,8 @@
   "elasticsearch": {
     "nodes": "ELASTICSEARCH_NODES",
     "username": "ELASTICSEARCH_USERNAME",
-    "password": "ELASTICSEARCH_PASSWORD"
+    "password": "ELASTICSEARCH_PASSWORD",
+    "timeout": "ELASTICSEARCH_TIMEOUT"
   },
   "cron": {
     "cleanLog": {
