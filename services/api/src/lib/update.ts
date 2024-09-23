@@ -9,6 +9,17 @@ import { generateExport, getExportByID, deleteExportByID } from '~/lib/holdingsI
 import appLogger from '~/lib/logger/appLogger';
 import downloadFileFromAWS from './aws';
 import { insertStandardFileInElastic, insertKbart2FileInElastic } from '~/lib/holdingsIQ/insert';
+import { sendErrorMail } from '~/lib/mail';
+import { setWorkInProgress } from '~/lib/status';
+import {
+  createState,
+  addStep,
+  failLatestStep,
+  endLatestStep,
+  end,
+  resetState,
+  getState,
+} from './state';
 
 async function generateAndDownloadExport(portalConfig, portalName, type, filename) {
   let res1;
@@ -16,9 +27,10 @@ async function generateAndDownloadExport(portalConfig, portalName, type, filenam
     res1 = await generateExport(portalConfig, portalName, type);
   } catch (err) {
     appLogger.error(`[${portalName}][holdingsIQ]: Cannot generate [${type}] export`);
-    return;
+    throw err;
   }
   const { id } = res1;
+  appLogger.info(`[${portalName}][holdingsIQ]: export ID [${id}]`);
   let res2;
   let status = '';
   let i = 0;
@@ -35,7 +47,12 @@ async function generateAndDownloadExport(portalConfig, portalName, type, filenam
   const downloadLink = res2.links[0].href;
   const filepath = path.resolve(paths.data.holdingsIQDir, filename);
   if (!await fs.existsSync(path.resolve(filepath))) {
-    await downloadFileFromAWS(portalName, downloadLink, filename);
+    try {
+      await downloadFileFromAWS(portalName, downloadLink, filename);
+    } catch (err) {
+      appLogger.info(`[${portalName}][aws]: Cannot download file from aws]`);
+      throw err;
+    }
   }
   return id;
 }
@@ -44,20 +61,112 @@ export default async function update() {
   const portalsName = Object.keys(portals);
   const date = format(new Date(), 'yyyy-MM-dd');
 
+  setWorkInProgress(true);
+
+  let state = createState();
+
+  appLogger.info('[holdingsIQ]: Start data update');
+
   for (let i = 0; i < portalsName.length; i += 1) {
     const portalName = portalsName[i];
     const portalConfig = portals[portalName];
 
-    const standardFilename = `${portalName}-${date}-STANDARD.csv`;
-    const standardId = await generateAndDownloadExport(portalConfig, portalName, 'STANDARD', standardFilename);
-    await insertStandardFileInElastic(portalName, standardFilename);
-    await deleteExportByID(portalConfig, standardId);
+    let type = 'STANDARD';
 
-    const kbart2Filename = `${portalName}-${date}-KBART2.csv`;
-    const kbart2Id = await generateAndDownloadExport(portalConfig, portalName, 'KBART2', kbart2Filename);
-    await insertKbart2FileInElastic(portalName, kbart2Filename);
-    await deleteExportByID(portalConfig, kbart2Id);
+    const standardFilename = `${portalName}-${date}-${type}.csv`;
+    let standardId;
+
+    addStep(portalName, '[holdingsIQ][download]', type);
+
+    try {
+      standardId = await generateAndDownloadExport(
+        portalConfig,
+        portalName,
+        type,
+        standardFilename,
+      );
+    } catch (err) {
+      const message = `[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`;
+      appLogger.error(message);
+      failLatestStep(message);
+      state = getState();
+      sendErrorMail(message, state);
+      return;
+    }
+
+    endLatestStep();
+    addStep(portalName, 'elastic', type);
+
+    try {
+      await insertStandardFileInElastic(portalName, standardFilename);
+    } catch (err) {
+      const message = `[${portalName}][elastic]: insert ${type} file in elastic. ${err}`;
+      appLogger.error(message);
+      failLatestStep(message);
+      state = getState();
+      sendErrorMail(message, state);
+      return;
+    }
+
+    endLatestStep();
+    addStep(portalName, '[holdingsIQ][delete]', type);
+
+    try {
+      await deleteExportByID(portalConfig, standardId);
+    } catch (err) {
+      appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${standardId}].`);
+    }
+
+    endLatestStep();
+
+    type = 'KBART2';
+    const kbart2Filename = `${portalName}-${date}-${type}.csv`;
+    let kbart2Id;
+
+    addStep(portalName, '[holdingsIQ][download]', type);
+
+    try {
+      kbart2Id = await generateAndDownloadExport(portalConfig, portalName, type, kbart2Filename);
+    } catch (err) {
+      const message = `[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`;
+      appLogger.error(message);
+      failLatestStep(message);
+      state = getState();
+      sendErrorMail(message, state);
+      return;
+    }
+
+    endLatestStep();
+    addStep(portalName, 'elastic', type);
+
+    try {
+      await insertKbart2FileInElastic(portalName, kbart2Filename);
+    } catch (err) {
+      const message = `[${portalName}][elastic]: insert STANDARD ${type} in elastic. ${err}`;
+      appLogger.error(message);
+      failLatestStep(message);
+      state = getState();
+      sendErrorMail(message, state);
+      return;
+    }
+
+    endLatestStep();
+    addStep(portalName, '[holdingsIQ][delete]', type);
+
+    try {
+      await deleteExportByID(portalConfig, kbart2Id);
+    } catch (err) {
+      appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${kbart2Id}].`);
+    }
+
+    endLatestStep();
+    end();
   }
 
+  setWorkInProgress(false);
+
+  appLogger.info('[holdingsIQ]: Data update is done.');
+
   // TODO delete yesterday index
+  resetState();
 }

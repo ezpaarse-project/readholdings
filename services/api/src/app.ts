@@ -23,7 +23,8 @@ import elasticRouter from '~/routes/elastic';
 import HLMRouter from '~/routes/hlm';
 import holdingsIQRouter from '~/routes/holdingsIQ';
 
-import cleanLogFileCron from '~/cron/cleanLogFile';
+import cleanFileCron from '~/cron/cleanFile';
+import updateDataCron from '~/cron/updateData';
 
 import { logConfig, config } from '~/lib/config';
 
@@ -109,8 +110,12 @@ const start = async () => {
     appLogger.error('[fastify]: Cannot initiate elastic client');
   }
 
-  if (cleanLogFileCron.active) {
-    cleanLogFileCron.start();
+  if (cleanFileCron.active) {
+    cleanFileCron.start();
+  }
+
+  if (updateDataCron.active) {
+    updateDataCron.start();
   }
 };
 

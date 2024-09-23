@@ -1,6 +1,15 @@
 {
   "nodeEnv": "development",
   "timezone": "Europe/Paris",
+  "smtp": {
+    "host": "localhost",
+    "port": 25
+  },
+  "notifications": {
+    "sender": "readholdings",
+    "receivers": ["readholdings@example.fr"],
+    "machine": "dev"
+  },
   "elasticsearch": {
     "nodes": "http://elastic:9200",
     "username": "elastic",
@@ -11,12 +20,18 @@
     "baseURL": "https://api.ebsco.io/rm/rmaccounts"
   },
   "cron": {
-    "cleanLog": {
+    "cleanFile": {
       "schedule": "0 0 0 * * *",
       "active": true,
       "applicationLogThreshold": 150,
       "accessLogThreshold": 30,
-      "healthcheckLogThreshold": 30
+      "healthcheckLogThreshold": 30,
+      "holdingsIQThreshold": 7,
+      "HLMThreshold": 7
+    },
+    "dataUpdate": {
+      "schedule": "0 0 0 * * 0",
+      "active": true
     }
   },
   "paths": {

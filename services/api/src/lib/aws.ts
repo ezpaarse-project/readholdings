@@ -24,22 +24,36 @@ async function getFileFromAWS(url) {
   return res;
 }
 
-async function download(data, filepath) {
+async function download(portalName, data, filepath) {
   if (data instanceof Readable) {
+    const totalSize = parseInt(data?.headers['content-length'], 10) || 0;
+    let downloadedSize = 0;
+
     await new Promise((resolve, reject) => {
+      data.on('data', (chunk) => {
+        downloadedSize += chunk.length;
+      });
+
       const writeStream = data.pipe(fs.createWriteStream(filepath));
 
+      const progressInterval = setInterval(() => {
+        const progress = ((downloadedSize / totalSize) * 100).toFixed(2);
+        appLogger.info(`[${portalName}][download]: Progress: ${progress}%`);
+      }, 5000);
+
       writeStream.on('ready', async () => {
-        appLogger.info('[download]: Ready');
+        appLogger.info(`[${portalName}][download]: Ready`);
       });
 
       writeStream.on('finish', async () => {
-        appLogger.info('[download]: File download completed');
+        clearInterval(progressInterval);
+        appLogger.info(`[${portalName}][download]: File [${filepath}] download completed`);
         return resolve(true);
       });
 
       writeStream.on('error', async (err) => {
-        appLogger.error('[download]: Error on stream', err);
+        clearInterval(progressInterval);
+        appLogger.error(`[${portalName}][download]: Error on stream`, err);
         return reject(err);
       });
     });
@@ -54,6 +68,6 @@ export default async function downloadFileFromAWS(portalName, downloadLink, file
   const res = await getFileFromAWS(downloadLink);
   const file = res.data;
   const filepath = path.resolve(paths.data.holdingsIQDir, filename);
-  await download(file, filepath);
+  await download(portalName, file, filepath);
   return filename;
 }
