@@ -7,23 +7,14 @@ import { paths } from 'config';
 import { format } from 'date-fns';
 import appLogger from '~/lib/logger/appLogger';
 import {
-  bulk, updateBulk, refresh, createIndex,
+  bulk, updateBulk, refresh,
 } from '~/lib/elastic';
 
 import { transformStringToArray, transformEmbargo } from '~/lib/holdingsIQ/transform';
 
-import holding from '~/../mapping/holding.json';
-
 export async function insertStandardFileInElastic(portalName, filename) {
   const date = format(new Date(), 'yyyy-MM-dd');
   const index = `holdings-${date}`;
-
-  try {
-    await createIndex(index, holding);
-  } catch (err) {
-    appLogger.error(`[${portalName}][elastic]: Cannot create index [${index}]`);
-    throw err;
-  }
 
   const filePath = path.resolve(paths.data.holdingsIQDir, filename);
   const parser = fs.createReadStream(filePath).pipe(parse({
@@ -123,13 +114,6 @@ export async function insertStandardFileInElastic(portalName, filename) {
 export async function insertKbart2FileInElastic(portalName, filename) {
   const date = format(new Date(), 'yyyy-MM-dd');
   const index = `holdings-${date}`;
-
-  try {
-    await createIndex(index, holding);
-  } catch (err) {
-    appLogger.error(`[${portalName}][elastic]: Cannot create index [${index}]`);
-    throw err;
-  }
 
   const filePath = path.resolve(paths.data.holdingsIQDir, filename);
   const parser = fs.createReadStream(filePath).pipe(parse({

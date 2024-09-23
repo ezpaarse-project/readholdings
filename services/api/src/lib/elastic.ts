@@ -290,6 +290,6 @@ export async function createIndex(indexName: string, mapping): Promise<void> {
 export async function getIndices() {
   const res = await elasticClient.cat.indices({ format: 'json' });
   let indices = res.body;
-  indices = indices.filter((index) => index.index.charAt(0) !== '.' && index.index.includes('holding'));
+  indices = indices.filter((index) => index.index.charAt(0) !== '.' && index.index.includes('holdings'));
   return indices;
 }

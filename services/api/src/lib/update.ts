@@ -2,7 +2,7 @@
 /* eslint-disable no-await-in-loop */
 import fs from 'fs';
 import path from 'path';
-import { format } from 'date-fns';
+import { format, getYear } from 'date-fns';
 import { portals, paths } from 'config';
 import { setTimeout } from 'node:timers/promises';
 import { generateExport, getExportByID, deleteExportByID } from '~/lib/holdingsIQ/api';
@@ -20,6 +20,9 @@ import {
   resetState,
   getState,
 } from './state';
+import { getIndices, createIndex, removeIndex } from '~/lib/elastic';
+
+import holding from '~/../mapping/holding.json';
 
 async function generateAndDownloadExport(portalConfig, portalName, type, filename) {
   let res1;
@@ -60,12 +63,20 @@ async function generateAndDownloadExport(portalConfig, portalName, type, filenam
 export default async function update() {
   const portalsName = Object.keys(portals);
   const date = format(new Date(), 'yyyy-MM-dd');
+  const index = `holdings-${date}`;
 
   setWorkInProgress(true);
 
   let state = createState();
 
   appLogger.info('[holdingsIQ]: Start data update');
+
+  try {
+    await createIndex(index, holding);
+  } catch (err) {
+    appLogger.error(`[elastic]: Cannot create index [${index}]`);
+    throw err;
+  }
 
   for (let i = 0; i < portalsName.length; i += 1) {
     const portalName = portalsName[i];
@@ -168,6 +179,19 @@ export default async function update() {
 
   appLogger.info('[holdingsIQ]: Data update is done.');
 
-  // TODO delete yesterday index
+  const actualYear = getYear(date);
+
+  let indices = await getIndices();
+  indices = indices.map((item) => item.index);
+  // remove current index and old year index
+  indices = indices.filter((item) => item !== index && item.includes(actualYear));
+
+  if (indices.length > 0) {
+    for (let i = 0; i < indices.length; i += 1) {
+      const indexCurrentYear = indices[i];
+      await removeIndex(indexCurrentYear);
+    }
+  }
+
   resetState();
 }
