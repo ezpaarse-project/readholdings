@@ -6,7 +6,9 @@ import path from 'path';
 import { paths } from 'config';
 import { format } from 'date-fns';
 import appLogger from '~/lib/logger/appLogger';
-import { bulk, refresh, createIndex } from '~/lib/elastic';
+import {
+  bulk, updateBulk, refresh, createIndex,
+} from '~/lib/elastic';
 
 import { transformStringToArray, transformEmbargo } from '~/lib/holdingsIQ/transform';
 
@@ -96,7 +98,6 @@ export async function insertStandardFileInElastic(portalName, filename) {
 
     if (records.length === 1000 * 2) {
       const dataToInsert = records.slice();
-
       const res = await bulk(dataToInsert);
       lineUpserted += res.insertedDocs + res.updatedDocs;
       records = [];
@@ -136,15 +137,13 @@ export async function insertKbart2FileInElastic(portalName, filename) {
   }));
   appLogger.info(`[${portalName}][csv]: read [${filename}]`);
 
-  let lineUpserted = 0;
+  let lineUpdate = 0;
 
   let records = [];
 
   for await (const record of parser) {
+    const holdingID = `${portalName}-${record?.vendor_id}-${record?.package_id}-${record?.title_id}`;
     const kbart2Record = {
-      meta: {
-        holdingID: `${portalName}-${record?.vendor_id}-${record?.package_id}-${record?.title_id}`,
-      },
       kbart2: {
         package_id: record?.package_id,
         vendor_id: record?.vendor_id,
@@ -170,27 +169,26 @@ export async function insertKbart2FileInElastic(portalName, filename) {
       },
     };
 
-    records.push({ index: { _index: index, _id: kbart2Record.meta.holdingID } });
-    records.push(kbart2Record);
+    records.push({ update: { _index: index, _id: holdingID } });
+    records.push({ doc: kbart2Record, doc_as_upsert: true });
 
     if (records.length === 1000 * 2) {
       const dataToInsert = records.slice();
-
-      const res = await bulk(dataToInsert);
-      lineUpserted += res.insertedDocs + res.updatedDocs;
+      const updatedDocs = await updateBulk(dataToInsert);
+      lineUpdate += updatedDocs;
       records = [];
 
-      if (lineUpserted % 10000 === 0) {
-        appLogger.info(`[${portalName}][elastic]: ${lineUpserted} lines upserted`);
+      if (lineUpdate % 10000 === 0) {
+        appLogger.info(`[${portalName}][elastic]: ${lineUpdate} lines updated`);
       }
     }
   }
   if (records.length > 0) {
     const dataToInsert = records.slice();
-    const res = await bulk(dataToInsert);
-    lineUpserted += res.insertedDocs + res.updatedDocs;
+    const updatedDocs = await updateBulk(dataToInsert);
+    lineUpdate += updatedDocs;
     records = [];
-    appLogger.info(`[${portalName}][elastic]: ${lineUpserted} lines upserted`);
+    appLogger.info(`[${portalName}][elastic]: ${lineUpdate} lines updated`);
   }
   appLogger.info(`[${portalName}][csv]: File [${filename}] is inserted`);
 

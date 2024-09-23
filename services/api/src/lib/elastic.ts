@@ -153,7 +153,6 @@ export async function bulk(data) {
     if (i?.index?.error !== undefined) {
       errors.push(i?.index?.error);
       appLogger.error(JSON.stringify(i?.index?.error, null, 2));
-      process.exit(1);
     }
   });
 
@@ -161,7 +160,6 @@ export async function bulk(data) {
     if (i?.index?.status !== 200 && i?.index?.status !== 201) {
       if (i?.delete === undefined) {
         appLogger.error(JSON.stringify(i?.index, null, 2));
-        process.exit(1);
       }
     }
   });
@@ -172,6 +170,39 @@ export async function bulk(data) {
     deletedDocs,
     errors,
   };
+}
+
+/**
+ * create, update, delete in bulk in elastic
+ *
+ * @param data
+ */
+export async function updateBulk(data) {
+  let res;
+
+  try {
+    res = await elasticClient.bulk({ body: data });
+  } catch (err) {
+    appLogger.error('[elastic]: Cannot bulk');
+    appLogger.error(JSON.stringify(err?.meta?.body?.error, null, 2));
+    process.exit(1);
+  }
+
+  const items = Array.isArray(res?.body?.items) ? res?.body?.items : [];
+
+  if (res?.body?.errors) {
+    appLogger.error('[elastic]: Error in bulk');
+  }
+
+  let updatedDocs = 0;
+
+  items.forEach((i) => {
+    if (i?.update?.status === 200) {
+      updatedDocs += 1;
+    }
+  });
+
+  return updatedDocs;
 }
 
 /**
