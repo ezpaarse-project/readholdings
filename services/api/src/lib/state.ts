@@ -79,5 +79,5 @@ export function createState() {
 }
 export function resetState() {
   state = {};
-  appLogger.info('[state]: State new state');
+  appLogger.info('[state]: Reset state');
 }
