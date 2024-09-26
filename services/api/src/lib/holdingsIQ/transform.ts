@@ -5,20 +5,23 @@
  *
  * @returns
  */
-export function transformStringToArray(coverage: string) {
-  if (!coverage) {
-    return null;
+export function transformStringToArray(coverage: string, date) {
+  if (date && coverage === 'Present') {
+    return `${new Date().getFullYear()}-12-31`;
   }
 
   if (coverage === 'Present') {
-    return `${new Date().getFullYear()}-12-31`;
+    return 'Present';
   }
 
   let updatedArray;
 
   if (coverage.includes('|')) {
     updatedArray = coverage.split('|');
-    return updatedArray.map((item) => (item === 'Present' ? `${new Date().getFullYear()}-12-31` : item));
+    if (date) {
+      return updatedArray.map((item) => (item === 'Present' ? `${new Date().getFullYear()}-12-31` : item));
+    }
+    return updatedArray;
   }
 }
 
