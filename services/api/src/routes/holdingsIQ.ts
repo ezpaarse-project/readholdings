@@ -8,7 +8,7 @@ const router: FastifyPluginAsync = async (fastify) => {
    * Admin only.
    */
   fastify.route({
-    method: 'GET',
+    method: 'POST',
     url: '/update',
     schema: {},
     config: {

@@ -13,7 +13,14 @@
     "properties": {
       "meta": {
         "properties": {
-          "holdingID": { "type": "keyword" }
+          "BibCNRS": { "type": "keyword" },
+          "createdAt": { "type": "keyword" },
+          "EmbargoMonth": { "type": "float" },
+          "CustomEmbargoMonth": { "type": "float" },
+          "ManagedCoverageBegin": { "type": "date" },
+          "ManagedCoverageEnd": { "type": "date" },
+          "CustomCoverageBegin": { "type": "date" },
+          "CustomCoverageEnd": { "type": "date" }
         }
       },
       "kbart2": {

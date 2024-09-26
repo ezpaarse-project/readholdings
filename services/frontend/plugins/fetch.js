@@ -1,10 +1,9 @@
-export default defineNuxtPlugin(nuxtApp => {
-  const baseURL = nuxtApp.$config.public.APIURL; 
+export default defineNuxtPlugin((nuxtApp) => {
+  const baseURL = nuxtApp.$config.public.APIURL;
 
   const customFetch = $fetch.create({
-    baseURL
+    baseURL,
   });
-
 
   nuxtApp.provide('fetch', customFetch);
 });

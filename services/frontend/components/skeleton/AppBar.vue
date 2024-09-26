@@ -8,27 +8,26 @@
 
 <script setup>
 
-const runtimeConfig = useRuntimeConfig()
+const runtimeConfig = useRuntimeConfig();
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 const title = computed(() => {
   if (runtimeConfig.public.environment === 'integration') {
-    return `ReadHoldings ${t('integration')}`
+    return `ReadHoldings ${t('integration')}`;
   }
   if (runtimeConfig.public.environment === 'production') {
-    return 'ReadHoldings'
+    return 'ReadHoldings';
   }
-  return `ReadHoldings ${t('development')}`
+  return `ReadHoldings ${t('development')}`;
 });
 
 const emit = defineEmits({
-  menuUpdate: undefined
-})
-  
+  menuUpdate: undefined,
+});
+
 async function updateVisibleMenu() {
   emit('menuUpdate');
-};
-
+}
 
 </script>

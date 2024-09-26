@@ -7,7 +7,7 @@
 <script setup>
 
 definePageMeta({
-  middleware: 'admin'
+  middleware: 'admin',
 });
 
 const adminStore = useAdminStore();

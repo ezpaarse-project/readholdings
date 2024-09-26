@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 import appLogger from '~/lib/logger/appLogger';
 
 let state: any = {};
@@ -11,14 +13,14 @@ export function setState(value) {
 }
 
 export function end() {
-  state.done = true;
+  state.status = 'done';
   state.endAt = new Date();
   state.took = (new Date(state.endAt) - new Date(state.createdAt)) / 1000;
 }
 
 export function fail() {
-  state.error = true;
   end();
+  state.status = 'error';
 }
 
 export function addStep(portal, name, fileType) {
@@ -28,8 +30,7 @@ export function addStep(portal, name, fileType) {
     fileType,
     startDate: new Date(),
     endDate: null,
-    error: false,
-    done: false,
+    status: 'inProgress',
   };
   state.steps.push(step);
   return step;
@@ -45,14 +46,13 @@ export function getLatestStep() {
 export function endLatestStep() {
   const step = getLatestStep();
   step.endDate = new Date();
-  step.done = true;
+  step.status = 'done';
 }
 
 export function failLatestStep(stack) {
   const step = getLatestStep();
   step.endDate = new Date();
-  step.done = true;
-  step.error = true;
+  step.status = 'error';
   step.stack = stack;
   fail();
 }
@@ -67,13 +67,17 @@ export function updateLatestStep(step) {
 
 export function createState() {
   appLogger.info('[state]: create new state');
+  const date = format(new Date(), 'yyyy-MM-dd');
+  const index = `holdings-${date}`;
+
   state = {
-    done: false,
+    status: 'inProgress',
+    index,
     createdAt: new Date(),
+    documents: 0,
     endAt: null,
     took: 0,
     steps: [],
-    error: false,
   };
   return state;
 }

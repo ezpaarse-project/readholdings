@@ -2,6 +2,7 @@
   "language": "Langue",
   "menu": {
     "home": "Accueil",
+    "report": "Rapports",
     "administration": "Administration"
   },
   "theme": {
@@ -15,9 +16,14 @@
     "logout": "Deconnexion",
     "password": "Mot de passe",
     "menu": {
+      "import": "Import",
+      "holdingsIQ": "holdingsIQ",
       "health": "État de santé",
       "cron": "Cron",
       "config": "Config"
+    },
+    "holdingsIQ": {
+      "title": "Mise à jour via l'API Holdings IQ d'Ebsco"
     },
     "hlm": {
       "title": "Importer des fichiers HLM",
@@ -41,9 +47,28 @@
       "api": "Configutation de l'API"
     }
   },
+  "report": {
+    "title": "Dernières mises à jour",
+    "reloadReports": "Recharger les rapports",
+    "reload": "Recharger l'historique des mises à jour",
+    "noReport": "Pas de rapport disponible",
+    "status": "Statut"
+  },
   "error": {
     "hlm": {
       "import": "Impossible d'importer les fichiers"
+    },
+    "report":{
+      "get": "Impossible de récupérer les rapports de mises à jour"
+    },
+    "status":{
+      "get": "Impossible de récupérer le status des mises à jour"
+    },
+    "state":{
+      "get": "Impossible de récupérer l'état de la mise à jour"
+    },
+    "holdingsIQ" : {
+      "update": "Impossible de lancer la mise à jour"
     },
     "index": {
       "delete": "Impossible de supprimer l'index"
@@ -52,6 +77,9 @@
   "info": {
     "hlm": {
       "imported": "Insertion des données en cours"
+    },
+    "holdingsIQ" : {
+      "update": "La mise à jour a commencé"
     }
   },
   "success": {

@@ -4,14 +4,14 @@ const { format } = require('date-fns');
 const logger = require('../../lib/logger');
 const { getFilesByCustomer } = require('../utils');
 
-const reportsDir = path.resolve(__dirname, '..', '..', 'out', 'report');
+const reportDir = path.resolve(__dirname, '..', '..', 'out', 'report');
 
 /**
  * create report on the folder "out/report" on behalf of the date of treatment
  * @param {String}  - state filename
  */
 async function createReport(customerName, state) {
-  const pathfile = path.resolve(reportsDir, customerName, `${format(new Date(), 'yyyy-MM-dd-HH-mm')}.json`);
+  const pathfile = path.resolve(reportDir, customerName, `${format(new Date(), 'yyyy-MM-dd-HH-mm')}.json`);
   try {
     await fs.writeFile(pathfile, JSON.stringify(state, null, 2));
   } catch (err) {
@@ -30,9 +30,9 @@ async function getReportByFilename(customerName, filename) {
   let report;
 
   try {
-    report = await fs.readFile(path.resolve(reportsDir, customerName, filename));
+    report = await fs.readFile(path.resolve(reportDir, customerName, filename));
   } catch (err) {
-    logger.error(`Cannot read ${path.resolve(reportsDir, customerName, filename)}`);
+    logger.error(`Cannot read ${path.resolve(reportDir, customerName, filename)}`);
     logger.error(err);
     return undefined;
   }

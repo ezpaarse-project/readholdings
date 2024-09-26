@@ -173,12 +173,12 @@ to the XML file content (from Marc Update) and enriches these id with the holdin
 # Execute this one time
 docker-compose -f docker-compose.debug.yml run --rm elastic chown -R elasticsearch /usr/share/elasticsearch/ 
 
-# Start ezunpaywall as daemon
+# Start readholdings as daemon
 docker-compose -f docker-compose.debug.yml up -d
 
-# Stop ezunpaywall
+# Stop readholdings
 docker-compose -f docker-compose.debug.yml stop
 
-# Get the status of ezunpaywall services
+# Get the status of readholdings services
 docker-compose -f docker-compose.debug.yml ps
 ```

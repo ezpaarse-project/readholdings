@@ -53,7 +53,6 @@ export async function sendErrorMail(text, state) {
   try {
     await sendMail(text, state);
   } catch (err) {
-    console.log(err);
     appLogger.error('[mail]: Cannot send error mail', err);
     return;
   }

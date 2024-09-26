@@ -16,7 +16,7 @@
 
 <script setup>
 
-const runtimeConfig = useRuntimeConfig()
+const runtimeConfig = useRuntimeConfig();
 
 const { t } = useI18n();
 

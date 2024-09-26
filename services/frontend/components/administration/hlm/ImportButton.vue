@@ -1,5 +1,7 @@
 <template>
-   <v-btn :loading="loading" @click.stop="importInElastic()" :disabled="props.dataToImport.length === 0"> {{ t("import") }} </v-btn>
+  <v-btn :loading="loading" :disabled="props.dataToImport.length === 0" @click.stop="importInElastic()">
+    {{ t("import") }}
+  </v-btn>
 </template>
 
 <script setup>
@@ -11,7 +13,7 @@ const props = defineProps({
 const emit = defineEmits(['import']);
 
 const { t } = useI18n();
-const snackStore = useSnacksStore()
+const snackStore = useSnacksStore();
 const adminStore = useAdminStore();
 const { $fetch } = useNuxtApp();
 
@@ -34,13 +36,13 @@ async function importInElastic() {
       method: 'POST',
       body: formData,
       headers: {
-        'x-api-key': password.value
-      }
+        'x-api-key': password.value,
+      },
     });
   } catch (err) {
     snackStore.error(t('error.hlm.import'));
     loading.value = false;
-    return
+    return;
   }
 
   loading.value = false;

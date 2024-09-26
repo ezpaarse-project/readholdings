@@ -42,7 +42,8 @@
     },
     "data": {
       "HLMDir": "./data/hlm",
-      "holdingsIQDir": "./data/holdings"
+      "holdingsIQDir": "./data/holdings",
+      "reportDir": "./data/report"
     }
   },
   "portals": {

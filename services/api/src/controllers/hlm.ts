@@ -34,7 +34,6 @@ export async function insertHLMFilesController(
 
   insertCSVInElastic();
 
-  // TODO return ID;
   reply.code(202);
 }
 

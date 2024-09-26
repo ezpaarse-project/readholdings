@@ -1,15 +1,15 @@
 <template>
   <v-list-item v-if="!isAdmin" link router :to="{ path: '/administration' }" ripple :title="t('menu.administration')">
-    <template v-slot:prepend>
-      <v-icon icon="mdi-security"></v-icon>
+    <template #prepend>
+      <v-icon icon="mdi-security" />
     </template>
   </v-list-item>
   <v-list v-else v-model:opened="open">
     <v-list-group value="Admin">
-      <template v-slot:activator="{ props }">
+      <template #activator="{ props }">
         <v-list-item v-bind="props" :title="t('menu.administration')">
-          <template v-slot:prepend>
-            <v-icon icon="mdi-security"></v-icon>
+          <template #prepend>
+            <v-icon icon="mdi-security" />
           </template>
         </v-list-item>
       </template>
@@ -20,7 +20,7 @@
 
 <script setup>
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 const adminStore = useAdminStore();
 

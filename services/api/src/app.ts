@@ -22,6 +22,9 @@ import configRouter from '~/routes/config';
 import elasticRouter from '~/routes/elastic';
 import HLMRouter from '~/routes/hlm';
 import holdingsIQRouter from '~/routes/holdingsIQ';
+import reportRouter from '~/routes/report';
+import stateRouter from '~/routes/state';
+import statusRouter from '~/routes/status';
 
 import cleanFileCron from '~/cron/cleanFile';
 import updateDataCron from '~/cron/updateData';
@@ -34,6 +37,7 @@ const start = async () => {
   // create log directory
   await mkdir(resolve(paths.data.HLMDir), { recursive: true });
   await mkdir(resolve(paths.data.holdingsIQDir), { recursive: true });
+  await mkdir(resolve(paths.data.reportDir), { recursive: true });
   await mkdir(resolve(paths.log.applicationDir), { recursive: true });
   await mkdir(resolve(paths.log.accessDir), { recursive: true });
   await mkdir(resolve(paths.log.healthCheckDir), { recursive: true });
@@ -95,6 +99,9 @@ const start = async () => {
   await fastify.register(elasticRouter, { prefix: '/elastic' });
   await fastify.register(HLMRouter, { prefix: '/hlm' });
   await fastify.register(holdingsIQRouter, { prefix: '/holdingsIQ' });
+  await fastify.register(reportRouter, { prefix: '/reports' });
+  await fastify.register(stateRouter, { prefix: '/state' });
+  await fastify.register(statusRouter, { prefix: '/status' });
 
   const address = await fastify.listen({ port: 3000, host: '::' });
   appLogger.info(`[fastify]: listening at [${address}]`);

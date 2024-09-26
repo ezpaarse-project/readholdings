@@ -12,7 +12,7 @@ const {
   getReportByFilename,
 } = require('../bin/update/report');
 
-const reportsDir = path.resolve(__dirname, '..', 'out', 'report');
+const reportDir = path.resolve(__dirname, '..', 'out', 'report');
 
 router.get('/reports/customerName/:customerName', async (req, res, next) => {
   let { customerName } = req.params;
@@ -39,7 +39,7 @@ router.get('/reports/customerName/:customerName', async (req, res, next) => {
   if (latest) {
     let latestFile;
     try {
-      latestFile = await getMostRecentFile(reportsDir);
+      latestFile = await getMostRecentFile(reportDir);
     } catch (err) {
       return next(err);
     }
@@ -58,7 +58,7 @@ router.get('/reports/customerName/:customerName', async (req, res, next) => {
     return res.status(200).json(reports);
   }
 
-  reports = await fs.readdir(reportsDir);
+  reports = await fs.readdir(reportDir);
   return res.status(200).json(reports);
 });
 
@@ -74,7 +74,7 @@ router.get('/reports/customerName/:customerName/filename/:filename', async (req,
   const { customerName, filename } = value;
 
   try {
-    await fs.stat(path.resolve(reportsDir, customerName, filename));
+    await fs.stat(path.resolve(reportDir, customerName, filename));
   } catch (err) {
     // TODO 404
     return next(err);

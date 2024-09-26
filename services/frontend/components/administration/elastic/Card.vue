@@ -21,7 +21,7 @@
             {{ index['store.size'] }}
           </v-chip>
         </v-col>
-        <template v-slot:append>
+        <template #append>
           <v-btn icon="mdi-delete" variant="text" @click.stop="openDeleteDialog(index.index)" />
         </template>
       </v-list-item>
@@ -36,7 +36,7 @@
 <script setup>
 
 const { t } = useI18n();
-const snackStore = useSnacksStore()
+const snackStore = useSnacksStore();
 const adminStore = useAdminStore();
 const { $fetch } = useNuxtApp();
 const { openConfirm } = useDialogStore();
@@ -71,7 +71,7 @@ async function getIndices() {
 
 /**
  * Delete elastic index.
- * 
+ *
  * @param indexName Index name.
  */
 async function deleteIndex(indexName) {
@@ -91,7 +91,7 @@ async function deleteIndex(indexName) {
 
 /**
  * Open dialog to delete index.
- * 
+ *
  * @param indexName Index name.
  */
 async function openDeleteDialog(indexName) {
@@ -101,7 +101,7 @@ async function openDeleteDialog(indexName) {
     agreeText: t('delete'),
     agreeIcon: 'mdi-delete',
     onAgree: async () => {
-      await deleteIndex(indexName)
+      await deleteIndex(indexName);
       await getIndices();
     },
   });
@@ -109,6 +109,6 @@ async function openDeleteDialog(indexName) {
 
 onMounted(async () => {
   await getIndices();
-})
+});
 
 </script>

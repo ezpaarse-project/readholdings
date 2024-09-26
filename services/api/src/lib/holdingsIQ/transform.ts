@@ -6,10 +6,20 @@
  * @returns
  */
 export function transformStringToArray(coverage: string) {
-  if (coverage.includes('|')) {
-    return coverage.split('|');
+  if (!coverage) {
+    return null;
   }
-  return coverage;
+
+  if (coverage === 'Present') {
+    return `${new Date().getFullYear()}-12-31`;
+  }
+
+  let updatedArray;
+
+  if (coverage.includes('|')) {
+    updatedArray = coverage.split('|');
+    return updatedArray.map((item) => (item === 'Present' ? `${new Date().getFullYear()}-12-31` : item));
+  }
 }
 
 const getProxy = (proxy) => {
@@ -141,7 +151,7 @@ export function transformEmbargo(embargo) {
     ratio = 0.3;
   }
 
-  return `${number * ratio} mois`;
+  return number * ratio;
 }
 
 /**

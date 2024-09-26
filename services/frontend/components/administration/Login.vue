@@ -42,7 +42,7 @@
 const snackStore = useSnacksStore();
 const adminStore = useAdminStore();
 
-const router = useRouter()
+const router = useRouter();
 
 const { t } = useI18n();
 const { $fetch } = useNuxtApp();
@@ -64,8 +64,8 @@ async function login() {
     await $fetch('/login', {
       method: 'POST',
       headers: {
-        'x-api-key': password.value
-      }
+        'x-api-key': password.value,
+      },
     });
   } catch (err) {
     loading.value = false;
@@ -75,10 +75,10 @@ async function login() {
 
   adminStore.setIsAdmin(true);
   adminStore.setPassword(password.value);
-  
+
   loading.value = false;
 
-  router.push('/administration/hlm')
+  router.push('/administration/holdingsIQ');
 }
 
 </script>

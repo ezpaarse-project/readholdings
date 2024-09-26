@@ -2,6 +2,7 @@
   "language": "Language",
   "menu": {
     "home": "Home",
+    "report": "Reports",
     "administration": "Administration"
   },
   "theme": {
@@ -16,9 +17,13 @@
     "password": "Password",
     "menu": {
       "import": "Import",
+      "holdingsIQ": "holdingsIQ",
       "health": "Health",
       "cron": "Cron",
       "config": "Config"
+    },
+    "holdingsIQ": {
+      "title": "Update via Ebsco Holdings IQ API"
     },
     "hlm": {
       "title": "HLM files import",
@@ -42,9 +47,28 @@
       "api": "API configuration"
     }
   },
+  "report": {
+    "title": "Last updates",
+    "reloadReports": "Reload reports",
+    "reload": "Reload update history",
+    "noReport": "No report available",
+    "status": "Status"
+  },
   "error": {
     "hlm": {
       "import": "Cannot import files"
+    },
+    "report": {
+      "get": "Cannot get update reports"
+    },
+    "status":{
+      "get": "Cannot get update status"
+    },
+    "state":{
+      "get": "Cannot get update state"
+    },
+    "holdingsIQ" : {
+      "update": "Cannot start update"
     },
     "index": {
       "delete": "Cannot delete index"
@@ -53,6 +77,9 @@
   "info": {
     "hlm": {
       "imported": "Inserting data in progress"
+    },
+    "holdingsIQ" : {
+      "update": "The update has begun"
     }
   },
   "success": {

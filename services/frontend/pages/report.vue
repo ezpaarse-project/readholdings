@@ -1,11 +1,9 @@
 <template>
-  <section>
-    readholdings
+  <section class="ma-3">
+    <ReportCard />
   </section>
 </template>
 
 <script setup>
-
-const { t } = useI18n();
 
 </script>
