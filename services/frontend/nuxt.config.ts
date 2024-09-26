@@ -19,7 +19,7 @@ export default defineNuxtConfig({
       gitHubRepoURL: process.env.GITHUB_REPO || 'https://github.com/ezpaarse-project/readholdings',
       APIURL: process.env.API_URL || 'http://localhost:59701',
       kibanaURL: process.env.KIBANA_URL || 'http://localhost:5601',
-    }
+    },
   },
 
   devtools: { enabled: true },
@@ -30,7 +30,7 @@ export default defineNuxtConfig({
   },
 
   i18n: {
-    vueI18n: './config/i18n.js'
+    vueI18n: './config/i18n.js',
   },
 
   pinia: {
@@ -40,7 +40,7 @@ export default defineNuxtConfig({
   plugins: [
     '~/plugins/vuetify',
     '~/plugins/fetch',
-    '~/plugins/highlight.client'
+    '~/plugins/highlight.client',
   ],
 
   css: [
@@ -49,4 +49,4 @@ export default defineNuxtConfig({
   ],
 
   compatibilityDate: '2024-07-15',
-})
+});

@@ -17,14 +17,14 @@
 
 <script setup>
 
-const { t } = useI18n()
+import { useTheme } from 'vuetify';
 
-import { useTheme } from 'vuetify'
+const { t } = useI18n();
 
-const theme = useTheme()
+const theme = useTheme();
 
 function updateTheme() {
-  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
+  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark';
 }
 
 </script>

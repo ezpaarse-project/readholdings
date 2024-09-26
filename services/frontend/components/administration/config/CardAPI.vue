@@ -10,7 +10,7 @@
         {{ t("administration.config.api") }}
       </v-toolbar-title>
     </v-toolbar>
-    <JSONView :code="APIconfig"/>
+    <JSONView :code="APIconfig" />
   </v-card>
 </template>
 
@@ -24,7 +24,7 @@ const { $fetch } = useNuxtApp();
 const { t } = useI18n();
 
 const loading = ref(false);
-const APIconfig = ref("");
+const APIconfig = ref('');
 
 /**
  * Get config of readholdingsv API
@@ -36,8 +36,8 @@ async function getAPIConfig() {
     appConfig = await $fetch('/config', {
       method: 'GET',
       headers: {
-        'x-api-key': password.value
-      }
+        'x-api-key': password.value,
+      },
     });
   } catch (err) {
     loading.value = false;
@@ -47,9 +47,8 @@ async function getAPIConfig() {
   loading.value = false;
 
   const stringifiedConfig = JSON.stringify(appConfig, null, 2);
-  APIconfig.value = stringifiedConfig
+  APIconfig.value = stringifiedConfig;
 }
-
 
 onMounted(() => {
   getAPIConfig();

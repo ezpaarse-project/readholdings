@@ -4,4 +4,4 @@ export default defineNuxtRouteMiddleware((to, from) => {
   if (!adminStore.isAdmin) {
     return navigateTo('/administration');
   }
-})
+});

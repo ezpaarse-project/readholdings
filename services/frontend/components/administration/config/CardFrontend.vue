@@ -10,7 +10,7 @@
         {{ t("administration.config.frontend") }}
       </v-toolbar-title>
     </v-toolbar>
-    <JSONView :code="config"/>
+    <JSONView :code="config" />
   </v-card>
 </template>
 

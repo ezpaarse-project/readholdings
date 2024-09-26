@@ -9,7 +9,7 @@ import colors from 'vuetify/util/colors';
 
 const I18N_KEY = '__VUE_I18N__';
 
-export default defineNuxtPlugin(nuxtApp => {
+export default defineNuxtPlugin((nuxtApp) => {
   const i18n = nuxtApp.vueApp[I18N_KEY];
   i18n.global.mergeLocaleMessage('en', { $vuetify: en });
   i18n.global.mergeLocaleMessage('fr', { $vuetify: fr });
@@ -17,32 +17,32 @@ export default defineNuxtPlugin(nuxtApp => {
   nuxtApp.vueApp.use(
     createVuetify({
       ssr: true,
-        components,
-        directives,
-        locale: {
-          adapter: createVueI18nAdapter({
-            i18n,
-            useI18n,
-          }),
-        },
-        theme: {
-          themes: {
-            light: {
-              colors: {
-                primary: colors.blue.darken1,
-                secondary: colors.grey.darken4,
-                secondary: colors.grey.darken4,
-              }
+      components,
+      directives,
+      locale: {
+        adapter: createVueI18nAdapter({
+          i18n,
+          useI18n,
+        }),
+      },
+      theme: {
+        themes: {
+          light: {
+            colors: {
+              primary: colors.blue.darken1,
+              secondary: colors.grey.darken4,
+              secondary: colors.grey.darken4,
             },
-            dark: {
-              colors: {
-                primary: colors.blue.darken1,
-                accent: colors.grey.darken3,
-                secondary: colors.grey.darken3,
-              }
-            }
-          }
-        }
-    })
+          },
+          dark: {
+            colors: {
+              primary: colors.blue.darken1,
+              accent: colors.grey.darken3,
+              secondary: colors.grey.darken3,
+            },
+          },
+        },
+      },
+    }),
   );
-})
+});

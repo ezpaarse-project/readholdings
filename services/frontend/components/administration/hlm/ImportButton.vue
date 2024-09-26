@@ -1,5 +1,8 @@
 <template>
-  <v-btn :loading="loading" :disabled="props.dataToImport.length === 0" @click.stop="importInElastic()">
+  <v-btn
+    :loading="loading"
+    :disabled="props.dataToImport.length === 0"
+    @click.stop="importInElastic()">
     {{ t("import") }}
   </v-btn>
 </template>
@@ -7,7 +10,7 @@
 <script setup>
 
 const props = defineProps({
-  dataToImport: { type: Object, default: () => [] },
+  dataToImport: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(['import']);

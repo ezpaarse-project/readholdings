@@ -1,7 +1,12 @@
 <template>
   <div class="text-center ma-2">
-    <v-btn small :href="gitHubRepo" target="_blank" rel="noreferrer"
-      variant="outlined">
+    <v-btn
+      small
+      :href="gitHubRepo"
+      target="_blank"
+      rel="noopener noreferrer"
+      variant="outlined"
+    >
       Version: {{ version }}
       <v-icon right>
         mdi-github
@@ -12,7 +17,7 @@
 
 <script setup>
 
-const runtimeConfig = useRuntimeConfig()
+const runtimeConfig = useRuntimeConfig();
 
 const version = ref(runtimeConfig.public.version);
 const gitHubRepo = ref(runtimeConfig.public.gitHubRepoURL);

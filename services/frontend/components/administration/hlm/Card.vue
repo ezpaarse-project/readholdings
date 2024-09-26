@@ -8,7 +8,7 @@
     <v-card-actions>
       <v-spacer />
       <AdministrationHlmImportButton
-        :dataToImport="dataToImport"
+        :data-to-import="dataToImport"
         @import="handleImport()"
       />
     </v-card-actions>
@@ -19,7 +19,7 @@
       prepend-icon="mdi-paperclip"
       multiple
     >
-      <template v-slot:selection="{ fileNames }">
+      <template #selection="{ fileNames }">
         <template v-for="fileName in fileNames" :key="fileName">
           <v-chip
             class="me-2"
@@ -52,22 +52,22 @@ const files = ref([]);
 const portals = ref([]);
 
 const dataToImport = computed(() => {
-  let data = [];
+  const data = [];
   files.value.forEach((file, index) => {
     const portal = portals.value[index];
     const mergedObject = { file, portal };
     data.push(mergedObject);
   });
   return data;
-})
+});
 
 const handlePortalUpdate = (index, portal) => {
-  portals.value[index] = portal
+  portals.value[index] = portal;
 };
 
 const handleImport = () => {
-  portals.value = []
-  files.value = []
+  portals.value = [];
+  files.value = [];
 };
 
 const removeItem = (index) => {

@@ -15,7 +15,7 @@
         {{ file.name }}
       </v-col>
     </v-row>
-    <template v-slot:append>
+    <template #append>
       <v-btn icon="mdi-delete" variant="text" @click.stop="removeSelf()" />
     </template>
   </v-list-item>
@@ -32,32 +32,32 @@ const props = defineProps({
 const emit = defineEmits(['update-portal', 'remove']);
 
 const portals = [
-  "IN2P3",
-  "INC",
-  "INEE",
-  "INP",
-  "INS2I",
-  "INSB",
-  "INSHS",
-  "INSIS",
-  "INSMI",
-  "INSU",
+  'IN2P3',
+  'INC',
+  'INEE',
+  'INP',
+  'INS2I',
+  'INSB',
+  'INSHS',
+  'INSIS',
+  'INSMI',
+  'INSU',
 ];
 
 const portal = ref('');
 
-onMounted(() => {
-  portal.value = portals.find(p => props?.file?.name?.includes(p)) || '';
-  updatePortal()
-})
-
-function updatePortal () {
+function updatePortal() {
   emit('update-portal', portal.value);
-};
+}
 
-function removeSelf () {
+onMounted(() => {
+  portal.value = portals.find((p) => props?.file?.name?.includes(p)) || '';
+  updatePortal();
+});
+
+function removeSelf() {
   emit('remove');
-};
+}
 
 watch(() => props.file.portal, (newPortal) => {
   portal.value = newPortal;

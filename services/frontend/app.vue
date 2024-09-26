@@ -2,7 +2,7 @@
   <v-app>
     <ClientOnly>
       <NuxtLayout>
-        <SkeletonAppBar @menuUpdate="updateVisibleMenu()" />
+        <SkeletonAppBar @menu-update="updateVisibleMenu()" />
         <SkeletonAppMenu v-model="visible" />
         <Snackbar />
         <ConfirmDialog />
@@ -16,15 +16,15 @@
 
 <script setup>
 
-let visible = ref(false);
+const visible = ref(false);
 
 const emit = defineEmits({
-  updated: () => true
-})
+  updated: () => true,
+});
 
 async function updateVisibleMenu() {
   visible.value = !visible.value;
   emit('updated');
-};
+}
 
 </script>

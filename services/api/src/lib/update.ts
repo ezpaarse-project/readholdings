@@ -92,21 +92,21 @@ export default async function update() {
 
     addStep(portalName, '[holdingsIQ][download]', type);
 
-    // try {
-    //   standardId = await generateAndDownloadExport(
-    //     portalConfig,
-    //     portalName,
-    //     type,
-    //     standardFilename,
-    //   );
-    // } catch (err) {
-    //   const message = `[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`;
-    //   appLogger.error(message);
-    //   failLatestStep(message);
-    //   state = getState();
-    //   sendErrorMail(message, state);
-    //   return;
-    // }
+    try {
+      standardId = await generateAndDownloadExport(
+        portalConfig,
+        portalName,
+        type,
+        standardFilename,
+      );
+    } catch (err) {
+      const message = `[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`;
+      appLogger.error(message);
+      failLatestStep(message);
+      state = getState();
+      sendErrorMail(message, state);
+      return;
+    }
 
     endLatestStep();
     addStep(portalName, '[elastic][insert]', type);
@@ -125,53 +125,53 @@ export default async function update() {
     endLatestStep();
     addStep(portalName, '[holdingsIQ][delete]', type);
 
-    // try {
-    //   await deleteExportByID(portalConfig, standardId);
-    // } catch (err) {
-    //   appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${standardId}].`);
-    // }
+    try {
+      await deleteExportByID(portalConfig, standardId);
+    } catch (err) {
+      appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${standardId}].`);
+    }
 
-    // endLatestStep();
+    endLatestStep();
 
-    // type = 'KBART2';
-    // const kbart2Filename = `${portalName}-${date}-${type}.csv`;
-    // let kbart2Id;
+    type = 'KBART2';
+    const kbart2Filename = `${portalName}-${date}-${type}.csv`;
+    let kbart2Id;
 
-    // addStep(portalName, '[holdingsIQ][download]', type);
+    addStep(portalName, '[holdingsIQ][download]', type);
 
-    // try {
-    //   kbart2Id = await generateAndDownloadExport(portalConfig, portalName, type, kbart2Filename);
-    // } catch (err) {
-    //   const message = `[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`;
-    //   appLogger.error(message);
-    //   failLatestStep(message);
-    //   state = getState();
-    //   sendErrorMail(message, state);
-    //   return;
-    // }
+    try {
+      kbart2Id = await generateAndDownloadExport(portalConfig, portalName, type, kbart2Filename);
+    } catch (err) {
+      const message = `[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`;
+      appLogger.error(message);
+      failLatestStep(message);
+      state = getState();
+      sendErrorMail(message, state);
+      return;
+    }
 
-    // endLatestStep();
-    // addStep(portalName, '[elastic][insert]', type);
+    endLatestStep();
+    addStep(portalName, '[elastic][insert]', type);
 
-    // try {
-    //   await insertKbart2FileInElastic(portalName, kbart2Filename);
-    // } catch (err) {
-    //   const message = `[${portalName}][elastic]: insert STANDARD ${type} in elastic. ${err}`;
-    //   appLogger.error(message);
-    //   failLatestStep(message);
-    //   state = getState();
-    //   sendErrorMail(message, state);
-    //   return;
-    // }
+    try {
+      await insertKbart2FileInElastic(portalName, kbart2Filename);
+    } catch (err) {
+      const message = `[${portalName}][elastic]: insert STANDARD ${type} in elastic. ${err}`;
+      appLogger.error(message);
+      failLatestStep(message);
+      state = getState();
+      sendErrorMail(message, state);
+      return;
+    }
 
-    // endLatestStep();
-    // addStep(portalName, '[holdingsIQ][delete]', type);
+    endLatestStep();
+    addStep(portalName, '[holdingsIQ][delete]', type);
 
-    // try {
-    //   await deleteExportByID(portalConfig, kbart2Id);
-    // } catch (err) {
-    //   appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${kbart2Id}].`);
-    // }
+    try {
+      await deleteExportByID(portalConfig, kbart2Id);
+    } catch (err) {
+      appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${kbart2Id}].`);
+    }
 
     endLatestStep();
   }

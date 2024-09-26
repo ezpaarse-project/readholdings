@@ -12,20 +12,23 @@
           :disabled="loading"
           :loading="loading"
           @click.stop="getHealth()"
-          >
+        >
           {{ health?.responseTime }} ms
         </v-btn>
       </v-row>
     </v-card-title>
-    <v-card-text v-if="name === 'elastic'"> {{ health?.nodes }} </v-card-text>
-    <v-card-text v-if="name === 'api'"> {{ runtimeConfig.public.APIURL }} </v-card-text>
+    <v-card-text v-if="name === 'elastic'">
+      {{ health?.nodes }}
+    </v-card-text>
+    <v-card-text v-if="name === 'api'">
+      {{ runtimeConfig.public.APIURL }}
+    </v-card-text>
   </v-card>
 </template>
 
 <script setup>
 
-
-const runtimeConfig = useRuntimeConfig()
+const runtimeConfig = useRuntimeConfig();
 const { $fetch } = useNuxtApp();
 
 const loading = ref(false);
