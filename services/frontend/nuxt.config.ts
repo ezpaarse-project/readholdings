@@ -1,3 +1,8 @@
+import { defineNuxtConfig } from 'nuxt/config';
+
+import i18nOptions from './app/i18n.options';
+import vuetifyOptions from './app/vuetify.options';
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   app: {
@@ -23,22 +28,25 @@ export default defineNuxtConfig({
   },
 
   devtools: { enabled: true },
-  modules: ['@pinia/nuxt', '@nuxtjs/i18n'],
+  modules: [
+    'vuetify-nuxt-module',
+    '@pinia/nuxt',
+    '@nuxtjs/i18n',
+  ],
 
   build: {
     transpile: ['vuetify'],
   },
 
-  i18n: {
-    vueI18n: './config/i18n.js',
-  },
+  i18n: i18nOptions,
+
+  vuetify: vuetifyOptions,
 
   pinia: {
     storesDirs: ['./store/**'],
   },
 
   plugins: [
-    '~/plugins/vuetify',
     '~/plugins/fetch',
     '~/plugins/highlight.client',
   ],
