@@ -9,7 +9,7 @@ export default defineNuxtModule({
     name: 'vuetify-i18n',
   },
   defaults: {
-    outDir: 'node_modules/.cache/ezmesure-build/vuetify-i18n',
+    outDir: 'node_modules/.cache/readholdings-build/vuetify-i18n',
   },
   async setup(options, nuxt) {
     const logger = useLogger('vuetify-i18n');
