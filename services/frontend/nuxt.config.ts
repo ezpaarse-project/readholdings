@@ -22,7 +22,7 @@ export default defineNuxtConfig({
       environment: process.env.NODE_ENV || 'development',
       version: process.env.VERSION || 'development',
       gitHubRepoURL: process.env.GITHUB_REPO || 'https://github.com/ezpaarse-project/readholdings',
-      APIURL: process.env.API_URL || 'http://localhost:59701',
+      API_URL: process.env.API_URL || 'http://localhost:59701',
       kibanaURL: process.env.KIBANA_URL || 'http://localhost:5601',
     },
   },
