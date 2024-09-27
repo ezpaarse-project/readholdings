@@ -51,6 +51,7 @@
     "title": "Dernières mises à jour",
     "reloadReports": "Recharger les rapports",
     "reload": "Recharger l'historique des mises à jour",
+    "reloadState": "Recharger l'état",
     "noReport": "Pas de rapport disponible",
     "status": "Statut"
   },

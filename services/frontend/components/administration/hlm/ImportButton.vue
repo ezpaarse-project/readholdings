@@ -2,7 +2,8 @@
   <v-btn
     :loading="loading"
     :disabled="props.dataToImport.length === 0"
-    @click.stop="importInElastic()">
+    @click.stop="importInElastic()"
+  >
     {{ t("import") }}
   </v-btn>
 </template>

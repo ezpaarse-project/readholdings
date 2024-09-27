@@ -103,6 +103,7 @@ export default async function update() {
       const message = `[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`;
       appLogger.error(message);
       failLatestStep(message);
+      setWorkInProgress(false);
       state = getState();
       sendErrorMail(message, state);
       return;
@@ -117,6 +118,7 @@ export default async function update() {
       const message = `[${portalName}][elastic]: insert ${type} file in elastic. ${err}`;
       appLogger.error(message);
       failLatestStep(message);
+      setWorkInProgress(false);
       state = getState();
       sendErrorMail(message, state);
       return;
@@ -145,6 +147,7 @@ export default async function update() {
       const message = `[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`;
       appLogger.error(message);
       failLatestStep(message);
+      setWorkInProgress(false);
       state = getState();
       sendErrorMail(message, state);
       return;
@@ -159,6 +162,7 @@ export default async function update() {
       const message = `[${portalName}][elastic]: insert STANDARD ${type} in elastic. ${err}`;
       appLogger.error(message);
       failLatestStep(message);
+      setWorkInProgress(false);
       state = getState();
       sendErrorMail(message, state);
       return;

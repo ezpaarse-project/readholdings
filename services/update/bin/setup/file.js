@@ -15,7 +15,7 @@ const logger = require('../../lib/logger');
  * @param {String} name key of data need to be parsed
  * @returns {Object} parsed data
  */
-function transformStringToArray(data, name) {
+function transformCoverage(data, name) {
   if (data[name].value) {
     if (data[name].value.includes('|')) {
       data[name].value = data[name].value.split('|');
@@ -105,10 +105,10 @@ async function insertFile(filePath, index, date) {
           data[attr.trim()] = { value: data[attr], tag: 'proprietary' };
         }
 
-        data = transformStringToArray(data, 'ManagedCoverageBegin');
-        data = transformStringToArray(data, 'ManagedCoverageEnd');
-        data = transformStringToArray(data, 'CustomCoverageBegin');
-        data = transformStringToArray(data, 'CustomCoverageEnd');
+        data = transformCoverage(data, 'ManagedCoverageBegin');
+        data = transformCoverage(data, 'ManagedCoverageEnd');
+        data = transformCoverage(data, 'CustomCoverageBegin');
+        data = transformCoverage(data, 'CustomCoverageEnd');
         data = transformEmbargo(data, 'Embargo');
         data = transformEmbargo(data, 'CustomEmbargo');
         data.createdAt = { value: date, tag: 'meta' };

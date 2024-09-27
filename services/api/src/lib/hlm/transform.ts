@@ -5,7 +5,7 @@
  *
  * @returns
  */
-export function transformStringToArray(coverage: string) {
+export function transformCoverage(coverage: string) {
   if (coverage.includes('|')) {
     return coverage.split('|');
   }

@@ -5,24 +5,33 @@
  *
  * @returns
  */
-export function transformStringToArray(coverage: string, date) {
-  if (date && coverage === 'Present') {
-    return `${new Date().getFullYear()}-12-31`;
-  }
-
+export function transformCoverage(coverage: string) {
   if (coverage === 'Present') {
-    return 'Present';
+    return `${new Date().getFullYear()}-12-31`;
   }
 
   let updatedArray;
 
   if (coverage.includes('|')) {
     updatedArray = coverage.split('|');
-    if (date) {
-      return updatedArray.map((item) => (item === 'Present' ? `${new Date().getFullYear()}-12-31` : item));
-    }
-    return updatedArray;
+    return updatedArray.map((item) => (item === 'Present' ? `${new Date().getFullYear()}-12-31` : item));
   }
+
+  return coverage;
+}
+
+/**
+ * Convert coverage to Array of string.
+ *
+ * @param coverage coverage data.
+ *
+ * @returns
+ */
+export function transformStringToArray(coverage: string) {
+  if (coverage.includes('|')) {
+    return coverage.split('|');
+  }
+  return coverage;
 }
 
 const getProxy = (proxy) => {

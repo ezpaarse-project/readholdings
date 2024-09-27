@@ -10,7 +10,11 @@ import {
   bulk, updateBulk, refresh,
 } from '~/lib/elastic';
 
-import { transformStringToArray, transformEmbargo } from '~/lib/holdingsIQ/transform';
+import {
+  transformCoverage,
+  transformStringToArray,
+  transformEmbargo,
+} from '~/lib/holdingsIQ/transform';
 
 export async function insertStandardFileInElastic(portalName, filename) {
   const date = format(new Date(), 'yyyy-MM-dd');
@@ -38,10 +42,10 @@ export async function insertStandardFileInElastic(portalName, filename) {
         createdAt: date,
         EmbargoMonth: transformEmbargo(record.Embargo) || null,
         CustomEmbargoMonth: transformEmbargo(record.CustomEmbargo) || null,
-        ManagedCoverageBegin: transformStringToArray(record?.ManagedCoverageBegin, true) || null,
-        ManagedCoverageEnd: transformStringToArray(record?.ManagedCoverageEnd, true) || null,
-        CustomCoverageBegin: transformStringToArray(record?.CustomCoverageBegin, true) || null,
-        CustomCoverageEnd: transformStringToArray(record?.CustomCoverageEnd, true) || null,
+        ManagedCoverageBegin: transformCoverage(record?.ManagedCoverageBegin) || null,
+        ManagedCoverageEnd: transformCoverage(record?.ManagedCoverageEnd) || null,
+        CustomCoverageBegin: transformCoverage(record?.CustomCoverageBegin) || null,
+        CustomCoverageEnd: transformCoverage(record?.CustomCoverageEnd) || null,
       },
       standard: {
         KBID: record?.KBID || null,
@@ -61,10 +65,10 @@ export async function insertStandardFileInElastic(portalName, filename) {
         OnlineISBN: record?.OnlineISBN || null,
         DOI: record?.DOI || null,
         PeerReviewed: record?.PeerReviewed || null,
-        ManagedCoverageBegin: transformStringToArray(record?.ManagedCoverageBegin, false) || null,
-        ManagedCoverageEnd: transformStringToArray(record?.ManagedCoverageEnd, false) || null,
-        CustomCoverageBegin: transformStringToArray(record?.CustomCoverageBegin, false) || null,
-        CustomCoverageEnd: transformStringToArray(record?.CustomCoverageEnd, false) || null,
+        ManagedCoverageBegin: transformStringToArray(record?.ManagedCoverageBegin) || null,
+        ManagedCoverageEnd: transformStringToArray(record?.ManagedCoverageEnd) || null,
+        CustomCoverageBegin: transformStringToArray(record?.CustomCoverageBegin) || null,
+        CustomCoverageEnd: transformStringToArray(record?.CustomCoverageEnd) || null,
         CoverageStatement: record?.CoverageStatement || null,
         Embargo: record?.Embargo || null,
         CustomEmbargo: record?.CustomEmbargo || null,

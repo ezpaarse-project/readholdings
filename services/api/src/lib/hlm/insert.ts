@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import appLogger from '~/lib/logger/appLogger';
 import { bulk, refresh, createIndex } from '~/lib/elastic';
 
-import { transformStringToArray, transformEmbargo } from '~/lib/hlm/transform';
+import { transformCoverage, transformEmbargo } from '~/lib/hlm/transform';
 
 import holding from '~/../mapping/holding.json';
 
@@ -43,10 +43,10 @@ export default async function insertCSVInElastic(data) {
     let records = [];
 
     for await (const record of parser) {
-      record.ManagedCoverageBegin = transformStringToArray(record.ManagedCoverageBegin);
-      record.ManagedCoverageEnd = transformStringToArray(record.ManagedCoverageEnd);
-      record.CustomCoverageBegin = transformStringToArray(record.CustomCoverageBegin);
-      record.CustomCoverageEnd = transformStringToArray(record.CustomCoverageEnd);
+      record.ManagedCoverageBegin = transformCoverage(record.ManagedCoverageBegin);
+      record.ManagedCoverageEnd = transformCoverage(record.ManagedCoverageEnd);
+      record.CustomCoverageBegin = transformCoverage(record.CustomCoverageBegin);
+      record.CustomCoverageEnd = transformCoverage(record.CustomCoverageEnd);
       record.Embargo = transformEmbargo(record.Embargo);
       record.CustomEmbargo = transformEmbargo(record.CustomEmbargo);
       record.createdAt = date;

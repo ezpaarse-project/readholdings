@@ -7,7 +7,7 @@
       <v-btn icon="mdi-reload" :disabled="loading" @click.stop="getIndices()" />
     </v-toolbar>
     <v-list v-if="indices.length > 0">
-      <v-list-item v-for="index in indices">
+      <v-list-item v-for="index in indices" :key="index.index">
         <v-col cols="12">
           <v-icon icon="mdi-circle" class="mx-1" :color="index.health" />
           <v-chip class="ma-2" color="green" variant="outlined">

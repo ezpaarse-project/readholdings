@@ -1,5 +1,6 @@
 <template>
-
+  <div>
+  </div>
 </template>
 
 <script setup>
@@ -9,6 +10,5 @@ definePageMeta({
 });
 
 const adminStore = useAdminStore();
-const isAdmin = computed(() => adminStore.isAdmin);
 
 </script>

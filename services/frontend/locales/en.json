@@ -51,6 +51,7 @@
     "title": "Last updates",
     "reloadReports": "Reload reports",
     "reload": "Reload update history",
+    "reloadState": "Reload state",
     "noReport": "No report available",
     "status": "Status"
   },

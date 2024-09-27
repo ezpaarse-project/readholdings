@@ -6,6 +6,4 @@
 
 <script setup>
 
-const { t } = useI18n();
-
 </script>

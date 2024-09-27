@@ -34,8 +34,6 @@
 
 <script setup>
 
-const { t } = useI18n();
-const snackStore = useSnacksStore();
 const { $fetch } = useNuxtApp();
 
 const props = defineProps({

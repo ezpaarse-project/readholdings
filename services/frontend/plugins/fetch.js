@@ -1,3 +1,5 @@
+import { defineNuxtPlugin } from '#imports';
+
 export default defineNuxtPlugin((nuxtApp) => {
   const baseURL = nuxtApp.$config.public.APIURL;
 
