@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row justify="center" class="ma-4">
+    <v-row v-if="state.createdAt" justify="center" class="ma-4">
       Date: {{ state.createdAt }}
     </v-row>
     <v-row v-for="portal in portals" :key="portal.name" justify="center">
