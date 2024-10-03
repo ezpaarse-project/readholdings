@@ -21,7 +21,7 @@
       {{ health?.nodes }}
     </v-card-text>
     <v-card-text v-if="name === 'api'">
-      {{ runtimeConfig.public.APIURL }}
+      {{ runtimeConfig.public.API_URL }}
     </v-card-text>
   </v-card>
 </template>
