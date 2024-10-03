@@ -72,9 +72,9 @@
       "apiKey": "IN2P3_APIKEY",
       "custid": "IN2P3_CUSTID"
     },
-    "CNRS": {
-      "apiKey": "CNRS_APIKEY",
-      "custid": "CNRS_CUSTID"
+    "INTEST": {
+      "apiKey": "INTEST_APIKEY",
+      "custid": "INTEST_CUSTID"
     }
   },
   "apikey": "ADMIN_APIKEY"

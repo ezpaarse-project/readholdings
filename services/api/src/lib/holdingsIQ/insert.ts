@@ -30,15 +30,10 @@ export async function insertStandardFileInElastic(portalName, filename) {
 
   let records = [];
 
-  let BibCNRS = portalName;
-  if (portalName === 'CNRS') {
-    BibCNRS = 'INTEST';
-  }
-
   for await (const record of parser) {
     const standardRecord = {
       meta: {
-        BibCNRS,
+        BibCNRS: portalName,
         createdAt: date,
         EmbargoMonth: transformEmbargo(record.Embargo) || null,
         CustomEmbargoMonth: transformEmbargo(record.CustomEmbargo) || null,

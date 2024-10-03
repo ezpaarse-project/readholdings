@@ -32,8 +32,8 @@ services:
       - INP_CUSTID
       - IN2P3_APIKEY
       - IN2P3_CUSTID
-      - CNRS_APIKEY
-      - CNRS_CUSTID
+      - INTEST_APIKEY
+      - INTEST_CUSTID
     command: "npm start"
     ports:
       - ${API_PORT:-59701}:3000
