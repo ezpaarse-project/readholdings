@@ -63,7 +63,7 @@ async function getState() {
 
   state.value = res;
 
-  if (state.value.status === 'done' || state.value.status === 'done') {
+  if (state.value.status === 'done' || state.value.status === 'error') {
     clearInterval(intervalId);
   }
 
