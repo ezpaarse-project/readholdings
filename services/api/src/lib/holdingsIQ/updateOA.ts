@@ -37,6 +37,28 @@ export default async function updateOA(portalName, indexName) {
     }
   }
 
+  const body = {
+    query: {
+      bool: {
+        must: [
+          {
+            terms: {
+              'standard.KBID': packetOfIds,
+            },
+          },
+          {
+            term: {
+              'meta.BibCNRS': portalName,
+            },
+          },
+        ],
+      },
+    },
+  };
+  const result = await search(indexName, packetOfIds.length, body);
+  const ids = result.map((res) => `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`);
+  updatedLines += await insertOAInElastic(portalName, ids, indexName);
+
   appLogger.info(`[${portalName}][elastic]: [${updatedLines}] has updated`);
 
   await redisClient.flushAll();
