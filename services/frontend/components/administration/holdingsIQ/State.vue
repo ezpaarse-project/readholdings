@@ -7,16 +7,18 @@
       <v-col>
         <span> {{ portal }} </span>
 
-        <v-icon v-if="stateGrouped[portal].every(step => step.status === 'done')" color="green">
-          mdi-circle
-        </v-icon>
+        <span v-if="stateGrouped[portal].every(step => step.status === 'done')" class="mx-2">
+          <v-icon color="green">
+            mdi-circle
+          </v-icon>
+        </span>
 
-        <span v-if="stateGrouped[portal].some(step => step.status === 'inProgress')">
+        <span v-if="stateGrouped[portal].some(step => step.status === 'inProgress')" class="mx-2">
           <v-progress-circular size="24" width="2" indeterminate color="blue" />
           {{ stateGrouped[portal].filter(step => step.status === 'inProgress')[0].fileType }} -
           {{ stateGrouped[portal].filter(step => step.status === 'inProgress')[0].name }}
         </span>
-        <span v-if="stateGrouped[portal].some(step => step.status === 'error')">
+        <span v-if="stateGrouped[portal].some(step => step.status === 'error')" class="mx-2">
           <v-icon color="red">
             mdi-circle
           </v-icon>
