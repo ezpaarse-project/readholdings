@@ -1,5 +1,3 @@
-import { format } from 'date-fns';
-
 import appLogger from '~/lib/logger/appLogger';
 
 let state: any = {};
@@ -15,7 +13,7 @@ export function setState(value) {
 export function end() {
   state.status = 'done';
   state.endAt = new Date();
-  state.took = (new Date(state.endAt) - new Date(state.createdAt)) / 1000;
+  state.took = (state.endAt - state.createdAt) / 1000;
 }
 
 export function fail() {
@@ -65,10 +63,8 @@ export function updateLatestStep(step) {
   appLogger.debug('[state]: step is updated');
 }
 
-export function createState() {
+export function createState(index) {
   appLogger.info('[state]: create new state');
-  const date = format(new Date(), 'yyyy-MM-dd');
-  const index = `holdings-${date}`;
 
   state = {
     status: 'inProgress',

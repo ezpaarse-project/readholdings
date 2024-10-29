@@ -27,7 +27,7 @@ const loading = ref(false);
 const APIconfig = ref('');
 
 /**
- * Get config of readholdingsv API
+ * Get config of readholdings API
  */
 async function getAPIConfig() {
   let appConfig;

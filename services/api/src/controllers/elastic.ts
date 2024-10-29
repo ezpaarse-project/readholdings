@@ -4,7 +4,7 @@ import { elasticsearch } from 'config';
 import {
   ping as pingElastic,
   initClient as initElasticClient,
-  getIndices,
+  getReadHoldingsIndices,
   checkIndex,
   removeIndex,
 } from '~/lib/elastic';
@@ -51,7 +51,7 @@ export async function getIndicesController(
   _request: FastifyRequest,
   reply: FastifyReply,
 ): Promise<void> {
-  const indices = await getIndices();
+  const indices = await getReadHoldingsIndices();
   reply.code(200).send(indices);
 }
 

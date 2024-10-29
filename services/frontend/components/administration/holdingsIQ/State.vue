@@ -1,32 +1,28 @@
 <template>
   <div>
-    <v-row v-if="state.createdAt" justify="center" class="ma-4">
+    <v-row v-if="state.createdAt" class="justify-center ma-4">
       Date: {{ state.createdAt }}
     </v-row>
-    <v-row v-for="portal in portals" :key="portal.name" justify="center">
-      <v-col cols="1">
-        <p> {{ portal }} </p>
-      </v-col>
-      <v-col v-if="stateGrouped[portal].every(step => step.status === 'done')" cols="1">
-        <v-icon color="green">
+    <v-row v-for="portal in portals" :key="portal.name" class="text-center">
+      <v-col>
+        <span> {{ portal }} </span>
+
+        <v-icon v-if="stateGrouped[portal].every(step => step.status === 'done')" color="green">
           mdi-circle
         </v-icon>
-      </v-col>
-      <v-col v-if="stateGrouped[portal].some(step => step.status === 'inProgress')" cols="1">
-        <v-progress-circular size="24" width="2" indeterminate color="blue" />
-      </v-col>
-      <v-col v-if="stateGrouped[portal].some(step => step.status === 'inProgress')" cols="10">
-        {{ stateGrouped[portal].filter(step => step.status === 'inProgress')[0].fileType }} -
-        {{ stateGrouped[portal].filter(step => step.status === 'inProgress')[0].name }}
-      </v-col>
-      <v-col v-if="stateGrouped[portal].some(step => step.status === 'error')" cols="1">
-        <v-icon color="red">
-          mdi-circle
-        </v-icon>
-      </v-col>
-      <v-col v-if="stateGrouped[portal].some(step => step.status === 'error')" cols="10">
-        {{ stateGrouped[portal].filter(step => step.status === 'error')[0].fileType }} -
-        {{ stateGrouped[portal].filter(step => step.status === 'error')[0].name }}
+
+        <span v-if="stateGrouped[portal].some(step => step.status === 'inProgress')">
+          <v-progress-circular size="24" width="2" indeterminate color="blue" />
+          {{ stateGrouped[portal].filter(step => step.status === 'inProgress')[0].fileType }} -
+          {{ stateGrouped[portal].filter(step => step.status === 'inProgress')[0].name }}
+        </span>
+        <span v-if="stateGrouped[portal].some(step => step.status === 'error')">
+          <v-icon color="red">
+            mdi-circle
+          </v-icon>
+          {{ stateGrouped[portal].filter(step => step.status === 'error')[0].fileType }} -
+          {{ stateGrouped[portal].filter(step => step.status === 'error')[0].name }}
+        </span>
       </v-col>
     </v-row>
   </div>
@@ -67,7 +63,7 @@ async function getState() {
 
   state.value = res;
 
-  if (state.value.status === 'done') {
+  if (state.value.status === 'done' || state.value.status === 'done') {
     clearInterval(intervalId);
   }
 

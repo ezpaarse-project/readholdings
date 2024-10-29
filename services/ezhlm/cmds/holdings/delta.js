@@ -36,7 +36,6 @@ async function update(args) {
 
   let upsert = files.filter((file) => matchUpsert.exec(file));
 
-  // TODO use .sort
   const match1 = /(Add-|Chg-)/i;
   const match2 = /(Addm|Chgm)/i;
 
@@ -95,7 +94,6 @@ async function update(args) {
     for (let i = 0; i < idsFromXML.length; i += 1) {
       const ezhlmid = idsFromXML[i];
 
-      // TODO maybe delete
       if (state) step.ezhlmids.push({ id: ezhlmid, file: filename });
 
       const id = ezhlmid.split('-');

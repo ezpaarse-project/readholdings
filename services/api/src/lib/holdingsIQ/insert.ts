@@ -4,11 +4,9 @@ import { parse } from 'csv-parse';
 import fs from 'fs';
 import path from 'path';
 import { paths } from 'config';
-import { format } from 'date-fns';
 import appLogger from '~/lib/logger/appLogger';
-import {
-  bulk, updateBulk, refresh,
-} from '~/lib/elastic';
+import { bulk, updateBulk, refresh } from '~/lib/elastic';
+import { getClient } from '~/lib/redis';
 
 import {
   transformCoverage,
@@ -16,10 +14,8 @@ import {
   transformEmbargo,
 } from '~/lib/holdingsIQ/transform';
 
-export async function insertStandardFileInElastic(portalName, filename) {
-  const date = format(new Date(), 'yyyy-MM-dd');
-  const index = `holdings-${date}`;
-
+export async function insertStandardFileInElastic(portalName, filename, index, date) {
+  const redisClient = getClient();
   const filePath = path.resolve(paths.data.holdingsIQDir, filename);
   const parser = fs.createReadStream(filePath).pipe(parse({
     columns: (header) => header.map((h) => h.trim()),
@@ -94,6 +90,10 @@ export async function insertStandardFileInElastic(portalName, filename) {
       },
     };
 
+    if (/DOAJ|DOAB/.test(record.PackageName)) {
+      await redisClient.set(record.KBID, '1');
+    }
+
     records.push({ index: { _index: index, _id: `${portalName}-${record.VendorID}-${record.PackageID}-${record.KBID}` } });
     records.push(standardRecord);
 
@@ -121,10 +121,7 @@ export async function insertStandardFileInElastic(portalName, filename) {
   await refresh(index);
 }
 
-export async function insertKbart2FileInElastic(portalName, filename) {
-  const date = format(new Date(), 'yyyy-MM-dd');
-  const index = `holdings-${date}`;
-
+export async function insertKbart2FileInElastic(portalName, filename, index) {
   const filePath = path.resolve(paths.data.holdingsIQDir, filename);
   const parser = fs.createReadStream(filePath).pipe(parse({
     columns: (header) => header.map((h) => h.trim()),
@@ -137,8 +134,10 @@ export async function insertKbart2FileInElastic(portalName, filename) {
 
   for await (const record of parser) {
     const holdingID = `${portalName}-${record?.vendor_id}-${record?.package_id}-${record?.title_id}`;
-    // TODO il manque des champs
     const kbart2Record = {
+      meta: {
+        access_type: record?.access_type || null,
+      },
       kbart2: {
         publication_title: record?.publication_title || null,
         print_identifier: record?.print_identifier || null,
@@ -172,7 +171,6 @@ export async function insertKbart2FileInElastic(portalName, filename) {
         resource_type: record?.resource_type || null,
         package_content_type: record?.package_content_type || null,
         proxied_url: record?.proxied_url || null,
-
       },
     };
 
@@ -201,4 +199,23 @@ export async function insertKbart2FileInElastic(portalName, filename) {
 
   appLogger.info(`[${portalName}][elastic]: refresh index [${index}] is started`);
   await refresh(index);
+}
+
+export async function insertOAInElastic(portalName, ids, indexName) {
+  const records = [];
+
+  for (let i = 0; i < ids.length; i += 1) {
+    const id = ids[i];
+    const record = {
+      meta: {
+        access_type: 'F',
+      },
+    };
+
+    records.push({ update: { _index: indexName, _id: id } });
+    records.push({ doc: record, doc_as_upsert: true });
+  }
+  const dataToInsert = records.slice();
+  const updatedDocs = await updateBulk(dataToInsert);
+  return updatedDocs;
 }

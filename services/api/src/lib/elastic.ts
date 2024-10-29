@@ -121,7 +121,6 @@ export async function bulk(data) {
   } catch (err) {
     appLogger.error('[elastic]: Cannot bulk');
     appLogger.error(JSON.stringify(err?.meta?.body?.error, null, 2));
-    process.exit(1);
   }
 
   const items = Array.isArray(res?.body?.items) ? res?.body?.items : [];
@@ -287,9 +286,7 @@ export async function createIndex(indexName: string, mapping): Promise<void> {
  * Get indices on elastic.
  *
  */
-export async function getIndices() {
-  const res = await elasticClient.cat.indices({ format: 'json' });
-  let indices = res.body;
-  indices = indices.filter((index) => index.index.charAt(0) !== '.' && index.index.includes('holdings'));
-  return indices;
+export async function getReadHoldingsIndices() {
+  const res = await elasticClient.cat.indices({ format: 'json', index: 'holdings*,-.*' });
+  return res.body;
 }

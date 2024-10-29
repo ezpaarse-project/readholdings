@@ -18,6 +18,10 @@ services:
       - ELASTICSEARCH_PORT
       - ELASTICSEARCH_USERNAME
       - ELASTICSEARCH_PASSWORD
+      # redis
+      - REDIS_HOST
+      - REDIS_PORT
+      - REDIS_PASSWORD
       # Ebsco
       - INSU_APIKEY
       - INSU_CUSTID
@@ -70,6 +74,25 @@ services:
         ]
       interval: 10s
       timeout: 10s
+      retries: 5
+  
+  redis:
+    image: redis:7.2.4
+    container_name: readholdings-redis-dev
+    command: redis-server --requirepass "${REDIS_PASSWORD:-changeme}"
+    volumes:
+      - ${REDIS_DATA_PATH:-./data/redis}:/data
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli --pass changeme ping | grep PONG"
+        ]
+      interval: 10s
+      timeout: 3s
       retries: 5
   
   frontend:

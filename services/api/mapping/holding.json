@@ -20,7 +20,8 @@
           "ManagedCoverageBegin": { "type": "date" },
           "ManagedCoverageEnd": { "type": "date" },
           "CustomCoverageBegin": { "type": "date" },
-          "CustomCoverageEnd": { "type": "date" }
+          "CustomCoverageEnd": { "type": "date" },
+          "access_type": { "type": "keyword" }
         }
       },
       "kbart2": {

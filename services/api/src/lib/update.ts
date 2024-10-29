@@ -21,10 +21,14 @@ import {
   setState,
   getState,
 } from './state';
-import { getIndices, createIndex, removeIndex } from '~/lib/elastic';
+import {
+  getReadHoldingsIndices, createIndex, removeIndex,
+} from '~/lib/elastic';
 
 import holding from '~/../mapping/holding.json';
 import { createReport } from './report';
+
+import updateOA from '~/lib/holdingsIQ/updateOA';
 
 async function generateAndDownloadExport(portalConfig, portalName, type, filename) {
   let res1;
@@ -48,10 +52,12 @@ async function generateAndDownloadExport(portalConfig, portalName, type, filenam
     if (status !== 'COMPLETED') {
       await setTimeout(10000);
     }
+    // TODO if status !== COMPLETED and QUEUE, and 10 minutes : exit
   }
   const downloadLink = res2.links[0].href;
   const filepath = path.resolve(paths.data.holdingsIQDir, filename);
-  if (!await fs.existsSync(path.resolve(filepath))) {
+  // TODO use async function
+  if (!fs.existsSync(path.resolve(filepath))) {
     try {
       await downloadFileFromAWS(portalName, downloadLink, filename);
     } catch (err) {
@@ -62,15 +68,25 @@ async function generateAndDownloadExport(portalConfig, portalName, type, filenam
   return id;
 }
 
+function fail(message) {
+  appLogger.error(message);
+  failLatestStep(message);
+  setWorkInProgress(false);
+  const state = getState();
+  sendErrorMail(message, state);
+}
+
+// TODO comment
 export default async function update() {
+  setWorkInProgress(true);
+
   resetState();
+
   const portalsName = Object.keys(portals);
   const date = format(new Date(), 'yyyy-MM-dd');
   const index = `holdings-${date}`;
 
-  setWorkInProgress(true);
-
-  let state = createState();
+  let state = createState(index);
 
   appLogger.info('[holdingsIQ]: Start data update');
 
@@ -81,6 +97,8 @@ export default async function update() {
     throw err;
   }
 
+  // TODO use Object.entries
+  // eslint-disable-next-line no-unreachable-loop
   for (let i = 0; i < portalsName.length; i += 1) {
     const portalName = portalsName[i];
     const portalConfig = portals[portalName];
@@ -100,12 +118,7 @@ export default async function update() {
         standardFilename,
       );
     } catch (err) {
-      const message = `[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`;
-      appLogger.error(message);
-      failLatestStep(message);
-      setWorkInProgress(false);
-      state = getState();
-      sendErrorMail(message, state);
+      fail(`[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
       return;
     }
 
@@ -113,18 +126,14 @@ export default async function update() {
     addStep(portalName, '[elastic][insert]', type);
 
     try {
-      await insertStandardFileInElastic(portalName, standardFilename);
+      await insertStandardFileInElastic(portalName, standardFilename, index, date);
     } catch (err) {
-      const message = `[${portalName}][elastic]: insert ${type} file in elastic. ${err}`;
-      appLogger.error(message);
-      failLatestStep(message);
-      setWorkInProgress(false);
-      state = getState();
-      sendErrorMail(message, state);
+      fail(`[${portalName}][elastic]: insert ${type} file in elastic. ${err}`);
       return;
     }
 
     endLatestStep();
+
     addStep(portalName, '[holdingsIQ][delete]', type);
 
     try {
@@ -144,12 +153,7 @@ export default async function update() {
     try {
       kbart2Id = await generateAndDownloadExport(portalConfig, portalName, type, kbart2Filename);
     } catch (err) {
-      const message = `[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`;
-      appLogger.error(message);
-      failLatestStep(message);
-      setWorkInProgress(false);
-      state = getState();
-      sendErrorMail(message, state);
+      fail(`[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
       return;
     }
 
@@ -157,18 +161,17 @@ export default async function update() {
     addStep(portalName, '[elastic][insert]', type);
 
     try {
-      await insertKbart2FileInElastic(portalName, kbart2Filename);
+      await insertKbart2FileInElastic(portalName, kbart2Filename, index);
     } catch (err) {
-      const message = `[${portalName}][elastic]: insert STANDARD ${type} in elastic. ${err}`;
-      appLogger.error(message);
-      failLatestStep(message);
-      setWorkInProgress(false);
-      state = getState();
-      sendErrorMail(message, state);
+      fail(`[${portalName}][elastic]: insert ${type} in elastic. ${err}`);
       return;
     }
 
     endLatestStep();
+
+    // TODO status
+    await updateOA(portalName, index);
+
     addStep(portalName, '[holdingsIQ][delete]', type);
 
     try {
@@ -187,21 +190,22 @@ export default async function update() {
 
   const actualYear = getYear(date);
 
-  let indices = await getIndices();
-  const curentIndex = indices.filter((item) => item.index === index);
-  indices = indices.map((item) => item.index);
+  // document why i do this
+  const indices = await getReadHoldingsIndices();
+  const currentIndexInfo = indices.find((item) => item.index === index);
+  let indexNames = indices.map((item) => item.index);
   // remove current index and old year index
-  indices = indices.filter((item) => item !== index && item.includes(actualYear));
+  indexNames = indexNames.filter(
+    (indexName) => indexName !== index && indexName.includes(actualYear),
+  );
 
-  if (indices.length > 0) {
-    for (let i = 0; i < indices.length; i += 1) {
-      const indexCurrentYear = indices[i];
-      await removeIndex(indexCurrentYear);
-    }
+  for (let i = 0; i < indexNames.length; i += 1) {
+    const indexCurrentYear = indexNames[i];
+    await removeIndex(indexCurrentYear);
   }
 
   state = getState();
-  state.documents = curentIndex[0]['docs.count'];
+  state.documents = currentIndexInfo['docs.count'];
   setState(state);
 
   await createReport(state);

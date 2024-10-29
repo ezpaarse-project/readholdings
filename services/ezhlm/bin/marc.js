@@ -110,7 +110,6 @@ async function unzipMarcFile(portal, file) {
 
   for await (const filename of filenames) {
     const fileData = await zip.files[filename].async('string');
-    // TODO
     try {
       await fs.writeFile(path.resolve(downloadDir, portal, filename), fileData, { flag: 'a' });
       logger.info(`[${filename}] unzip`);

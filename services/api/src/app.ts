@@ -9,9 +9,13 @@ import appLogger from '~/lib/logger/appLogger';
 import accessLogger from '~/lib/logger/access';
 
 import {
-  initClient as initClientElastic,
+  initClient as initElasticClient,
   ping as pingElastic,
 } from '~/lib/elastic';
+import {
+  initClient as initRedisClient,
+  startConnectionRedis,
+} from './lib/redis';
 
 import rateLimiter from '~/plugins/rateLimit';
 
@@ -111,10 +115,17 @@ const start = async () => {
 
   // ping
   try {
-    await initClientElastic();
+    await initElasticClient();
     await pingElastic();
   } catch (err) {
     appLogger.error('[fastify]: Cannot initiate elastic client');
+  }
+
+  try {
+    await initRedisClient();
+    await startConnectionRedis();
+  } catch (err) {
+    appLogger.error('[fastify]: Cannot initiate redis client');
   }
 
   if (cleanFileCron.active) {
