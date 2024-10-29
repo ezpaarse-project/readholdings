@@ -88,7 +88,7 @@ const start = async () => {
       statusCode: reply.statusCode,
       contentLength: reply.getHeader('content-length') || 0,
       userAgent: request.headers['user-agent'] || '-',
-      responseTime: request.responseTime ? `${request.responseTime}ms` : '-',
+      responseTime: request.responseTime.toString() ? `${request.responseTime}ms` : '-',
     });
   });
 
