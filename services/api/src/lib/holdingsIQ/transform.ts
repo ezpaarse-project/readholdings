@@ -10,6 +10,10 @@ export function transformCoverage(coverage: string) {
     return `${new Date().getFullYear()}-12-31`;
   }
 
+  if (coverage === 'No Access') {
+    return '0001-01-01';
+  }
+
   let updatedArray;
 
   if (coverage.includes('|')) {

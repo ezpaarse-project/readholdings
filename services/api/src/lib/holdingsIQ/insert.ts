@@ -64,7 +64,7 @@ export async function insertStandardFileInElastic(portalName, filename, index, d
         Embargo: record?.Embargo || null,
         CustomEmbargo: record?.CustomEmbargo || null,
         Description: record?.Description || null,
-        Subject: record?.Subject || null,
+        Subject: transformStringToArray(record?.Subject) || null,
         ResourceType: record?.ResourceType || null,
         PackageContentType: record?.PackageContentType || null,
         CreateCustom: record?.CreateCustom || null,
@@ -119,6 +119,7 @@ export async function insertStandardFileInElastic(portalName, filename, index, d
 
   appLogger.info(`[${portalName}][elastic]: Refresh index [${index}] is started`);
   await refresh(index);
+  return lineUpserted;
 }
 
 export async function insertKbart2FileInElastic(portalName, filename, index) {
