@@ -11,7 +11,7 @@ export default async function updateOA(portalName, indexName) {
   let updatedLines = 0;
   for (let i = 0; i < idsOpenAccess.length; i += 1) {
     packetOfIds.push(idsOpenAccess[i]);
-    if (packetOfIds.length === 1000) {
+    if (packetOfIds.length === 100) {
       const body = {
         query: {
           bool: {
@@ -30,7 +30,7 @@ export default async function updateOA(portalName, indexName) {
           },
         },
       };
-      const result = await search(indexName, packetOfIds.length, body);
+      const result = await search(indexName, 10000, body);
       const ids = result.map((res) => `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`);
       updatedLines += await insertOAInElastic(portalName, ids, indexName);
       packetOfIds = [];

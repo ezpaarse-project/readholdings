@@ -111,7 +111,6 @@ export default async function update() {
     let standardId;
 
     addStep(portalName, '[holdingsIQ][download]', type);
-
     try {
       standardId = await generateAndDownloadExport(
         portalConfig,
@@ -123,32 +122,27 @@ export default async function update() {
       fail(`[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
       return;
     }
-
     endLatestStep();
+
     addStep(portalName, '[elastic][insert]', type);
-
     let lineUpserted;
-
     try {
       lineUpserted = await insertStandardFileInElastic(portalName, standardFilename, index, date);
     } catch (err) {
       fail(`[${portalName}][elastic]: insert ${type} file in elastic. ${err}`);
       return;
     }
-
     const standardInsertStep = getLatestStep();
     standardInsertStep.lineUpserted = lineUpserted;
     updateLatestStep(standardInsertStep);
     endLatestStep();
 
     addStep(portalName, '[holdingsIQ][delete]', type);
-
     try {
       await deleteExportByID(portalConfig, standardId);
     } catch (err) {
       appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${standardId}].`);
     }
-
     endLatestStep();
 
     type = 'KBART2';
@@ -156,49 +150,50 @@ export default async function update() {
     let kbart2Id;
 
     addStep(portalName, '[holdingsIQ][download]', type);
-
     try {
       kbart2Id = await generateAndDownloadExport(portalConfig, portalName, type, kbart2Filename);
     } catch (err) {
       fail(`[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
       return;
     }
-
     endLatestStep();
-    addStep(portalName, '[elastic][insert]', type);
 
+    addStep(portalName, '[elastic][insert]', type);
     try {
       lineUpserted = await insertKbart2FileInElastic(portalName, kbart2Filename, index);
     } catch (err) {
       fail(`[${portalName}][elastic]: insert ${type} in elastic. ${err}`);
       return;
     }
-
     const kbart2InsertStep = getLatestStep();
     kbart2InsertStep.lineUpserted = lineUpserted;
     updateLatestStep(kbart2InsertStep);
     endLatestStep();
-    addStep(portalName, '[elastic][insert][access_type]', type);
 
-    try {
-      lineUpserted = await updateOA(portalName, index);
-    } catch (err) {
-      appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${kbart2Id}].`);
-    }
-
-    const accessTypeInsertStep = getLatestStep();
-    accessTypeInsertStep.lineUpserted = lineUpserted;
-    updateLatestStep(accessTypeInsertStep);
-    endLatestStep();
     addStep(portalName, '[holdingsIQ][delete]', type);
-
     try {
       await deleteExportByID(portalConfig, kbart2Id);
     } catch (err) {
       appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${kbart2Id}].`);
     }
-
     endLatestStep();
+
+    addStep(portalName, '[elastic][insert][access_type]', type);
+    try {
+      lineUpserted = await updateOA(portalName, index);
+    } catch (err) {
+      appLogger.error(`[${portalName}][holdingsIQ]: Cannot update OA`);
+    }
+    const accessTypeInsertStep = getLatestStep();
+    accessTypeInsertStep.lineUpserted = lineUpserted;
+    updateLatestStep(accessTypeInsertStep);
+    endLatestStep();
+
+    end();
+
+    setWorkInProgress(false);
+
+    return;
   }
   end();
 
