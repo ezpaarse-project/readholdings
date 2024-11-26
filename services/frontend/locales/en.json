@@ -17,7 +17,6 @@
     "password": "Password",
     "menu": {
       "import": "Import",
-      "holdingsIQ": "holdingsIQ",
       "health": "Health",
       "cron": "Cron",
       "config": "Config"

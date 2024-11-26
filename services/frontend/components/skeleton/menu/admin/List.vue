@@ -4,8 +4,8 @@
       <template #prepend>
         <v-icon icon="mdi-database-refresh" />
       </template>
-      <v-list-item-title class="custom-font-style ml-2">
-        {{ t('administration.menu.holdingsIQ') }}
+      <v-list-item-title class="custom-font-style">
+        holdingsIQ
       </v-list-item-title>
     </v-list-item>
 
@@ -13,7 +13,7 @@
       <template #prepend>
         <v-icon icon="mdi-heart-pulse" />
       </template>
-      <v-list-item-title class="custom-font-style ml-2">
+      <v-list-item-title class="custom-font-style">
         {{ t('administration.menu.health') }}
       </v-list-item-title>
     </v-list-item>

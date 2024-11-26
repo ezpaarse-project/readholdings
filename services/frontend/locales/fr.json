@@ -17,7 +17,6 @@
     "password": "Mot de passe",
     "menu": {
       "import": "Import",
-      "holdingsIQ": "holdingsIQ",
       "health": "État de santé",
       "cron": "Cron",
       "config": "Config"
