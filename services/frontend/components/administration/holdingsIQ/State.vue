@@ -81,6 +81,10 @@ watch(
   },
 );
 
+onBeforeUnmount(() => {
+  clearInterval(intervalId);
+});
+
 defineExpose({
   getState,
 });
