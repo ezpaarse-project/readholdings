@@ -188,9 +188,8 @@ export default async function update() {
     accessTypeInsertStep.lineUpserted = lineUpserted;
     updateLatestStep(accessTypeInsertStep);
     endLatestStep();
-
-    return;
   }
+
   end();
 
   setWorkInProgress(false);
