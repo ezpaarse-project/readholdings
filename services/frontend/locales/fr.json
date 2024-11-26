@@ -56,6 +56,9 @@
     "status": "Statut"
   },
   "error": {
+    "administration" :{
+      "invalidPassword": "Mot de passe incorrect"
+    },
     "hlm": {
       "import": "Impossible d'importer les fichiers"
     },
