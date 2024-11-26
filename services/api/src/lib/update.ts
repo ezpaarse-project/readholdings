@@ -189,10 +189,6 @@ export default async function update() {
     updateLatestStep(accessTypeInsertStep);
     endLatestStep();
 
-    end();
-
-    setWorkInProgress(false);
-
     return;
   }
   end();
