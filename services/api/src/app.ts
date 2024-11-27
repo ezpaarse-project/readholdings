@@ -29,6 +29,8 @@ import holdingsIQRouter from '~/routes/holdingsIQ';
 import reportRouter from '~/routes/report';
 import stateRouter from '~/routes/state';
 import statusRouter from '~/routes/status';
+import filesRouter from '~/routes/file';
+import openAPIRouter from '~/routes/openapi';
 
 import cleanFileCron from '~/cron/cleanFile';
 import updateDataCron from '~/cron/updateData';
@@ -106,6 +108,8 @@ const start = async () => {
   await fastify.register(reportRouter, { prefix: '/reports' });
   await fastify.register(stateRouter, { prefix: '/state' });
   await fastify.register(statusRouter, { prefix: '/status' });
+  await fastify.register(filesRouter, { prefix: '/files' });
+  await fastify.register(openAPIRouter, { prefix: '/' });
 
   const address = await fastify.listen({ port: 3000, host: '::' });
   appLogger.info(`[fastify]: listening at [${address}]`);

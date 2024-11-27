@@ -1,0 +1,11 @@
+openapi: 3.0.0
+info:
+  description: 'The API service for readholdings.'
+  version: 1.0.0
+  title: API
+  contact:
+    email: ezteam@couperin.org
+    name: ezTeam
+  license:
+    name: CeCILL 2.1
+    url: http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
