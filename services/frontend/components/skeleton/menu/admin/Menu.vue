@@ -4,7 +4,7 @@
       <v-icon icon="mdi-security" />
     </template>
     <v-list-item-title class="custom-font-style">
-      {{ t('menu.administration') }}
+      {{ t('administration.title') }}
     </v-list-item-title>
   </v-list-item>
   <v-list v-else v-model:opened="open">
@@ -15,7 +15,7 @@
             <v-icon icon="mdi-security" />
           </template>
           <v-list-item-title class="custom-font-style">
-            {{ t('menu.administration') }}
+            {{ t('administration.title') }}
           </v-list-item-title>
         </v-list-item>
       </template>

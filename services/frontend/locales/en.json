@@ -17,12 +17,21 @@
     "password": "Password",
     "menu": {
       "import": "Import",
+      "file": "File",
       "health": "Health",
       "cron": "Cron",
       "config": "Config"
     },
     "holdingsIQ": {
       "title": "Update via Ebsco Holdings IQ API"
+    },
+    "file": {
+      "title": "List of installed files from unpaywall",
+      "reload": "Reload files",
+      "filename": "Filename",
+      "filetype": "File type",
+      "delete": "Delete file",
+      "deleteMessage": "Are you sure you want to delete this file: {filename} ? (irreversible action)"
     },
     "hlm": {
       "title": "HLM files import",
@@ -61,6 +70,10 @@
     "hlm": {
       "import": "Cannot import files"
     },
+    "file": {
+      "get": "Cannot get files",
+      "delete": "Cannot delete file"
+    },
     "report": {
       "get": "Cannot get update reports"
     },
@@ -80,6 +93,9 @@
   "info": {
     "hlm": {
       "imported": "Inserting data in progress"
+    },
+    "file": {
+      "deleted": "File is deleted"
     },
     "holdingsIQ" : {
       "update": "The update has begun"
@@ -109,5 +125,6 @@
   "no": "No",
   "detail": "Detail",
   "development": "development",
-  "integration": "integration"
+  "integration": "integration",
+  "noData": "No data available"
 }

@@ -18,6 +18,15 @@
       </v-list-item-title>
     </v-list-item>
 
+    <v-list-item link router :to="{ path: '/administration/file' }" ripple>
+      <template #prepend>
+        <v-icon icon="mdi-file" />
+      </template>
+      <v-list-item-title class="custom-font-style">
+        {{ t('administration.menu.file') }}
+      </v-list-item-title>
+    </v-list-item>
+
     <v-list-item link router to="/administration/elastic" ripple>
       <template #prepend>
         <v-avatar rounded="0">
