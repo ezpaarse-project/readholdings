@@ -153,13 +153,16 @@ services:
       - ELASTICSEARCH_HOSTS="http://elastic:9200"
       - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME:-elastic}
       - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-changeme}
-      - xpack.security.enabled=true
-    depends_on:
-      elastic:
-        condition: service_healthy
+      - XPACK_SECURITY_ENABLED=true
+      - XPACK_REPORTING_MAXCONCURRENTEXPORTS=5
+      - XPACK_REPORTING_CSV_MAXSIZEBYTES=3221225472
+      - XPACK_REPORTING_QUEUE_TIMEOUT=1800000
     ports:
       - 5601:5601
     restart: unless-stopped
+    depends_on:
+      elastic:
+        condition: service_healthy
     healthcheck:
       test:
         [
