@@ -18,7 +18,6 @@ export default async function getOpenAPIController(
     fileContent = fs.readFileSync(filePath, 'utf8');
     reply.type('text/yaml');
   } catch (err) {
-    console.log(err);
     reply.code(500).send();
   }
   reply.code(200).send(fileContent);

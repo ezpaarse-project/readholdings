@@ -6,12 +6,17 @@ import appLogger from '~/lib/logger/appLogger';
 
 export default async function updateOA(portalName, indexName) {
   const redisClient = getClient();
-  const idsOpenAccess = await redisClient.keys('*');
+  let oaID = await redisClient.keys('*');
+  oaID = oaID.filter((id) => id.includes('oa'));
+  oaID = oaID.map((id) => {
+    const [, idFiltered] = id.split('-');
+    return idFiltered;
+  });
   let packetOfIds = [];
   let updatedLines = 0;
-  for (let i = 0; i < idsOpenAccess.length; i += 1) {
-    packetOfIds.push(idsOpenAccess[i]);
-    if (packetOfIds.length === 100) {
+  for (let i = 0; i < oaID.length; i += 1) {
+    packetOfIds.push(oaID[i]);
+    if (packetOfIds.length === 1000) {
       const body = {
         query: {
           bool: {
@@ -32,7 +37,8 @@ export default async function updateOA(portalName, indexName) {
       };
       const result = await search(indexName, 10000, body);
       const ids = result.map((res) => `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`);
-      updatedLines += await insertOAInElastic(portalName, ids, indexName);
+      updatedLines += await insertOAInElastic(ids, indexName);
+      appLogger.info(`[${portalName}][elastic]: ${updatedLines} oa updated`);
       packetOfIds = [];
     }
   }
@@ -57,11 +63,10 @@ export default async function updateOA(portalName, indexName) {
   };
   const result = await search(indexName, packetOfIds.length, body);
   const ids = result.map((res) => `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`);
-  updatedLines += await insertOAInElastic(portalName, ids, indexName);
+  updatedLines += await insertOAInElastic(ids, indexName);
 
   appLogger.info(`[${portalName}][elastic]: [${updatedLines}] has updated`);
 
-  await redisClient.flushAll();
   appLogger.info(`[${portalName}][elastic]: refresh index [${indexName}] is started`);
   await refresh(indexName);
 }

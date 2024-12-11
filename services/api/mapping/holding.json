@@ -15,13 +15,25 @@
         "properties": {
           "BibCNRS": { "type": "keyword" },
           "createdAt": { "type": "keyword" },
+          "holdingID": { "type": "keyword" },
           "EmbargoMonth": { "type": "float" },
           "CustomEmbargoMonth": { "type": "float" },
           "ManagedCoverageBegin": { "type": "date" },
           "ManagedCoverageEnd": { "type": "date" },
           "CustomCoverageBegin": { "type": "date" },
           "CustomCoverageEnd": { "type": "date" },
-          "access_type": { "type": "keyword" }
+          "access_type": { "type": "keyword" },
+          "IN2P3": { "type" : "keyword" },
+          "INC": { "type" : "keyword" },
+          "INEE": { "type" : "keyword" },
+          "INP": { "type" : "keyword" },
+          "INS2I": { "type" : "keyword" },
+          "INSB": { "type" : "keyword" },
+          "INSHS": { "type" : "keyword" },
+          "INSIS": { "type" : "keyword" },
+          "INSMI": { "type" : "keyword" },
+          "INSU": { "type" : "keyword" },
+          "INTEST": { "type" : "keyword" }
         }
       },
       "kbart2": {

@@ -27,10 +27,13 @@ import {
   getReadHoldingsIndices, createIndex, removeIndex,
 } from '~/lib/elastic';
 
-import holding from '~/../mapping/holding.json';
-import { createReport } from './report';
+import { getClient } from '~/lib/redis';
 
 import updateOA from '~/lib/holdingsIQ/updateOA';
+import updatePortals from '~/lib/holdingsIQ/updatePortal';
+
+import holding from '~/../mapping/holding.json';
+import { createReport } from './report';
 
 async function generateAndDownloadExport(portalConfig, portalName, type, filename) {
   let res1;
@@ -79,12 +82,17 @@ function fail(message) {
 }
 
 // TODO comment
-export default async function update() {
+export default async function update(portal, forceDownload = false) {
   setWorkInProgress(true);
 
   resetState();
 
-  const portalsName = Object.keys(portals);
+  let localPortals = JSON.parse(JSON.stringify(portals));
+
+  if (portal) {
+    localPortals = { [portal]: localPortals[portal] };
+  }
+
   const date = format(new Date(), 'yyyy-MM-dd');
   const index = `holdings-${date}`;
 
@@ -99,31 +107,35 @@ export default async function update() {
     throw err;
   }
 
-  // TODO use Object.entries
-  // eslint-disable-next-line no-unreachable-loop
-  for (let i = 0; i < portalsName.length; i += 1) {
-    const portalName = portalsName[i];
-    const portalConfig = portals[portalName];
-
+  // eslint-disable-next-line no-restricted-syntax
+  for (const [portalName, portalConfig] of Object.entries(localPortals)) {
     let type = 'STANDARD';
 
+    // #region Download STANDARD
     const standardFilename = `${portalName}-${date}-${type}.csv`;
     let standardId;
 
-    addStep(portalName, '[holdingsIQ][download]', type);
-    try {
-      standardId = await generateAndDownloadExport(
-        portalConfig,
-        portalName,
-        type,
-        standardFilename,
-      );
-    } catch (err) {
-      fail(`[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
-      return;
+    if (!await fs.existsSync(path.resolve(paths.data.holdingsIQDir, standardFilename))
+      || forceDownload) {
+      addStep(portalName, '[holdingsIQ][download]', type);
+      try {
+        standardId = await generateAndDownloadExport(
+          portalConfig,
+          portalName,
+          type,
+          standardFilename,
+        );
+      } catch (err) {
+        fail(`[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
+        return;
+      }
+      endLatestStep();
+    } else {
+      appLogger.info(`[${portalName}][holdingsIQ]: File [${standardFilename}] already exists`);
     }
-    endLatestStep();
+    // #endregion Download STANDARD
 
+    // #region Insert STANDARD
     addStep(portalName, '[elastic][insert]', type);
     let lineUpserted;
     try {
@@ -136,28 +148,42 @@ export default async function update() {
     standardInsertStep.lineUpserted = lineUpserted;
     updateLatestStep(standardInsertStep);
     endLatestStep();
+    // #endregion Insert STANDARD
 
-    addStep(portalName, '[holdingsIQ][delete]', type);
-    try {
-      await deleteExportByID(portalConfig, standardId);
-    } catch (err) {
-      appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${standardId}].`);
+    // #region Delete STANDARD
+    if (standardId) {
+      addStep(portalName, '[holdingsIQ][delete]', type);
+      try {
+        await deleteExportByID(portalConfig, standardId);
+      } catch (err) {
+        appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${standardId}].`);
+      }
+      endLatestStep();
     }
-    endLatestStep();
+    // #endregion Delete STANDARD
 
+    // #region Download KBART2
     type = 'KBART2';
     const kbart2Filename = `${portalName}-${date}-${type}.csv`;
     let kbart2Id;
 
-    addStep(portalName, '[holdingsIQ][download]', type);
-    try {
-      kbart2Id = await generateAndDownloadExport(portalConfig, portalName, type, kbart2Filename);
-    } catch (err) {
-      fail(`[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
-      return;
+    if (!await fs.existsSync(path.resolve(paths.data.holdingsIQDir, kbart2Filename))
+      || forceDownload) {
+      addStep(portalName, '[holdingsIQ][download]', type);
+      try {
+        kbart2Id = await generateAndDownloadExport(portalConfig, portalName, type, kbart2Filename);
+      } catch (err) {
+        fail(`[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
+        return;
+      }
+      endLatestStep();
+    } else {
+      appLogger.info(`[${portalName}][holdingsIQ]: File [${kbart2Filename}] already exists`);
     }
-    endLatestStep();
 
+    // #endregion Download KBART2
+
+    // #region Insert KBART2
     addStep(portalName, '[elastic][insert]', type);
     try {
       lineUpserted = await insertKbart2FileInElastic(portalName, kbart2Filename, index);
@@ -169,15 +195,21 @@ export default async function update() {
     kbart2InsertStep.lineUpserted = lineUpserted;
     updateLatestStep(kbart2InsertStep);
     endLatestStep();
+    // #endregion Insert KBART2
 
-    addStep(portalName, '[holdingsIQ][delete]', type);
-    try {
-      await deleteExportByID(portalConfig, kbart2Id);
-    } catch (err) {
-      appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${kbart2Id}].`);
+    // #region Delete KBART2
+    if (kbart2Id) {
+      addStep(portalName, '[holdingsIQ][delete]', type);
+      try {
+        await deleteExportByID(portalConfig, kbart2Id);
+      } catch (err) {
+        appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${kbart2Id}].`);
+      }
+      endLatestStep();
     }
-    endLatestStep();
+    // #endregion Delete KBART2
 
+    // #region Update OA
     addStep(portalName, '[elastic][insert][access_type]', type);
     try {
       lineUpserted = await updateOA(portalName, index);
@@ -188,7 +220,19 @@ export default async function update() {
     accessTypeInsertStep.lineUpserted = lineUpserted;
     updateLatestStep(accessTypeInsertStep);
     endLatestStep();
+    // #endregion Update OA
   }
+
+  // region Update Portal
+  try {
+    await updatePortals(index);
+  } catch (err) {
+    appLogger.error('[holdingsIQ]: Cannot update portals');
+  }
+  // #endregion Update Portal
+
+  const redisClient = getClient();
+  await redisClient.flushAll();
 
   end();
 
@@ -198,7 +242,6 @@ export default async function update() {
 
   const actualYear = getYear(date);
 
-  // document why i do this
   const indices = await getReadHoldingsIndices();
   const currentIndexInfo = indices.find((item) => item.index === index);
   let indexNames = indices.map((item) => item.index);

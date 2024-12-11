@@ -68,7 +68,6 @@ async function deleteFile(filename) {
       },
     });
   } catch (err) {
-    console.log(err);
     snackStore.error(t('error.file.delete'));
     return;
   }

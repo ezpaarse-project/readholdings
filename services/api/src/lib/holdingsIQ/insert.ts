@@ -91,7 +91,7 @@ export async function insertStandardFileInElastic(portalName, filename, index, d
     };
 
     if (/DOAJ|DOAB/.test(record.PackageName)) {
-      await redisClient.set(record.KBID, '1');
+      await redisClient.set(`oa-${record.KBID}`, '1');
     }
 
     records.push({ index: { _index: index, _id: `${portalName}-${record.VendorID}-${record.PackageID}-${record.KBID}` } });
@@ -123,6 +123,8 @@ export async function insertStandardFileInElastic(portalName, filename, index, d
 }
 
 export async function insertKbart2FileInElastic(portalName, filename, index) {
+  const redisClient = getClient();
+
   const filePath = path.resolve(paths.data.holdingsIQDir, filename);
   const parser = fs.createReadStream(filePath).pipe(parse({
     columns: (header) => header.map((h) => h.trim()),
@@ -138,6 +140,18 @@ export async function insertKbart2FileInElastic(portalName, filename, index) {
     const kbart2Record = {
       meta: {
         access_type: record?.access_type || null,
+        holdingID: `${record?.vendor_id}_${record?.package_id}_${record?.title_id}_${record.date_first_issue_online}_${record.date_last_issue_online}_${record.embargo_info}`,
+        IN2P3: '',
+        INC: '',
+        INEE: '',
+        INP: '',
+        INS2I: '',
+        INSB: '',
+        INSHS: '',
+        INSIS: '',
+        INSMI: '',
+        INSU: '',
+        INTEST: '',
       },
       kbart2: {
         publication_title: record?.publication_title || null,
@@ -178,6 +192,8 @@ export async function insertKbart2FileInElastic(portalName, filename, index) {
     records.push({ update: { _index: index, _id: holdingID } });
     records.push({ doc: kbart2Record, doc_as_upsert: true });
 
+    await redisClient.set(`holdingID_${kbart2Record.meta.holdingID}`, 1);
+
     if (records.length === 1000 * 2) {
       const dataToInsert = records.slice();
       const updatedDocs = await updateBulk(dataToInsert);
@@ -202,7 +218,7 @@ export async function insertKbart2FileInElastic(portalName, filename, index) {
   await refresh(index);
 }
 
-export async function insertOAInElastic(portalName, ids, indexName) {
+export async function insertOAInElastic(ids, indexName) {
   const records = [];
 
   for (let i = 0; i < ids.length; i += 1) {
@@ -216,6 +232,31 @@ export async function insertOAInElastic(portalName, ids, indexName) {
     records.push({ update: { _index: indexName, _id: id } });
     records.push({ doc: record, doc_as_upsert: true });
   }
+  const dataToInsert = records.slice();
+  const updatedDocs = await updateBulk(dataToInsert);
+  return updatedDocs;
+}
+
+export async function insertPortalsInElastic(holdingIDs, result, indexName) {
+  const records = [];
+
+  for (let i = 0; i < holdingIDs.length; i += 1) {
+    const holdingID = holdingIDs[i];
+
+    const dataHasHoldingID = result.filter((res) => res.meta.holdingID === holdingID);
+    const portals = dataHasHoldingID.map((res) => res.meta.BibCNRS);
+
+    dataHasHoldingID.forEach((res) => {
+      const id = `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`;
+      const record = { meta: { } };
+      portals.forEach((portal) => {
+        record.meta[portal] = true;
+      });
+      records.push({ update: { _index: indexName, _id: id } });
+      records.push({ doc: record, doc_as_upsert: true });
+    });
+  }
+
   const dataToInsert = records.slice();
   const updatedDocs = await updateBulk(dataToInsert);
   return updatedDocs;

@@ -1,6 +1,28 @@
 {
   "attributes": {
-    "meta": ["holdingID"],
+    "meta": [
+      "BibCNRS",
+      "createdAt",
+      "holdingID",
+      "EmbargoMonth",
+      "CustomEmbargoMonth",
+      "ManagedCoverageBegin",
+      "ManagedCoverageEnd",
+      "CustomCoverageBegin",
+      "CustomCoverageEnd",
+      "access_type",
+      "IN2P3",
+      "INC",
+      "INEE",
+      "INP",
+      "INS2I",
+      "INSB",
+      "INSHS",
+      "INSIS",
+      "INSMI",
+      "INSU",
+      "INTEST"
+    ],
     "kbart2": [
       "publication_title",
       "print_identifier",
