@@ -41,6 +41,17 @@ There are 4 types of field :
     - ManagedCoverageEnd: Transform the array into a string, replacing 'Present' with the 31st of December of the current year and 'No Access' with '0001-01-01'
     - CustomCoverageBegin: Transform the array into a string, replacing 'Present' with the 31st of December of the current year and 'No Access' with '0001-01-01'
     - CustomCoverageEnd: Transform the array into a string, replacing 'Present' with the 31st of December of the current year and 'No Access' with '0001-01-01'
+    - holdingID: Concatenation of standard.VendorID, standard.PackageID, standard.KBID, kbart2.date_first_issue_online, kbart2.date_last_issue_online, kbart2.embargo_info
+    - INSU: Presence of holdingID in another portal
+    - INSMI: Presence of holdingID in another portal
+    - INSHS: Presence of holdingID in another portal
+    - INS2I: Presence of holdingID in another portal
+    - INC: Presence of holdingID in another portal
+    - INEE: Presence of holdingID in another portal
+    - INSIS: Presence of holdingID in another portal
+    - INP: Presence of holdingID in another portal
+    - IN2P3: Presence of holdingID in another portal
+    - INTEST: Presence of holdingID in another portal
 
 
 ## Installation
