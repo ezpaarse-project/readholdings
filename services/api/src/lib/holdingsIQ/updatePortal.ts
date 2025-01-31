@@ -16,7 +16,7 @@ export default async function updatePortals(indexName) {
   let updatedLines = 0;
   for (let i = 0; i < holdingsID.length; i += 1) {
     packetOfIds.push(holdingsID[i]);
-    if (packetOfIds.length === 1000) {
+    if (packetOfIds.length === 100) {
       const body = {
         query: {
           bool: {
@@ -31,7 +31,7 @@ export default async function updatePortals(indexName) {
         },
       };
 
-      const result = await search(indexName, 10000, body);
+      const result = await search(indexName, 1000, body);
       updatedLines += await insertPortalsInElastic(packetOfIds, result, indexName);
       appLogger.info(`[elastic]: ${updatedLines} portals updated`);
       packetOfIds = [];
@@ -52,7 +52,7 @@ export default async function updatePortals(indexName) {
     },
   };
 
-  const result = await search(indexName, 10000, body);
+  const result = await search(indexName, 1000, body);
   updatedLines += await insertPortalsInElastic(packetOfIds, result, indexName);
   appLogger.info(`[elastic]: ${updatedLines} portals updated`);
   packetOfIds = [];
