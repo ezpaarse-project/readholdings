@@ -1,6 +1,6 @@
 # readholdings
 
-Readholdings is a service providing a global view of several accounts used by EbscoHost's HLM tool. The data is saved in an elasticsearch index and can be viewed on kibana dashboards.
+Readholdings is a service providing a global view of several accounts used by EbscoHost's HLM tool. The data is saved in an elasticsearch index and can be viewed on kibana dashboards. This application need API key from [ebsco API](https://developer.ebsco.com/knowledge-services/docs/holdingsiq-overview).
 
 **Table of content**
 - [Description](#Description)
