@@ -85,6 +85,7 @@
       "active": true
     }
   },
+  "apikey": "changeme",
   "paths": {
     "log": {
       "applicationDir": "./log/application",
@@ -96,6 +97,5 @@
       "holdingsIQDir": "./data/holdings",
       "reportDir": "./data/report"
     }
-  },
-  "apikey": "changeme"
+  }
 }

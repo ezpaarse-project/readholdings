@@ -6,16 +6,16 @@ import appLogger from '~/lib/logger/appLogger';
 
 export default async function updateOA(portalName, indexName) {
   const redisClient = getClient();
-  let oaID = await redisClient.keys('*');
-  oaID = oaID.filter((id) => id.includes('oa'));
-  oaID = oaID.map((id) => {
+  const allID = await redisClient.keys('*');
+  const oaID = allID.filter((id) => id.includes('oa'));
+  const oaIDFiltered = oaID.map((id) => {
     const [, idFiltered] = id.split('-');
     return idFiltered;
   });
   let packetOfIds = [];
   let updatedLines = 0;
-  for (let i = 0; i < oaID.length; i += 1) {
-    packetOfIds.push(oaID[i]);
+  for (let i = 0; i < oaIDFiltered.length; i += 1) {
+    packetOfIds.push(oaIDFiltered[i]);
     if (packetOfIds.length === 1000) {
       const body = {
         query: {
@@ -65,8 +65,10 @@ export default async function updateOA(portalName, indexName) {
   const ids = result.map((res) => `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`);
   updatedLines += await insertOAInElastic(ids, indexName);
 
-  appLogger.info(`[${portalName}][elastic]: [${updatedLines}] has updated`);
+  appLogger.info(`[${portalName}][elastic]: ${updatedLines} oa has updated`);
 
   appLogger.info(`[${portalName}][elastic]: refresh index [${indexName}] is started`);
   await refresh(indexName);
+
+  await redisClient.del(oaID);
 }

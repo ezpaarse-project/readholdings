@@ -85,6 +85,9 @@ function fail(message) {
 export default async function update(portal, forceDownload = false) {
   setWorkInProgress(true);
 
+  const redisClient = getClient();
+  await redisClient.flushAll();
+
   resetState();
 
   let localPortals = JSON.parse(JSON.stringify(portals));
@@ -231,7 +234,6 @@ export default async function update(portal, forceDownload = false) {
   }
   // #endregion Update Portal
 
-  const redisClient = getClient();
   await redisClient.flushAll();
 
   end();
