@@ -1,6 +1,7 @@
 {
   "nodeEnv": "development",
   "timezone": "Europe/Paris",
+  "apikey": "changeme",
   "smtp": {
     "host": "localhost",
     "port": 25
@@ -85,12 +86,11 @@
       "active": true
     }
   },
-  "apikey": "changeme",
   "paths": {
     "log": {
       "applicationDir": "./log/application",
       "accessDir": "./log/access",
-      "healthCheckDir": "./log/healthcheck"
+      "healthcheckDir": "./log/healthcheck"
     },
     "data": {
       "HLMDir": "./data/hlm",
