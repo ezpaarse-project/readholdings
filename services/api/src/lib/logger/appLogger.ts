@@ -2,9 +2,9 @@ import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import { paths } from 'config';
 
-const formatter = (info: winston.Logform.TransformableInfo) => `${info.timestamp} ${info.level}: ${info.message} ${(info instanceof Error ? `\n\n${info.stack}\n` : '')}`;
+const formatter = (info) => `${info.timestamp} ${info.level}: ${info.message} ${(info instanceof Error ? `\n\n${info.stack}\n` : '')}`;
 
-const baseLogger: winston.LoggerOptions = {
+const baseLogger = {
   level: process.env.LOG_LEVEL || (process.env.NODE_ENV !== 'production' ? 'debug' : 'info'),
   exitOnError: false,
   format: winston.format.combine(
@@ -13,9 +13,19 @@ const baseLogger: winston.LoggerOptions = {
   ),
 };
 
-winston.loggers.add('app', {
-  ...baseLogger,
-  transports: [
+const transports = [];
+
+if (process.env.NODE_ENV === 'test') {
+  transports.push(new winston.transports.Console({
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.timestamp(),
+      winston.format.label({ label: 'app' }),
+      winston.format.printf(formatter),
+    ),
+  }));
+} else {
+  transports.push(
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
@@ -28,7 +38,12 @@ winston.loggers.add('app', {
       filename: `${paths.log.applicationDir}/%DATE%-application.log`,
       datePattern: 'YYYY-MM-DD',
     }),
-  ],
+  );
+}
+
+winston.loggers.add('app', {
+  ...baseLogger,
+  transports,
 });
 
 const appLogger = winston.loggers.get('app');

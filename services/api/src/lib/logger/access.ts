@@ -1,35 +1,45 @@
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
-import { paths, nodeEnv } from 'config';
+import { paths } from 'config';
+import { format } from 'date-fns';
 
-const apacheFormat = winston.format.printf((info: winston.Logform.TransformableInfo) => {
+const apacheFormat = winston.format.printf((info) => {
   const {
     method,
+    ip,
     url,
     statusCode,
-    contentLength,
     userAgent,
     responseTime,
   } = info.message;
-  return `${info.timestamp} ${method} ${url} ${statusCode} ${contentLength} ${userAgent} ${responseTime}`;
+
+  const timestamp = format(new Date(info.timestamp), 'dd/MMM/yyyy:HH:mm:ss xxx');
+
+  return `${ip || '-'} "-" [${timestamp}] "${method} ${url} HTTP/1.1" ${statusCode} - "-" "${responseTime}" "${userAgent || '-'}"`;
 });
 
-const transports = nodeEnv === 'development'
-  ? [
-    new winston.transports.Console(),
-    new DailyRotateFile({
-      filename: `${paths.log.accessDir}/%DATE%-access.log`,
-      datePattern: 'YYYY-MM-DD',
-    }),
-  ]
-  : [
-    new DailyRotateFile({
-      filename: `${paths.log.accessDir}/%DATE%-access.log`,
-      datePattern: 'YYYY-MM-DD',
-    }),
-  ];
+const transports = [];
 
-export default winston.createLogger({
+if (process.env.NODE_ENV === 'test') {
+  transports.push(new winston.transports.Console());
+} else if (process.env.NODE_ENV === 'development') {
+  transports.push(new winston.transports.Console());
+  transports.push(
+    new DailyRotateFile({
+      filename: `${paths.log.accessDir}/%DATE%-access.log`,
+      datePattern: 'YYYY-MM-DD',
+    }),
+  );
+} else {
+  transports.push(
+    new DailyRotateFile({
+      filename: `${paths.log.accessDir}/%DATE%-access.log`,
+      datePattern: 'YYYY-MM-DD',
+    }),
+  );
+}
+
+const accessLogger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
@@ -37,3 +47,5 @@ export default winston.createLogger({
   ),
   transports,
 });
+
+export default accessLogger;
