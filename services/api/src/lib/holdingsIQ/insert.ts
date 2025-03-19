@@ -31,8 +31,8 @@ export async function insertStandardFileInElastic(portalName, filename, index, d
       meta: {
         BibCNRS: portalName,
         createdAt: date,
-        EmbargoMonth: transformEmbargo(record.Embargo) || null,
-        CustomEmbargoMonth: transformEmbargo(record.CustomEmbargo) || null,
+        EmbargoMonth: transformEmbargo(record?.Embargo) || null,
+        CustomEmbargoMonth: transformEmbargo(record?.CustomEmbargo) || null,
         ManagedCoverageBegin: transformCoverage(record?.ManagedCoverageBegin) || null,
         ManagedCoverageEnd: transformCoverage(record?.ManagedCoverageEnd) || null,
         CustomCoverageBegin: transformCoverage(record?.CustomCoverageBegin) || null,

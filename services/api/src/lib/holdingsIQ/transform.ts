@@ -32,6 +32,9 @@ export function transformCoverage(coverage: string) {
  * @returns
  */
 export function transformStringToArray(coverage: string) {
+  if (!coverage) {
+    return '';
+  }
   if (coverage.includes('|')) {
     return coverage.split('|');
   }
