@@ -53,6 +53,12 @@ There are 4 types of field :
     - IN2P3: Presence of holdingID in another portal
     - INTEST: Presence of holdingID in another portal
 
+## Kibana config
+
+- XPACK_REPORTING_MAXCONCURRENTEXPORTS=5
+- XPACK_REPORTING_CSV_MAXSIZEBYTES=3221225472
+- XPACK_REPORTING_QUEUE_TIMEOUT=1800000
+- ELASTICSEARCH_SETTING_kibana.autocompleteTimeout=300000
 
 ## Installation
 
