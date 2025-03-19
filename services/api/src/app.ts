@@ -46,7 +46,7 @@ const start = async () => {
   await mkdir(resolve(paths.data.reportDir), { recursive: true });
   await mkdir(resolve(paths.log.applicationDir), { recursive: true });
   await mkdir(resolve(paths.log.accessDir), { recursive: true });
-  await mkdir(resolve(paths.log.healthCheckDir), { recursive: true });
+  await mkdir(resolve(paths.log.healthcheckDir), { recursive: true });
 
   const fastify = Fastify();
 
