@@ -78,8 +78,8 @@
       "applicationLogThreshold": 150,
       "accessLogThreshold": 30,
       "healthcheckLogThreshold": 30,
-      "holdingsIQThreshold": 7,
-      "HLMThreshold": 7
+      "holdingsIQThreshold": 1,
+      "HLMThreshold": 1
     },
     "dataUpdate": {
       "schedule": "0 0 0 * * 0",
