@@ -40,11 +40,11 @@ async function generateAndDownloadExport(portalConfig, portalName, type, filenam
   try {
     res1 = await generateExport(portalConfig, portalName, type);
   } catch (err) {
-    appLogger.error(`[${portalName}][holdingsIQ]: Cannot generate [${type}] export`);
+    appLogger.error(`[${portalName}][${type}][holdingsIQ]: Cannot generate [${type}] export`);
     throw err;
   }
   const { id } = res1;
-  appLogger.info(`[${portalName}][holdingsIQ]: export ID [${id}]`);
+  appLogger.info(`[${portalName}][${type}][holdingsIQ]: export ID [${id}]`);
   let res2;
   let status = '';
   let i = 0;
@@ -52,8 +52,8 @@ async function generateAndDownloadExport(portalConfig, portalName, type, filenam
     i += 1;
     res2 = await getExportByID(portalConfig, id);
     status = res2.status;
-    appLogger.verbose(`[${portalName}][holdingsIQ]: ${i} try`);
-    appLogger.verbose(`[${portalName}][holdingsIQ]: status of [${type}] export: [${res2.status}]`);
+    appLogger.verbose(`[${portalName}][${type}][holdingsIQ]: ${i} try`);
+    appLogger.verbose(`[${portalName}][${type}][holdingsIQ]: status of export: [${res2.status}]`);
     if (status !== 'COMPLETED') {
       await setTimeout(10000);
     }
@@ -66,7 +66,7 @@ async function generateAndDownloadExport(portalConfig, portalName, type, filenam
     try {
       await downloadFileFromAWS(portalName, downloadLink, filename);
     } catch (err) {
-      appLogger.info(`[${portalName}][aws]: Cannot download file from aws]`);
+      appLogger.info(`[${portalName}][${type}][aws]: Cannot download file from aws`);
       throw err;
     }
   }
@@ -129,12 +129,12 @@ export default async function update(portal, forceDownload = false) {
           standardFilename,
         );
       } catch (err) {
-        fail(`[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
+        fail(`[${portalName}][${type}][holdingsIQ]: Cannot generate and download export. ${err}`);
         return;
       }
       endLatestStep();
     } else {
-      appLogger.info(`[${portalName}][holdingsIQ]: File [${standardFilename}] already exists`);
+      appLogger.info(`[${portalName}][${type}][holdingsIQ]: File [${standardFilename}] already exists`);
     }
     // #endregion Download STANDARD
 
@@ -144,7 +144,7 @@ export default async function update(portal, forceDownload = false) {
     try {
       lineUpserted = await insertStandardFileInElastic(portalName, standardFilename, index, date);
     } catch (err) {
-      fail(`[${portalName}][elastic]: insert ${type} file in elastic. ${err}`);
+      fail(`[${portalName}][${type}][elastic]: insert file in elastic. ${err}`);
       return;
     }
     const standardInsertStep = getLatestStep();
@@ -159,7 +159,7 @@ export default async function update(portal, forceDownload = false) {
       try {
         await deleteExportByID(portalConfig, standardId);
       } catch (err) {
-        appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${standardId}].`);
+        appLogger.error(`[${portalName}][${type}][holdingsIQ]: Cannot delete export [${standardId}].`);
       }
       endLatestStep();
     }
@@ -176,12 +176,12 @@ export default async function update(portal, forceDownload = false) {
       try {
         kbart2Id = await generateAndDownloadExport(portalConfig, portalName, type, kbart2Filename);
       } catch (err) {
-        fail(`[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
+        fail(`[${portalName}][${type}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
         return;
       }
       endLatestStep();
     } else {
-      appLogger.info(`[${portalName}][holdingsIQ]: File [${kbart2Filename}] already exists`);
+      appLogger.info(`[${portalName}][${type}][holdingsIQ]: File [${kbart2Filename}] already exists`);
     }
 
     // #endregion Download KBART2
@@ -191,7 +191,7 @@ export default async function update(portal, forceDownload = false) {
     try {
       lineUpserted = await insertKbart2FileInElastic(portalName, kbart2Filename, index);
     } catch (err) {
-      fail(`[${portalName}][elastic]: insert ${type} in elastic. ${err}`);
+      fail(`[${portalName}][${type}][elastic]: insert ${type} in elastic. ${err}`);
       return;
     }
     const kbart2InsertStep = getLatestStep();
@@ -206,7 +206,7 @@ export default async function update(portal, forceDownload = false) {
       try {
         await deleteExportByID(portalConfig, kbart2Id);
       } catch (err) {
-        appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${kbart2Id}].`);
+        appLogger.error(`[${portalName}][${type}][holdingsIQ]: Cannot delete export [${kbart2Id}].`);
       }
       endLatestStep();
     }
@@ -217,7 +217,7 @@ export default async function update(portal, forceDownload = false) {
     try {
       lineUpserted = await updateOA(portalName, index);
     } catch (err) {
-      appLogger.error(`[${portalName}][holdingsIQ]: Cannot update OA`);
+      appLogger.error(`[${portalName}][oa][holdingsIQ]: Cannot update OA`);
     }
     const accessTypeInsertStep = getLatestStep();
     accessTypeInsertStep.lineUpserted = lineUpserted;
