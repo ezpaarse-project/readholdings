@@ -1,10 +1,14 @@
+import type { MultipartFile } from '@fastify/multipart';
+
 import fsp from 'fs/promises';
-import { createWriteStream } from 'fs';
+import { createWriteStream, type Stats } from 'fs';
 import { join, extname, resolve } from 'path';
 import { pipeline } from 'stream/promises';
 
-import { paths } from 'config';
 import appLogger from '~/lib/logger/appLogger';
+import { config } from '~/lib/config';
+
+const { HLMDir } = config.paths.data;
 
 /**
  * Deletes files in a directory that are older than n time.
@@ -20,7 +24,7 @@ export async function deleteOldFiles(directory: string, age: number) {
 
   const files: string[] = await fsp.readdir(directory);
 
-  const deletedFiles = [];
+  const deletedFiles: string[] = [];
 
   const promises = files.map(async (file) => {
     const filePath: string = join(directory, file);
@@ -46,29 +50,30 @@ export async function deleteOldFiles(directory: string, age: number) {
  *
  * @param parts
  */
-export async function uploadFile(part) {
-  if (part) {
-    const fileType: string = part.mimetype;
-    const fileExtension: string = extname(part.filename).toLowerCase();
-
-    // Verify that the file is a CSV
-    if (fileType !== 'text/csv' || fileExtension !== '.csv') {
-      throw new Error(`Invalid file type: ${part.filename}`);
-    }
-
-    await pipeline(part.file, createWriteStream(`${paths.data.HLMDir}/${part.filename}`));
+export async function uploadFile(part: MultipartFile) {
+  if (!part) {
+    return;
   }
+
+  const fileType: string = part.mimetype;
+  const fileExtension: string = extname(part.filename).toLowerCase();
+
+  // Verify that the file is a CSV
+  if (fileType !== 'text/csv' || fileExtension !== '.csv') {
+    throw new Error(`Invalid file type: ${part.filename}`);
+  }
+
+  await pipeline(part.file, createWriteStream(`${HLMDir}/${part.filename}`));
 }
 
 /**
  * Get the files in a directory in order by date.
  *
- * @param {string} dir Directory path.
+ * @param dir Directory path.
  *
- * @returns {Promise<Array<{filename: string, stat: import('fs').Stats}>>} list of files
- * sorted by modification date.
+ * @returns list of files sorted by modification date.
  */
-async function orderRecentFiles(dir) {
+async function orderRecentFiles(dir: string): Promise<Array<{ filename: string; stat: Stats; }>> {
   const filenames = await fsp.readdir(dir);
 
   const files = await Promise.all(
@@ -89,11 +94,11 @@ async function orderRecentFiles(dir) {
 /**
  * Get the most recent file in a directory.
  *
- * @param {string} dir Directory path.
+ * @param dir Directory path.
  *
  * @returns most recent filepath.
  */
-export async function getMostRecentFile(dir) {
+export async function getMostRecentFile(dir: string) {
   const files = await orderRecentFiles(dir);
   return files.length ? files[0] : undefined;
 }
@@ -101,11 +106,9 @@ export async function getMostRecentFile(dir) {
 /**
  * Delete file installed on readholdings
  *
- * @param {string} filepath Filepath.
- *
- * @returns {Promise<void>}
+ * @param filepath Filepath.
  */
-export async function deleteFile(filepath) {
+export async function deleteFile(filepath: string): Promise<void> {
   try {
     await fsp.unlink(filepath);
   } catch (err) {

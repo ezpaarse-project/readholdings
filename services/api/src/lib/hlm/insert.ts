@@ -33,7 +33,7 @@ export default async function insertCSVInElastic(data) {
     const { portal, filename } = data[i];
     const filePath = path.resolve(paths.data.HLMDir, filename);
     const parser = fs.createReadStream(filePath).pipe(parse({
-      columns: (header) => header.map((h) => h.trim()),
+      columns: (header) => header.map((h: string) => h.trim()),
     }));
 
     appLogger.info(`[csv]: read [${filename}] ${i + 1}/${data.length} files`);

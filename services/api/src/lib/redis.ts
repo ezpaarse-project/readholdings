@@ -1,8 +1,11 @@
 import { createClient } from 'redis';
 
 import util from 'util';
-import { redis } from 'config';
-import appLogger from './logger/appLogger';
+
+import { config } from '~/lib/config';
+import appLogger from '~/lib/logger/appLogger';
+
+const { redis } = config;
 
 let redisClient = createClient({
   legacyMode: true,
@@ -54,16 +57,16 @@ export function initClient() {
   redisClient.ping = util.promisify(redisClient.ping);
   redisClient.set = util.promisify(redisClient.set);
   redisClient.keys = util.promisify(redisClient.keys);
-  redisClient.flushall = util.promisify(redisClient.flushall);
+  redisClient.flushAll = util.promisify(redisClient.flushAll);
 }
 
 /**
  * Load the dev apiKeys on redis from apikey-dev.json.
  * Using for test.
  *
- * @returns {Promise<boolean>} ping
+ * @returns ping
  */
-export async function pingRedis() {
+export async function pingRedis(): Promise<boolean> {
   try {
     await redisClient.ping();
   } catch (err) {

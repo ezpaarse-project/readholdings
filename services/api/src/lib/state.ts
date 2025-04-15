@@ -1,19 +1,42 @@
 import appLogger from '~/lib/logger/appLogger';
 
-let state: any = {};
+type Step = Record<string, unknown> & {
+  portal: string;
+  name: string;
+  fileType: string;
+  startDate: Date;
+  endDate: Date | null;
+  status: string;
+};
+
+type State = {
+  status?: string;
+  index?: string;
+  createdAt?: Date;
+  documents?: number | null;
+  endAt?: Date | null;
+  took?: number;
+  steps?: Step[];
+};
+
+let state: State = {};
 
 export function getState() {
   return state;
 }
 
-export function setState(value) {
+export function setState(value: State) {
   state = value;
 }
 
 export function end() {
+  if (!state) {
+    return;
+  }
+
   state.status = 'done';
   state.endAt = new Date();
-  state.took = (state.endAt - state.createdAt) / 1000;
+  state.took = ((state.endAt?.getTime() ?? 0) - (state.createdAt?.getTime() ?? 0)) / 1000;
 }
 
 export function fail() {
@@ -21,8 +44,8 @@ export function fail() {
   state.status = 'error';
 }
 
-export function addStep(portal, name, fileType) {
-  const step = {
+export function addStep(portal: string, name: string, fileType: string) {
+  const step: Step = {
     portal,
     name,
     fileType,
@@ -30,7 +53,7 @@ export function addStep(portal, name, fileType) {
     endDate: null,
     status: 'inProgress',
   };
-  state.steps.push(step);
+  state.steps?.push(step);
   return step;
 }
 
@@ -38,17 +61,23 @@ export function addStep(portal, name, fileType) {
  * Get the latest step in state.
  */
 export function getLatestStep() {
-  return state.steps[state.steps.length - 1];
+  return state.steps?.at(-1);
 }
 
 export function endLatestStep() {
   const step = getLatestStep();
+  if (!step) {
+    return;
+  }
   step.endDate = new Date();
   step.status = 'done';
 }
 
-export function failLatestStep(stack) {
+export function failLatestStep(stack: string) {
   const step = getLatestStep();
+  if (!step) {
+    return;
+  }
   step.endDate = new Date();
   step.status = 'error';
   step.stack = stack;
@@ -58,12 +87,15 @@ export function failLatestStep(stack) {
 /**
  * Update latest step in state.
  */
-export function updateLatestStep(step) {
+export function updateLatestStep(step: Step) {
+  if (!state.steps) {
+    return;
+  }
   state.steps[state.steps.length - 1] = step;
   appLogger.debug('[state]: step is updated');
 }
 
-export function createState(index) {
+export function createState(index: string) {
   appLogger.info('[state]: create new state');
 
   state = {

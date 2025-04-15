@@ -4,7 +4,9 @@ import { search, refresh } from '~/lib/elastic';
 import { insertPortalsInElastic } from '~/lib/holdingsIQ/insert';
 import appLogger from '~/lib/logger/appLogger';
 
-export default async function updatePortals(indexName) {
+import type { Holding } from '~/models/holding';
+
+export default async function updatePortals(indexName: string) {
   const redisClient = getClient();
   let holdingsID = await redisClient.keys('*');
   holdingsID = holdingsID.filter((id) => id.includes('holdingID_'));
@@ -31,7 +33,7 @@ export default async function updatePortals(indexName) {
         },
       };
 
-      const result = await search(indexName, 1000, body);
+      const result = (await search<Holding>(indexName, 1000, body)).filter((res) => !!res);
       updatedLines += await insertPortalsInElastic(packetOfIds, result, indexName);
       appLogger.info(`[elastic]: ${updatedLines} portals updated`);
       packetOfIds = [];
@@ -52,7 +54,7 @@ export default async function updatePortals(indexName) {
     },
   };
 
-  const result = await search(indexName, 1000, body);
+  const result = (await search<Holding>(indexName, 1000, body)).filter((res) => !!res);
   updatedLines += await insertPortalsInElastic(packetOfIds, result, indexName);
   appLogger.info(`[elastic]: ${updatedLines} portals updated`);
   packetOfIds = [];

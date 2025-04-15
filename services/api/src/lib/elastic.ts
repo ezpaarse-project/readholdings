@@ -1,5 +1,6 @@
 import {
   Client,
+  ApiError,
   type ClientOptions,
   type estypes as ES,
   type ApiResponse,
@@ -8,9 +9,10 @@ import {
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 
-import { nodeEnv, elasticsearch } from 'config';
-
 import appLogger from '~/lib/logger/appLogger';
+import { config } from '~/lib/config';
+
+const { nodeEnv, elasticsearch } = config;
 
 const isProd: boolean = (nodeEnv === 'production');
 
@@ -88,14 +90,18 @@ export async function ping(): Promise<boolean> {
  *
  * @returns Elastic response
  */
-export async function search(indexName: string, size: number, body: ES.SearchRequest['body']) {
+export async function search<T = any>(
+  indexName: string,
+  size: number,
+  body: ES.SearchRequest['body'],
+) {
   if (!elasticClient) {
     throw new Error('[elastic]: Elastic client is not initialized');
   }
 
-  let res: any | undefined;
+  let res;
   try {
-    res = await elasticClient.search({
+    res = await elasticClient.search<ES.SearchResponse<T>>({
       index: indexName,
       size,
       body,
@@ -108,19 +114,53 @@ export async function search(indexName: string, size: number, body: ES.SearchReq
   return res.body.hits.hits.map((hit) => hit._source);
 }
 
+export async function* scrollSearch<T = any>(
+  indexName: string,
+  body: ES.SearchRequest['body'],
+): AsyncIterable<ES.SearchHit<T | undefined>> {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
+  try {
+    const results = elasticClient.helpers.scrollSearch<T, ES.SearchResponse<T>>({
+      index: indexName,
+      body,
+    });
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const res of results) {
+      // eslint-disable-next-line no-underscore-dangle
+      yield* res.body.hits.hits;
+    }
+  } catch (err) {
+    appLogger.error(`[elastic]: Cannot request elastic in index [${indexName}]`, err);
+    throw err;
+  }
+}
+
 /**
  * create, update, delete in bulk in elastic
  *
  * @param data
  */
-export async function bulk(data) {
+export async function bulk<T extends Record<string, unknown> = Record<string, unknown>>(
+  data: Exclude<ES.BulkRequest<T>['body'], undefined>,
+) {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
   let res;
 
   try {
-    res = await elasticClient.bulk({ body: data });
+    res = await elasticClient.bulk<ES.BulkResponse>({ body: data });
   } catch (err) {
     appLogger.error('[elastic]: Cannot bulk');
-    appLogger.error(JSON.stringify(err?.meta?.body?.error, null, 2));
+
+    const apiError = err as ApiError;
+    if ('meta' in apiError) {
+      appLogger.error(JSON.stringify(apiError.meta?.body?.error, null, 2));
+    }
   }
 
   const items = Array.isArray(res?.body?.items) ? res?.body?.items : [];
@@ -129,7 +169,7 @@ export async function bulk(data) {
     appLogger.error('[elastic]: Error in bulk');
   }
 
-  const errors = [];
+  const errors: ES.ErrorCause[] = [];
 
   let insertedDocs = 0;
   let updatedDocs = 0;
@@ -176,14 +216,23 @@ export async function bulk(data) {
  *
  * @param data
  */
-export async function updateBulk(data) {
+export async function updateBulk<T extends Record<string, any> = Record<string, any>>(
+  data: Exclude<ES.BulkRequest<T>['body'], undefined>,
+) {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
   let res;
 
   try {
-    res = await elasticClient.bulk({ body: data });
+    res = await elasticClient.bulk<ES.BulkResponse>({ body: data });
   } catch (err) {
     appLogger.error('[elastic]: Cannot bulk');
-    appLogger.error(JSON.stringify(err?.meta?.body?.error, null, 2));
+    const apiError = err as ApiError;
+    if ('meta' in apiError) {
+      appLogger.error(JSON.stringify(apiError.meta?.body?.error, null, 2));
+    }
     process.exit(1);
   }
 
@@ -210,6 +259,10 @@ export async function updateBulk(data) {
  * @param indexName name of index
  */
 export async function refresh(indexName: string): Promise<void> {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
   try {
     await elasticClient.indices.refresh({ index: indexName }, { requestTimeout: '60s' });
   } catch (err) {
@@ -227,6 +280,10 @@ export async function refresh(indexName: string): Promise<void> {
  * @returns is exist
  */
 export async function checkIndex(indexName: string): Promise<boolean> {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
   let res;
   try {
     res = await elasticClient.indices.exists({
@@ -245,6 +302,10 @@ export async function checkIndex(indexName: string): Promise<boolean> {
  * @param indexName Name of index
  */
 export async function removeIndex(indexName: string): Promise<void> {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
   const exist = await checkIndex(indexName);
   if (exist) {
     try {
@@ -266,7 +327,11 @@ export async function removeIndex(indexName: string): Promise<void> {
  * @param mapping mapping in JSON format
  *
  */
-export async function createIndex(indexName: string, mapping): Promise<void> {
+export async function createIndex(indexName: string, mapping: any): Promise<void> {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
   const exist = await checkIndex(indexName);
   if (!exist) {
     try {
@@ -287,6 +352,10 @@ export async function createIndex(indexName: string, mapping): Promise<void> {
  *
  */
 export async function getReadHoldingsIndices() {
-  const res = await elasticClient.cat.indices({ format: 'json', index: 'holdings*,-.*' });
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
+  const res = await elasticClient.cat.indices<ES.CatIndicesResponse>({ format: 'json', index: 'holdings*,-.*' });
   return res.body;
 }

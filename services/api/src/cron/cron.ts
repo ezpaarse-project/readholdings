@@ -1,6 +1,9 @@
 import { CronJob } from 'cron';
-import { timezone } from 'config';
+
+import { config } from '~/lib/config';
 import appLogger from '~/lib/logger/appLogger';
+
+const { timezone } = config;
 
 type TaskFunction = () => void | Promise<void>;
 

@@ -1,20 +1,15 @@
-import { paths, cron } from 'config';
-
+import { config } from '~/lib/config';
 import appLogger from '~/lib/logger/appLogger';
 import Cron from '~/cron/cron';
 
 import { deleteOldFiles } from '~/lib/file';
 
-const cronConfig = cron.cleanFile;
-
-let { active } = cronConfig;
-if (active === 'true' || active) active = true;
-else active = false;
+const { paths, cron: { cleanFile: cronConfig } } = config;
 
 /**
  * Removes logs files after a certain time define in config.
  */
-async function task(): Promise<void> {
+async function task(this: Cron): Promise<void> {
   const deletedApplicationLogFiles = await deleteOldFiles(
     paths.log.applicationDir,
     cronConfig.applicationLogThreshold,
@@ -46,6 +41,6 @@ async function task(): Promise<void> {
   appLogger.info(`[cron][${this.name}]: ${deletedHLMFiles?.join(',')} (${deletedHLMFiles.length}) HLM files are deleted`);
 }
 
-const deleteFileCron = new Cron('cleanFile', cronConfig.schedule, task, active);
+const deleteFileCron = new Cron('cleanFile', cronConfig.schedule, task, cronConfig.active);
 
 export default deleteFileCron;

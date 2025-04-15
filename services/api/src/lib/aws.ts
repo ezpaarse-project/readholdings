@@ -2,14 +2,16 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { Readable } from 'stream';
-import { paths } from 'config';
 
-import appLogger from './logger/appLogger';
+import { config } from '~/lib/config';
+import appLogger from '~/lib/logger/appLogger';
+
+const { paths } = config;
 
 /**
  * @returns {Readable} Stream of snapshot.
  */
-async function getFileFromAWS(url) {
+async function getFileFromAWS(url: string) {
   let res;
   try {
     res = await axios({
@@ -24,14 +26,18 @@ async function getFileFromAWS(url) {
   return res;
 }
 
-async function download(portalName, data, filepath) {
+async function download(
+  portalName: string,
+  { data, headers }: axios.AxiosResponse,
+  filepath: string,
+) {
   if (!(data instanceof Readable)) {
-    const writeStream = await fs.createWriteStream(filepath);
+    const writeStream = fs.createWriteStream(filepath);
     writeStream.write(data);
     writeStream.end();
     return;
   }
-  const totalSize = parseInt(data?.headers['content-length'], 10) || 0;
+  const totalSize = parseInt(headers['content-length'], 10) || 0;
   let downloadedSize = 0;
 
   await new Promise((resolve, reject) => {
@@ -64,7 +70,11 @@ async function download(portalName, data, filepath) {
   });
 }
 
-export default async function downloadFileFromAWS(portalName, downloadLink, filename) {
+export default async function downloadFileFromAWS(
+  portalName: string,
+  downloadLink: string,
+  filename: string,
+) {
   let res;
   try {
     res = await getFileFromAWS(downloadLink);
@@ -72,9 +82,8 @@ export default async function downloadFileFromAWS(portalName, downloadLink, file
     appLogger.error('[aws]: Cannot get file');
     throw err;
   }
-  const file = res.data;
   const filepath = path.resolve(paths.data.holdingsIQDir, filename);
   // TODO check error
-  await download(portalName, file, filepath);
+  await download(portalName, res, filepath);
   return filename;
 }

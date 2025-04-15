@@ -4,10 +4,12 @@ import { search, refresh } from '~/lib/elastic';
 import { insertOAInElastic } from '~/lib/holdingsIQ/insert';
 import appLogger from '~/lib/logger/appLogger';
 
-export default async function updateOA(portalName, indexName) {
+import type { Holding } from '~/models/holding';
+
+export default async function updateOA(portalName: string, indexName: string): Promise<number> {
   const redisClient = getClient();
   const allID = await redisClient.keys('*');
-  const oaID = allID.filter((id) => id.includes('oa'));
+  const oaID = allID.filter((id) => id.startsWith('oa-'));
   const oaIDFiltered = oaID.map((id) => {
     const [, idFiltered] = id.split('-');
     return idFiltered;
@@ -35,8 +37,9 @@ export default async function updateOA(portalName, indexName) {
           },
         },
       };
-      const result = await search(indexName, 10000, body);
-      const ids = result.map((res) => `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`);
+      const result = await search<Holding>(indexName, 10000, body);
+      const ids = result.filter((res) => !!res)
+        .map((res) => `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`);
       updatedLines += await insertOAInElastic(ids, indexName);
       appLogger.info(`[${portalName}][elastic]: ${updatedLines} oa updated`);
       packetOfIds = [];
@@ -61,8 +64,9 @@ export default async function updateOA(portalName, indexName) {
       },
     },
   };
-  const result = await search(indexName, packetOfIds.length, body);
-  const ids = result.map((res) => `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`);
+  const result = await search<Holding>(indexName, packetOfIds.length, body);
+  const ids = result.filter((res) => !!res)
+    .map((res) => `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`);
   updatedLines += await insertOAInElastic(ids, indexName);
 
   appLogger.info(`[${portalName}][elastic]: ${updatedLines} oa has updated`);
@@ -71,4 +75,6 @@ export default async function updateOA(portalName, indexName) {
   await refresh(indexName);
 
   await redisClient.del(oaID);
+
+  return updatedLines;
 }

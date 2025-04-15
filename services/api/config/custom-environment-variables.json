@@ -4,7 +4,7 @@
   "apikey": "ADMIN_APIKEY",
   "smtp": {
     "host": "SMTP_HOST",
-    "port": "SMTP_PORT"
+    "port": { "__name": "SMTP_PORT", "__format": "number" }
   },
   "notifications": {
     "sender": "NOTIFICATIONS_SENDER",
@@ -15,11 +15,11 @@
     "nodes": "ELASTICSEARCH_NODES",
     "username": "ELASTICSEARCH_USERNAME",
     "password": "ELASTICSEARCH_PASSWORD",
-    "timeout": "ELASTICSEARCH_TIMEOUT"
+    "timeout": { "__name": "ELASTICSEARCH_TIMEOUT", "__format": "number" }
   },
   "redis":  {
     "host": "REDIS_HOST",
-    "port": "REDIS_PORT",
+    "port": { "__name": "REDIS_PORT", "__format": "number" },
     "password": "REDIS_PASSWORD"
   },
   "holdingsIQ": {
@@ -74,16 +74,16 @@
   "cron": {
     "cleanFile": {
       "schedule": "CRON_CLEAN_FILE_SCHEDULE",
-      "active": "CRON_CLEAN_FILE_ACTIVE",
-      "applicationLogThreshold": "CRON_CLEAN_LOG_APPLICATION_THRESHOLD",
-      "accessLogThreshold": "CRON_CLEAN_LOG_ACCESS_THRESHOLD",
-      "healthcheckLogThreshold": "CRON_CLEAN_LOG_HEALTHCHECK_THRESHOLD",
-      "holdingsIQThreshold": "CRON_CLEAN_HOLDINGSIQ_THRESHOLD",
-      "HLMThreshold": "CRON_CLEAN_HLM_THRESHOLD"
+      "active": { "__name": "CRON_CLEAN_FILE_ACTIVE", "__format": "boolean" },
+      "applicationLogThreshold": { "__name": "CRON_CLEAN_LOG_APPLICATION_THRESHOLD", "__format": "number" },
+      "accessLogThreshold": { "__name": "CRON_CLEAN_LOG_ACCESS_THRESHOLD", "__format": "number" },
+      "healthcheckLogThreshold": { "__name": "CRON_CLEAN_LOG_HEALTHCHECK_THRESHOLD", "__format": "number" },
+      "holdingsIQThreshold": { "__name": "CRON_CLEAN_HOLDINGSIQ_THRESHOLD", "__format": "number" },
+      "HLMThreshold": { "__name": "CRON_CLEAN_HLM_THRESHOLD", "__format": "number" }
     },
     "dataUpdate": {
       "schedule": "CRON_DATA_UPDATE_SCHEDULE",
-      "active": "CRON_DATA_UPDATE_ACTIVE"
+      "active": { "__name": "CRON_DATA_UPDATE_ACTIVE", "__format": "boolean" }
     }
   }
 }

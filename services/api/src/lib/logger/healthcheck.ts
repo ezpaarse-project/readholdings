@@ -1,7 +1,9 @@
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
-import { paths } from 'config';
+import { config } from '~/lib/config';
+
+const { paths } = config;
 
 const apacheFormat = winston.format.printf((info) => {
   const {
@@ -21,7 +23,7 @@ if (process.env.NODE_ENV === 'test') {
 } else {
   transports.push(
     new DailyRotateFile({
-      filename: `${paths.log.healthcheckDir}/%DATE%-healthcheck.log`,
+      filename: `${paths.log.healthCheckDir}/%DATE%-healthcheck.log`,
       datePattern: 'YYYY-MM-DD',
     }),
   );

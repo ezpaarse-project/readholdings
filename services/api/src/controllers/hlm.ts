@@ -1,3 +1,4 @@
+import type { MultipartValue } from '@fastify/multipart';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { uploadFile } from '~/lib/file';
 import insertCSVInElastic from '~/lib/insert';
@@ -12,9 +13,12 @@ export async function uploadHLMFilesController(
   request: FastifyRequest,
   reply: FastifyReply,
 ):Promise<void> {
-  const parts = request.parts();
+  const parts = request.files();
 
-  uploadFile(parts);
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const file of parts) {
+    await uploadFile(file);
+  }
 
   // TODO return ID;
   reply.code(202);
@@ -58,11 +62,11 @@ export async function uploadAndInsertHLMFilesController(
   // eslint-disable-next-line no-restricted-syntax
   for await (const file of files) {
     await uploadFile(file);
-    data.push({ filename: file.filename, portal: file.fields[`portal-${i}`].value });
+    data.push({ filename: file.filename, portal: (file.fields[`portal-${i}`] as MultipartValue).value });
     i += 1;
   }
 
-  readAndInsertCSVInElastic(data);
+  insertCSVInElastic(data);
 
   reply.code(202);
 }

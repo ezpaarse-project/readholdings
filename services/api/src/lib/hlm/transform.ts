@@ -19,7 +19,7 @@ export function transformCoverage(coverage: string) {
  *
  * @returns
  */
-export function transformEmbargo(embargo) {
+export function transformEmbargo(embargo: string) {
   const time = embargo;
 
   if (!time) {
@@ -27,7 +27,7 @@ export function transformEmbargo(embargo) {
   }
 
   const separate = time.split(' ');
-  const number = separate[0];
+  const number = Number.parseInt(separate[0], 10);
   const indicator = separate[1].toUpperCase();
 
   let ratio = 1;

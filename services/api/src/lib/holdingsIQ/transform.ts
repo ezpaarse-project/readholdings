@@ -31,9 +31,9 @@ export function transformCoverage(coverage: string) {
  *
  * @returns
  */
-export function transformStringToArray(coverage: string) {
+export function transformStringToArray(coverage?: string) {
   if (!coverage) {
-    return '';
+    return null;
   }
   if (coverage.includes('|')) {
     return coverage.split('|');
@@ -151,15 +151,15 @@ export function transformGetHoldings(data, institute) {
   };
 }
 
-export function transformEmbargo(embargo) {
+export function transformEmbargo(embargo: string | undefined) {
   const time = embargo;
 
   if (!time) {
-    return time;
+    return null;
   }
 
   const separate = time.split(' ');
-  const number = separate[0];
+  const number = Number.parseInt(separate[0], 10);
   const indicator = separate[1].toUpperCase();
 
   let ratio = 1;

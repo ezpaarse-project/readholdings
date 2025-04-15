@@ -1,6 +1,8 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import { nodeEnv } from 'config';
+import { config } from '~/lib/config';
+
+const { nodeEnv } = config;
 
 /**
  * Middleware for dev.

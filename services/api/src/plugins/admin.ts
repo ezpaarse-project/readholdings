@@ -1,6 +1,8 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import { apikey } from 'config';
+import { config } from '~/lib/config';
+
+const { apikey } = config;
 
 /**
  * Middleware for administrators only

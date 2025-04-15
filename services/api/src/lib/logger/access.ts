@@ -1,7 +1,10 @@
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
-import { paths } from 'config';
 import { format } from 'date-fns';
+
+import { config } from '~/lib/config';
+
+const { paths } = config;
 
 const apacheFormat = winston.format.printf((info) => {
   const {
