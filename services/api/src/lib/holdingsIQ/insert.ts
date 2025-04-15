@@ -280,7 +280,25 @@ export async function insertPortalsInElastic(
     });
   }
 
-  const dataToInsert = records.slice();
-  const updatedDocs = await updateBulk(dataToInsert);
+  const updatedDocs = await updateBulk<Holding>(dataToInsert);
+  return updatedDocs;
+}
+
+export async function insertFirstOccurrenceInElastic(
+  idsPerHoldingId: Map<string, string[]>,
+  indexName: string,
+) {
+  const dataToInsert: ESHoldingBulkAction[] = [];
+
+  for (const [, ids] of idsPerHoldingId) {
+    for (let i = 0; i < ids.length; i += 1) {
+      dataToInsert.push(
+        { update: { _index: indexName, _id: ids[i] } },
+        { doc: { meta: { firstOccurrence: i === 0 } }, doc_as_upsert: true },
+      );
+    }
+  }
+
+  const updatedDocs = await updateBulk<Holding>(dataToInsert);
   return updatedDocs;
 }

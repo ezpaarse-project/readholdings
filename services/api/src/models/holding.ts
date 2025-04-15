@@ -106,6 +106,7 @@ export interface HoldingMeta {
   INSMI: string;
   INSU: string;
   INTEST: string;
+  firstOccurrence?: boolean;
 }
 
 export interface Holding {
