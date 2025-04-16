@@ -46,11 +46,11 @@ export async function generateAndDownloadExport(
   try {
     res1 = await generateExport(portalConfig, type);
   } catch (err) {
-    appLogger.error(`[${portalName}][holdingsIQ]: Cannot generate [${type}] export`);
+    appLogger.error(`[${portalName}][${type}][holdingsIQ]: Cannot generate [${type}] export`);
     throw err;
   }
   const { id } = res1;
-  appLogger.info(`[${portalName}][holdingsIQ]: export ID [${id}]`);
+  appLogger.info(`[${portalName}][${type}][holdingsIQ]: export ID [${id}]`);
   let res2;
   let status = '';
   let i = 0;
@@ -58,8 +58,8 @@ export async function generateAndDownloadExport(
     i += 1;
     res2 = await getExportByID(portalConfig, id);
     status = res2.status;
-    appLogger.verbose(`[${portalName}][holdingsIQ]: ${i} try`);
-    appLogger.verbose(`[${portalName}][holdingsIQ]: status of [${type}] export: [${res2.status}]`);
+    appLogger.verbose(`[${portalName}][${type}][holdingsIQ]: ${i} try`);
+    appLogger.verbose(`[${portalName}][${type}][holdingsIQ]: status of export: [${res2.status}]`);
     if (status !== 'COMPLETED') {
       await setTimeout(10000);
     }
@@ -71,7 +71,7 @@ export async function generateAndDownloadExport(
     try {
       await downloadFileFromAWS(portalName, downloadLink, filename);
     } catch (err) {
-      appLogger.info(`[${portalName}][aws]: Cannot download file from aws]`);
+      appLogger.info(`[${portalName}][${type}][aws]: Cannot download file from aws`);
       throw err;
     }
   }
@@ -134,7 +134,7 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
     try {
       lineUpserted = await updateOA(portalName, index);
     } catch (err) {
-      appLogger.error(`[${portalName}][holdingsIQ]: Cannot update OA`);
+      appLogger.error(`[${portalName}][oa][holdingsIQ]: Cannot update OA`);
     }
     accessTypeStep.lineUpserted = lineUpserted;
     updateLatestStep(accessTypeStep); // ? Maybe not useful as insertStep is a ref

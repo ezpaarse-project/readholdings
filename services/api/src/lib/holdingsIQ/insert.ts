@@ -34,7 +34,7 @@ export async function insertStandardFileInElastic(
   const parser = createReadStream(filePath).pipe(parse({
     columns: (header) => header.map((h: string) => h.trim()),
   }));
-  appLogger.info(`[csv]: read [${filename}]`);
+  appLogger.info(`[${portalName}][standard][csv]: read [${filename}]`);
 
   let lineUpserted = 0;
 
@@ -118,7 +118,7 @@ export async function insertStandardFileInElastic(
       records = [];
 
       if (lineUpserted % 10000 === 0) {
-        appLogger.info(`[${portalName}][elastic]: ${lineUpserted} lines upserted`);
+        appLogger.info(`[${portalName}][standard][elastic]: ${lineUpserted} lines upserted`);
       }
     }
   }
@@ -127,11 +127,11 @@ export async function insertStandardFileInElastic(
     const res = await bulk(dataToInsert);
     lineUpserted += res.insertedDocs + res.updatedDocs;
     records = [];
-    appLogger.info(`[${portalName}][elastic]: ${lineUpserted} lines upserted`);
+    appLogger.info(`[${portalName}][standard][elastic]: ${lineUpserted} lines upserted`);
   }
-  appLogger.info(`[${portalName}][csv]: File [${filename}] is inserted`);
+  appLogger.info(`[${portalName}][standard][csv]: File [${filename}] is inserted`);
 
-  appLogger.info(`[${portalName}][elastic]: Refresh index [${index}] is started`);
+  appLogger.info(`[${portalName}][standard][elastic]: Refresh index [${index}] is started`);
   await refresh(index);
   return lineUpserted;
 }
@@ -147,7 +147,7 @@ export async function insertKbart2FileInElastic(
   const parser = createReadStream(filePath).pipe(parse({
     columns: (header) => header.map((h: string) => h.trim()),
   }));
-  appLogger.info(`[${portalName}][csv]: read [${filename}]`);
+  appLogger.info(`[${portalName}][kbart2][csv]: read [${filename}]`);
 
   let lineUpdate = 0;
 
@@ -157,19 +157,19 @@ export async function insertKbart2FileInElastic(
     const id = `${portalName}-${record?.vendor_id}-${record?.package_id}-${record?.title_id}`;
     const kbart2Record: DeepPartial<Holding> = {
       meta: {
-        access_type: record?.access_type || null,
+        access_type: 'P',
         holdingID: `${record?.vendor_id}_${record?.package_id}_${record?.title_id}_${record.date_first_issue_online}_${record.date_last_issue_online}_${record.embargo_info}`,
-        IN2P3: '',
-        INC: '',
-        INEE: '',
-        INP: '',
-        INS2I: '',
-        INSB: '',
-        INSHS: '',
-        INSIS: '',
-        INSMI: '',
-        INSU: '',
-        INTEST: '',
+        IN2P3: false,
+        INC: false,
+        INEE: false,
+        INP: false,
+        INS2I: false,
+        INSB: false,
+        INSHS: false,
+        INSIS: false,
+        INSMI: false,
+        INSU: false,
+        INTEST: false,
       },
       kbart2: {
         publication_title: record?.publication_title || null,
@@ -219,7 +219,7 @@ export async function insertKbart2FileInElastic(
       records = [];
 
       if (lineUpdate % 10000 === 0) {
-        appLogger.info(`[${portalName}][elastic]: ${lineUpdate} lines updated`);
+        appLogger.info(`[${portalName}][kbart2][elastic]: ${lineUpdate} lines updated`);
       }
     }
   }
@@ -228,11 +228,11 @@ export async function insertKbart2FileInElastic(
     const updatedDocs = await updateBulk(dataToInsert);
     lineUpdate += updatedDocs;
     records = [];
-    appLogger.info(`[${portalName}][elastic]: ${lineUpdate} lines updated`);
+    appLogger.info(`[${portalName}][kbart2][elastic]: ${lineUpdate} lines updated`);
   }
-  appLogger.info(`[${portalName}][csv]: File [${filename}] is inserted`);
+  appLogger.info(`[${portalName}][kbart2][csv]: File [${filename}] is inserted`);
 
-  appLogger.info(`[${portalName}][elastic]: refresh index [${index}] is started`);
+  appLogger.info(`[${portalName}][kbart2][elastic]: refresh index [${index}] is started`);
   await refresh(index);
   return lineUpdate;
 }

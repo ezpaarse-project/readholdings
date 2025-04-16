@@ -42,11 +42,11 @@ async function generateAndDownloadExport(
   try {
     res1 = await generateExport(portalConfig, type);
   } catch (err) {
-    appLogger.error(`[${portalName}][holdingsIQ]: Cannot generate [${type}] export`);
+    appLogger.error(`[${portalName}][${type}][holdingsIQ]: Cannot generate export`);
     throw err;
   }
   const { id } = res1;
-  appLogger.info(`[${portalName}][holdingsIQ]: export ID [${id}]`);
+  appLogger.info(`[${portalName}][${type}][holdingsIQ]: export ID [${id}]`);
   let res2;
   let status = '';
   let i = 0;
@@ -55,8 +55,8 @@ async function generateAndDownloadExport(
     // eslint-disable-next-line no-await-in-loop
     res2 = await getExportByID(portalConfig, id);
     status = res2.status;
-    appLogger.verbose(`[${portalName}][holdingsIQ]: ${i} try`);
-    appLogger.verbose(`[${portalName}][holdingsIQ]: status of [${type}] export: [${res2.status}]`);
+    appLogger.verbose(`[${portalName}][${type}][holdingsIQ]: ${i} try`);
+    appLogger.verbose(`[${portalName}][${type}][holdingsIQ]: status of export: [${res2.status}]`);
     if (status !== 'COMPLETED') {
       // eslint-disable-next-line no-await-in-loop
       await setTimeout(10000);
@@ -105,12 +105,12 @@ export async function downloadAndInsertFile(
         filename,
       );
     } catch (err) {
-      fail(`[${portalName}][holdingsIQ]: Cannot generate and download ${type} export. ${err}`);
+      fail(`[${portalName}][${type}][holdingsIQ]: Cannot generate and download export. ${err}`);
       throw err;
     }
     endLatestStep();
   } else {
-    appLogger.info(`[${portalName}][holdingsIQ]: File [${filename}] already exists`);
+    appLogger.info(`[${portalName}][${type}][holdingsIQ]: File [${filename}] already exists`);
   }
 
   const insertStep = addStep(portalName, '[elastic][insert]', type);
@@ -118,7 +118,7 @@ export async function downloadAndInsertFile(
   try {
     lineUpserted = await inserters[type](portalName, filename, index, date);
   } catch (err) {
-    fail(`[${portalName}][elastic]: insert ${type} file in elastic. ${err}`);
+    fail(`[${portalName}][${type}][elastic]: insert file in elastic. ${err}`);
     throw err;
   }
   insertStep.lineUpserted = lineUpserted;
@@ -133,7 +133,7 @@ export async function downloadAndInsertFile(
   try {
     await deleteExportByID(portalConfig, id);
   } catch (err) {
-    appLogger.error(`[${portalName}][holdingsIQ]: Cannot delete export [${id}].`);
+    appLogger.error(`[${portalName}][${type}][holdingsIQ]: Cannot delete export [${id}].`);
   }
   endLatestStep();
 }

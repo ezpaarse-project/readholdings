@@ -16,9 +16,11 @@ export default async function updateOA(portalName: string, indexName: string): P
   });
   let packetOfIds = [];
   let updatedLines = 0;
+  // TODO 2025-04-14 put in config
+  const length = 100;
   for (let i = 0; i < oaIDFiltered.length; i += 1) {
     packetOfIds.push(oaIDFiltered[i]);
-    if (packetOfIds.length === 1000) {
+    if (packetOfIds.length === length) {
       const body = {
         query: {
           bool: {
@@ -37,7 +39,7 @@ export default async function updateOA(portalName: string, indexName: string): P
           },
         },
       };
-      const result = await search<Holding>(indexName, 10000, body);
+      const result = await search<Holding>(indexName, length * 11, body);
       const ids = result.filter((res) => !!res)
         .map((res) => `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`);
       updatedLines += await insertOAInElastic(ids, indexName);
