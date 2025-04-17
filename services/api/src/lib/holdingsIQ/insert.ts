@@ -293,18 +293,16 @@ export async function insertPortalsInElastic(
 }
 
 export async function insertFirstOccurrenceInElastic(
-  idsPerHoldingId: Map<string, string[]>,
+  ids: { id: string; firstOccurrence: boolean }[],
   indexName: string,
 ) {
   const dataToInsert: ESHoldingBulkAction[] = [];
 
-  for (const [, ids] of idsPerHoldingId) {
-    for (let i = 0; i < ids.length; i += 1) {
-      dataToInsert.push(
-        { update: { _index: indexName, _id: ids[i] } },
-        { doc: { meta: { firstOccurrence: i === 0 } }, doc_as_upsert: true },
-      );
-    }
+  for (const { id, firstOccurrence } of ids) {
+    dataToInsert.push(
+      { update: { _index: indexName, _id: id } },
+      { doc: { meta: { firstOccurrence } }, doc_as_upsert: true },
+    );
   }
 
   if (dataToInsert.length === 0) {

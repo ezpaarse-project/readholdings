@@ -95,17 +95,17 @@ export interface HoldingMeta {
   CustomCoverageBegin?: string | string[] | null; // Date
   CustomCoverageEnd?: string | string[] | null; // Date
   access_type: string;
-  IN2P3: string;
-  INC: string;
-  INEE: string;
-  INP: string;
-  INS2I: string;
-  INSB: string;
-  INSHS: string;
-  INSIS: string;
-  INSMI: string;
-  INSU: string;
-  INTEST: string;
+  IN2P3: boolean;
+  INC: boolean;
+  INEE: boolean;
+  INP: boolean;
+  INS2I: boolean;
+  INSB: boolean;
+  INSHS: boolean;
+  INSIS: boolean;
+  INSMI: boolean;
+  INSU: boolean;
+  INTEST: boolean;
   firstOccurrence?: boolean;
 }
 

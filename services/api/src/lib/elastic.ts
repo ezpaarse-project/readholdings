@@ -228,7 +228,7 @@ export async function updateBulk<T extends Record<string, any> = Record<string, 
   try {
     res = await elasticClient.bulk<ES.BulkResponse>({ body: data });
   } catch (err) {
-    appLogger.error('[elastic]: Cannot bulk');
+    appLogger.error(`[elastic]: Cannot bulk - ${err instanceof Error ? err.message : err}`);
     const apiError = err as ApiError;
     if ('meta' in apiError) {
       appLogger.error(JSON.stringify(apiError.meta?.body?.error, null, 2));
@@ -344,6 +344,22 @@ export async function createIndex(indexName: string, mapping: any): Promise<void
       throw err;
     }
     appLogger.info(`[elastic]: Index [${indexName}] is created`);
+  }
+}
+
+export async function getIndexSettings(index: string) {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
+  try {
+    const { body } = await elasticClient.indices.getSettings<ES.IndicesGetSettingsResponse>({
+      index,
+    });
+    return body[index];
+  } catch (err) {
+    appLogger.error(`[elastic]: Cannot request settings of index [${index}]`, err);
+    throw err;
   }
 }
 
