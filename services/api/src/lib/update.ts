@@ -117,13 +117,13 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
   // eslint-disable-next-line no-restricted-syntax
   for (const [portalName, portalConfig] of Object.entries(localPortals)) {
     try {
-      downloadAndInsertFile(portalName, portalConfig, forceDownload, date, 'STANDARD');
+      await downloadAndInsertFile(portalName, portalConfig, forceDownload, date, 'STANDARD');
     } catch {
       return;
     }
 
     try {
-      downloadAndInsertFile(portalName, portalConfig, forceDownload, date, 'KBART2');
+      await downloadAndInsertFile(portalName, portalConfig, forceDownload, date, 'KBART2');
     } catch {
       return;
     }

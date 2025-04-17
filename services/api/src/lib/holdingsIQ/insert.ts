@@ -252,6 +252,10 @@ export async function insertOAInElastic(ids: string[], indexName: string) {
     dataToInsert.push({ doc: record, doc_as_upsert: true });
   }
 
+  if (dataToInsert.length === 0) {
+    return 0;
+  }
+
   const updatedDocs = await updateBulk<Holding>(dataToInsert);
   return updatedDocs;
 }
@@ -280,6 +284,10 @@ export async function insertPortalsInElastic(
     });
   }
 
+  if (dataToInsert.length === 0) {
+    return 0;
+  }
+
   const updatedDocs = await updateBulk<Holding>(dataToInsert);
   return updatedDocs;
 }
@@ -297,6 +305,10 @@ export async function insertFirstOccurrenceInElastic(
         { doc: { meta: { firstOccurrence: i === 0 } }, doc_as_upsert: true },
       );
     }
+  }
+
+  if (dataToInsert.length === 0) {
+    return 0;
   }
 
   const updatedDocs = await updateBulk<Holding>(dataToInsert);
