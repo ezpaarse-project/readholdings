@@ -2,41 +2,11 @@
 import { getIndexSettings, refresh, scrollSearch } from '~/lib/elastic';
 import { insertFirstOccurrenceInElastic } from '~/lib/holdingsIQ/insert';
 import appLogger from '~/lib/logger/appLogger';
+import createInMemoryQueue from '~/lib/queue';
 
 import type { Holding } from '~/models/holding';
 
 type FirstOccurrenceUpdate = { id: string, firstOccurrence: boolean };
-
-function createInsertQueue(indexName: string) {
-  const queue: FirstOccurrenceUpdate[][] = [];
-  const promises: Promise<number>[] = [];
-  let current: Promise<number> | undefined;
-  let updated = 0;
-
-  const insertNext = async () => {
-    const processing = queue.shift();
-    if (!processing) {
-      return;
-    }
-
-    promises.push(insertFirstOccurrenceInElastic(processing, indexName));
-    updated += await promises.at(-1)!;
-    insertNext();
-  };
-
-  return {
-    push(toInsert: FirstOccurrenceUpdate[]) {
-      queue.push(toInsert);
-      if (!current) {
-        insertNext();
-      }
-    },
-    async flush() {
-      await Promise.all(promises);
-      return updated;
-    },
-  };
-}
 
 export default async function updateFirstOccurrence(indexName: string) {
   let size = 10000; // Elasticsearch defaults
@@ -71,8 +41,11 @@ export default async function updateFirstOccurrence(indexName: string) {
   });
 
   let buffer: FirstOccurrenceUpdate[] = [];
-  const insertQueue = createInsertQueue(indexName);
   const foundHoldingIds = new Set<string>();
+
+  const insertQueue = createInMemoryQueue<FirstOccurrenceUpdate[], number>(
+    (data) => insertFirstOccurrenceInElastic(data, indexName),
+  );
 
   let i = 0;
   // eslint-disable-next-line no-restricted-syntax
@@ -104,7 +77,8 @@ export default async function updateFirstOccurrence(indexName: string) {
   appLogger.info(`[elastic]: ${foundHoldingIds.size} first occurrences found so far...`);
   insertQueue.push(buffer);
 
-  const updatedLines = await insertQueue.flush();
+  const updated = await insertQueue.flush();
+  const updatedLines = updated.reduce((acc, curr) => acc + curr, 0);
 
   appLogger.info(`[elastic]: ${updatedLines} first occurrences updated`);
 
