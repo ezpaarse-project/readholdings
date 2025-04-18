@@ -77,6 +77,7 @@ export default async function updateFirstOccurrence(indexName: string) {
   appLogger.info(`[elastic]: ${foundHoldingIds.size} first occurrences found so far...`);
   insertQueue.push(buffer);
 
+  appLogger.info(`[elastic]: Waiting on ${insertQueue.size * 1000} updates...`);
   const updated = await insertQueue.flush();
   const updatedLines = updated.reduce((acc, curr) => acc + curr, 0);
 

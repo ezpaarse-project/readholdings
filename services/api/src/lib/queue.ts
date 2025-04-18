@@ -4,29 +4,38 @@ export default function createInMemoryQueue<
   FncType extends (data: DataType) => Promise<ReturnType> = (data: DataType) => Promise<ReturnType>,
 >(process: FncType) {
   const queue: DataType[] = [];
-  const promises: Promise<ReturnType>[] = [];
-  let current: Promise<ReturnType> | undefined;
+  const results: ReturnType[] = [];
+  let processing: Promise<void> | undefined;
 
-  const next = async () => {
-    const processing = queue.shift();
-    if (!processing) {
-      return;
+  const processQueue = async () => {
+    while (queue.length > 0) {
+      const data = queue.shift();
+      if (!data) {
+        break;
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      const result = await process(data);
+      results.push(result);
     }
 
-    promises.push(process(processing));
-    await promises.at(-1)!;
-    next();
+    processing = undefined;
   };
 
   return {
+    get size() {
+      return queue.length;
+    },
     push(data: DataType) {
       queue.push(data);
-      if (!current) {
-        next();
+      if (!processing) {
+        processing = processQueue();
       }
     },
-    flush(): Promise<ReturnType[]> {
-      return Promise.all(promises);
+    async flush(): Promise<ReturnType[]> {
+      await processing;
+
+      return results;
     },
   };
 }
