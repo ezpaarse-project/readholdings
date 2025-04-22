@@ -233,7 +233,7 @@ export async function updateBulk<T extends Record<string, any> = Record<string, 
     if ('meta' in apiError) {
       appLogger.error(JSON.stringify(apiError.meta?.body?.error, null, 2));
     }
-    process.exit(1);
+    throw new Error(JSON.stringify(apiError, null, 2));
   }
 
   const items = Array.isArray(res?.body?.items) ? res?.body?.items : [];
