@@ -58,8 +58,10 @@ export default async function updateFirstOccurrence(indexName: string) {
     const { holdingID } = document._source.meta;
 
     // Buffering
-    buffer.push({ id: `${document._id}`, firstOccurrence: !foundHoldingIds.has(holdingID) });
-    foundHoldingIds.add(holdingID);
+    if (!foundHoldingIds.has(holdingID)) {
+      buffer.push({ id: `${document._id}`, firstOccurrence: true });
+      foundHoldingIds.add(holdingID);
+    }
 
     // Logging
     if (i % (size * 10) === 0) {
