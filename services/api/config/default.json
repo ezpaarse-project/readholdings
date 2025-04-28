@@ -26,19 +26,7 @@
     "baseURL": "https://api.ebsco.io/rm/rmaccounts"
   },
   "portals": {
-    "INSU": {
-      "apiKey": "changeme",
-      "custid": "changeme"
-    },
-    "INSMI": {
-      "apiKey": "changeme",
-      "custid": "changeme"
-    },
-    "INSHS": {
-      "apiKey": "changeme",
-      "custid": "changeme"
-    },
-    "INS2I": {
+    "INC": {
       "apiKey": "changeme",
       "custid": "changeme"
     },
@@ -46,15 +34,23 @@
       "apiKey": "changeme",
       "custid": "changeme"
     },
-    "INC": {
-      "apiKey": "changeme",
-      "custid": "changeme"
-    },
     "INEE": {
       "apiKey": "changeme",
       "custid": "changeme"
     },
+    "INSU": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INSHS": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
     "INSIS": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INS2I": {
       "apiKey": "changeme",
       "custid": "changeme"
     },
@@ -63,6 +59,10 @@
       "custid": "changeme"
     },
     "IN2P3": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INSMI": {
       "apiKey": "changeme",
       "custid": "changeme"
     },
