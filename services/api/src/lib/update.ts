@@ -154,7 +154,7 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
     appLogger.error('[holdingsIQ]: Cannot update first occurrence');
   }
 
-  await redisClient.flushAll();
+  await redisClient.flushall();
 
   end();
 
