@@ -91,7 +91,7 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
   setWorkInProgress(true);
 
   const redisClient = getClient();
-  await redisClient.flushAll();
+  await redisClient.flushall();
 
   resetState();
 

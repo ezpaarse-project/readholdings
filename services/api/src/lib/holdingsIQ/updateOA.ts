@@ -8,18 +8,16 @@ import type { Holding } from '~/models/holding';
 
 export default async function updateOA(portalName: string, indexName: string): Promise<number> {
   const redisClient = getClient();
-  const allID = await redisClient.keys('*');
-  const oaID = allID.filter((id) => id.startsWith('oa-'));
-  const oaIDFiltered = oaID.map((id) => {
-    const [, idFiltered] = id.split('-');
-    return idFiltered;
-  });
+
+  const oaKeys = await redisClient.keys('oa-*');
+  const oaIDs = oaKeys.map((id) => id.split('-')[1]);
+
   let packetOfIds = [];
   let updatedLines = 0;
   // TODO 2025-04-14 put in config
   const length = 100;
-  for (let i = 0; i < oaIDFiltered.length; i += 1) {
-    packetOfIds.push(oaIDFiltered[i]);
+  for (let i = 0; i < oaIDs.length; i += 1) {
+    packetOfIds.push(oaIDs[i]);
     if (packetOfIds.length === length) {
       const body = {
         query: {
@@ -76,7 +74,7 @@ export default async function updateOA(portalName: string, indexName: string): P
   appLogger.info(`[${portalName}][elastic]: refresh index [${indexName}] is started`);
   await refresh(indexName);
 
-  await redisClient.del(oaID);
+  await redisClient.del(oaKeys);
 
   return updatedLines;
 }

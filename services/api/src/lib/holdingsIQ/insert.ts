@@ -30,6 +30,7 @@ export async function insertStandardFileInElastic(
   date: string,
 ): Promise<number> {
   const redisClient = getClient();
+
   const filePath = path.resolve(holdingsIQDir, filename);
   const parser = createReadStream(filePath).pipe(parse({
     columns: (header) => header.map((h: string) => h.trim()),

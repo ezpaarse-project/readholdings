@@ -8,12 +8,11 @@ import type { Holding } from '~/models/holding';
 
 export default async function updatePortals(indexName: string) {
   const redisClient = getClient();
-  let holdingsID = await redisClient.keys('*');
-  holdingsID = holdingsID.filter((id) => id.includes('holdingID_'));
-  holdingsID = holdingsID.map((id) => {
-    const [, idFiltered] = id.split('holdingID_');
-    return idFiltered;
-  });
+
+  const holdingsID = (
+    await redisClient.keys('holdingID_*')
+  ).map((id) => id.split('holdingID_')[1]);
+
   let packetOfIds = [];
   let updatedLines = 0;
   for (let i = 0; i < holdingsID.length; i += 1) {

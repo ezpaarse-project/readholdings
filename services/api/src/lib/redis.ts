@@ -1,18 +1,13 @@
-import { createClient } from 'redis';
-
-import util from 'util';
+import Redis from 'ioredis';
 
 import { config } from '~/lib/config';
 import appLogger from '~/lib/logger/appLogger';
 
 const { redis } = config;
 
-let redisClient = createClient({
-  legacyMode: true,
-  socket: {
-    host: redis.host,
-    port: redis.port,
-  },
+let redisClient = new Redis({
+  host: redis.host,
+  port: redis.port,
   password: redis.password,
 });
 
@@ -22,12 +17,9 @@ export function getClient() {
 
 export function initClient() {
   try {
-    redisClient = createClient({
-      legacyMode: true,
-      socket: {
-        host: redis.host,
-        port: redis.port,
-      },
+    redisClient = new Redis({
+      host: redis.host,
+      port: redis.port,
       password: redis.password,
     });
     appLogger.info('[redis]: Client is created');
@@ -51,13 +43,6 @@ export function initClient() {
   redisClient.on('reconnecting', () => {
     appLogger.error('[redis]: Status [reconnecting]');
   });
-
-  redisClient.get = util.promisify(redisClient.get);
-  redisClient.del = util.promisify(redisClient.del);
-  redisClient.ping = util.promisify(redisClient.ping);
-  redisClient.set = util.promisify(redisClient.set);
-  redisClient.keys = util.promisify(redisClient.keys);
-  redisClient.flushAll = util.promisify(redisClient.flushAll);
 }
 
 /**
