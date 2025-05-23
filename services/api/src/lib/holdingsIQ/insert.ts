@@ -160,6 +160,7 @@ export async function insertKbart2FileInElastic(
       meta: {
         access_type: 'P',
         holdingID: `${record?.vendor_id}_${record?.package_id}_${record?.title_id}_${record.date_first_issue_online}_${record.date_last_issue_online}_${record.embargo_info}`,
+        firstOccurrence: false,
         IN2P3: false,
         INC: false,
         INEE: false,
