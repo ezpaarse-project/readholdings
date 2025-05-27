@@ -148,11 +148,11 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
     appLogger.error('[holdingsIQ]: Cannot update portals');
   }
 
-  try {
-    await updateFirstOccurrence(index);
-  } catch (err) {
-    appLogger.error('[holdingsIQ]: Cannot update first occurrence');
-  }
+  // try {
+  //   await updateFirstOccurrence(index);
+  // } catch (err) {
+  //   appLogger.error('[holdingsIQ]: Cannot update first occurrence');
+  // }
 
   await redisClient.flushall();
 
