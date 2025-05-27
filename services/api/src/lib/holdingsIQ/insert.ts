@@ -156,7 +156,7 @@ export async function insertKbart2FileInElastic(
 
   for await (const record of parser) {
     const holdingID = `${record?.vendor_id}_${record?.package_id}_${record?.title_id}_${record.date_first_issue_online}_${record.date_last_issue_online}_${record.embargo_info}`;
-    const firstOccurrence = !!(await redisClient.exists(`holdingID_${holdingID}`));
+    const firstOccurrence = !(await redisClient.exists(`holdingID_${holdingID}`));
 
     const id = `${portalName}-${record?.vendor_id}-${record?.package_id}-${record?.title_id}`;
     const kbart2Record: DeepPartial<Holding> = {
