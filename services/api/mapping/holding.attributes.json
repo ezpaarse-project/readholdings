@@ -11,6 +11,7 @@
       "CustomCoverageBegin",
       "CustomCoverageEnd",
       "access_type",
+      "firstOccurrence",
       "IN2P3",
       "INC",
       "INEE",

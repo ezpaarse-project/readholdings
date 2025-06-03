@@ -15,7 +15,6 @@ import { getClient } from '~/lib/redis';
 
 import updateOA from '~/lib/holdingsIQ/updateOA';
 import updatePortals from '~/lib/holdingsIQ/updatePortal';
-import updateFirstOccurrence from '~/lib/holdingsIQ/updateFirstOccurrence';
 
 import holding from '~/../mapping/holding.json';
 import { createReport } from './report';
@@ -119,13 +118,13 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
     try {
       await downloadAndInsertFile(portalName, portalConfig, forceDownload, date, 'STANDARD');
     } catch {
-      return;
+      continue;
     }
 
     try {
       await downloadAndInsertFile(portalName, portalConfig, forceDownload, date, 'KBART2');
     } catch {
-      return;
+      continue;
     }
 
     // #region Update OA
@@ -147,12 +146,6 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
   } catch (err) {
     appLogger.error('[holdingsIQ]: Cannot update portals');
   }
-
-  // try {
-  //   await updateFirstOccurrence(index);
-  // } catch (err) {
-  //   appLogger.error('[holdingsIQ]: Cannot update first occurrence');
-  // }
 
   await redisClient.flushall();
 
