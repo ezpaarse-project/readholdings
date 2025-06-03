@@ -166,15 +166,25 @@ export async function insertKbart2FileInElastic(
         firstOccurrence,
         IN2P3: false,
         INC: false,
+        'INC.label': '',
         INEE: false,
+        'INEE.label': '',
         INP: false,
+        'INP.label': '',
         INS2I: false,
+        'INS2I.label': '',
         INSB: false,
+        'INSB.label': '',
         INSHS: false,
+        'INSHS.label': '',
         INSIS: false,
+        'INSIS.label': '',
         INSMI: false,
+        'INSMI.label': '',
         INSU: false,
+        'INSU.label': '',
         INTEST: false,
+        'INTEST.label': '',
       },
       kbart2: {
         publication_title: record?.publication_title || null,
@@ -280,9 +290,10 @@ export async function insertPortalsInElastic(
 
     dataHasHoldingID.forEach((res) => {
       const id = `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`;
-      const record = { meta: { } as Record<string, boolean> };
+      const record = { meta: { } as Record<string, boolean | string> };
       portals.forEach((portal) => {
         record.meta[portal] = true;
+        record.meta[`${portal}.label`] = 'Disponible';
       });
       dataToInsert.push({ update: { _index: indexName, _id: id } });
       dataToInsert.push({ doc: record, doc_as_upsert: true });

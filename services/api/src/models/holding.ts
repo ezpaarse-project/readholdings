@@ -97,15 +97,25 @@ export interface HoldingMeta {
   access_type: string;
   IN2P3: boolean;
   INC: boolean;
+  'INC.label': string;
   INEE: boolean;
+  'INEE.label': string;
   INP: boolean;
+  'INP.label': string;
   INS2I: boolean;
+  'INS2I.label': string;
   INSB: boolean;
+  'INSB.label': string;
   INSHS: boolean;
+  'INSHS.label': string;
   INSIS: boolean;
+  'INSIS.label': string;
   INSMI: boolean;
+  'INSMI.label': string;
   INSU: boolean;
+  'INSU.label': string;
   INTEST: boolean;
+  'INTEST.label': string;
   firstOccurrence?: boolean;
 }
 

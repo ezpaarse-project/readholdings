@@ -24,17 +24,83 @@
           "CustomCoverageEnd": { "type": "date" },
           "access_type": { "type": "keyword" },
           "firstOccurrence": { "type": "boolean", "null_value": false },
-          "IN2P3": { "type": "boolean", "null_value": false },
-          "INC": { "type": "boolean", "null_value": false },
-          "INEE": { "type": "boolean", "null_value": false },
-          "INP": { "type": "boolean", "null_value": false },
-          "INS2I": { "type": "boolean", "null_value": false },
-          "INSB": { "type": "boolean", "null_value": false },
-          "INSHS": { "type": "boolean", "null_value": false },
-          "INSIS": { "type": "boolean", "null_value": false },
-          "INSMI": { "type": "boolean", "null_value": false },
-          "INSU": { "type": "boolean", "null_value": false },
-          "INTEST": { "type": "boolean", "null_value": false }
+          "IN2P3": {
+            "type": "boolean",
+            "null_value": false,
+            "fields": {
+              "label": { "type": "keyword" }
+            }
+          },
+          "INC": {
+            "type": "boolean",
+            "null_value": false,
+            "fields": {
+              "label": { "type": "keyword" }
+            }
+          },
+          "INEE": {
+            "type": "boolean",
+            "null_value": false,
+            "fields": {
+              "label": { "type": "keyword" }
+            }
+          },
+          "INP": {
+            "type": "boolean",
+            "null_value": false,
+            "fields": {
+              "label": { "type": "keyword" }
+            }
+          },
+          "INS2I": {
+            "type": "boolean",
+            "null_value": false,
+            "fields": {
+              "label": { "type": "keyword" }
+            }
+          },
+          "INSB": {
+            "type": "boolean",
+            "null_value": false,
+            "fields": {
+              "label": { "type": "keyword" }
+            }
+          },
+          "INSHS": {
+            "type": "boolean",
+            "null_value": false,
+            "fields": {
+              "label": { "type": "keyword" }
+            }
+          },
+          "INSIS": {
+            "type": "boolean",
+            "null_value": false,
+            "fields": {
+              "label": { "type": "keyword" }
+            }
+          },
+          "INSMI": {
+            "type": "boolean",
+            "null_value": false,
+            "fields": {
+              "label": { "type": "keyword" }
+            }
+          },
+          "INSU": {
+            "type": "boolean",
+            "null_value": false,
+            "fields": {
+              "label": { "type": "keyword" }
+            }
+          },
+          "INTEST": {
+            "type": "boolean",
+            "null_value": false,
+            "fields": {
+              "label": { "type": "keyword" }
+            }
+          }
         }
       },
       "kbart2": {
