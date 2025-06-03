@@ -10,6 +10,74 @@
         }
       }
     ],
+    "runtime": {
+      "meta.IN2P3.label": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['meta.IN2P3'].size() > 0 && doc['meta.IN2P3'].value == true ? 'Disponible' : '')"
+        }
+      },
+      "meta.INC.label": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['meta.INC'].size() > 0 && doc['meta.INC'].value == true ? 'Disponible' : '')"
+        }
+      },
+      "meta.INEE.label": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['meta.INEE'].size() > 0 && doc['meta.INEE'].value == true ? 'Disponible' : '')"
+        }
+      },
+      "meta.INP.label": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['meta.INP'].size() > 0 && doc['meta.INP'].value == true ? 'Disponible' : '')"
+        }
+      },
+      "meta.INS2I.label": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['meta.INS2I'].size() > 0 && doc['meta.INS2I'].value == true ? 'Disponible' : '')"
+        }
+      },
+      "meta.INSB.label": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['meta.INSB'].size() > 0 && doc['meta.INSB'].value == true ? 'Disponible' : '')"
+        }
+      },
+      "meta.INSHS.label": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['meta.INSHS'].size() > 0 && doc['meta.INSHS'].value == true ? 'Disponible' : '')"
+        }
+      },
+      "meta.INSIS.label": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['meta.INSIS'].size() > 0 && doc['meta.INSIS'].value == true ? 'Disponible' : '')"
+        }
+      },
+      "meta.INSMI.label": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['meta.INSMI'].size() > 0 && doc['meta.INSMI'].value == true ? 'Disponible' : '')"
+        }
+      },
+      "meta.INSU.label": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['meta.INSU'].size() > 0 && doc['meta.INSU'].value == true ? 'Disponible' : '')"
+        }
+      },
+      "meta.INTEST.label": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['meta.INTEST'].size() > 0 && doc['meta.INTEST'].value == true ? 'Disponible' : '')"
+        }
+      }
+    },
     "properties": {
       "meta": {
         "properties": {
@@ -24,83 +92,17 @@
           "CustomCoverageEnd": { "type": "date" },
           "access_type": { "type": "keyword" },
           "firstOccurrence": { "type": "boolean", "null_value": false },
-          "IN2P3": {
-            "type": "boolean",
-            "null_value": false,
-            "fields": {
-              "label": { "type": "keyword" }
-            }
-          },
-          "INC": {
-            "type": "boolean",
-            "null_value": false,
-            "fields": {
-              "label": { "type": "keyword" }
-            }
-          },
-          "INEE": {
-            "type": "boolean",
-            "null_value": false,
-            "fields": {
-              "label": { "type": "keyword" }
-            }
-          },
-          "INP": {
-            "type": "boolean",
-            "null_value": false,
-            "fields": {
-              "label": { "type": "keyword" }
-            }
-          },
-          "INS2I": {
-            "type": "boolean",
-            "null_value": false,
-            "fields": {
-              "label": { "type": "keyword" }
-            }
-          },
-          "INSB": {
-            "type": "boolean",
-            "null_value": false,
-            "fields": {
-              "label": { "type": "keyword" }
-            }
-          },
-          "INSHS": {
-            "type": "boolean",
-            "null_value": false,
-            "fields": {
-              "label": { "type": "keyword" }
-            }
-          },
-          "INSIS": {
-            "type": "boolean",
-            "null_value": false,
-            "fields": {
-              "label": { "type": "keyword" }
-            }
-          },
-          "INSMI": {
-            "type": "boolean",
-            "null_value": false,
-            "fields": {
-              "label": { "type": "keyword" }
-            }
-          },
-          "INSU": {
-            "type": "boolean",
-            "null_value": false,
-            "fields": {
-              "label": { "type": "keyword" }
-            }
-          },
-          "INTEST": {
-            "type": "boolean",
-            "null_value": false,
-            "fields": {
-              "label": { "type": "keyword" }
-            }
-          }
+          "IN2P3": { "type": "boolean", "null_value": false },
+          "INC": { "type": "boolean", "null_value": false },
+          "INEE": { "type": "boolean", "null_value": false },
+          "INP": { "type": "boolean", "null_value": false },
+          "INS2I": { "type": "boolean", "null_value": false },
+          "INSB": { "type": "boolean", "null_value": false },
+          "INSHS": { "type": "boolean", "null_value": false },
+          "INSIS": { "type": "boolean", "null_value": false },
+          "INSMI": { "type": "boolean", "null_value": false },
+          "INSU": { "type": "boolean", "null_value": false },
+          "INTEST": { "type": "boolean", "null_value": false  }
         }
       },
       "kbart2": {

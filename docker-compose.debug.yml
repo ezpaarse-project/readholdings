@@ -107,6 +107,7 @@ services:
       - 24678:24678
     environment:
       - NODE_ENV
+      - HOST=0.0.0.0
       - NUXT_PUBLIC_ENVIRONMENT=development
       - NUXT_PUBLIC_ELASTIC_ENV=development
       - NUXT_PUBLIC_VERSION=development

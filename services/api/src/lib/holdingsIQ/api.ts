@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 import { config } from '~/lib/config';
 import appLogger from '~/lib/logger/appLogger';
@@ -77,6 +77,13 @@ export async function generateExport(conf: ApiAuth, type: string) {
     });
   } catch (err) {
     appLogger.error(`[holdingsIQ]: Cannot POST /${custid}/exports`);
+    if (err instanceof AxiosError) {
+      if (!err.response?.data) {
+        appLogger.error('[holdingsIQ]: Got no response');
+      } else {
+        appLogger.error(`[holdingsIQ]: Got "${err.response?.data?.message}"`);
+      }
+    }
     throw err;
   }
 

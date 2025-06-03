@@ -118,12 +118,14 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
     try {
       await downloadAndInsertFile(portalName, portalConfig, forceDownload, date, 'STANDARD');
     } catch {
+      // eslint-disable-next-line no-continue
       continue;
     }
 
     try {
       await downloadAndInsertFile(portalName, portalConfig, forceDownload, date, 'KBART2');
     } catch {
+      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -133,7 +135,7 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
     try {
       lineUpserted = await updateOA(portalName, index);
     } catch (err) {
-      appLogger.error(`[${portalName}][oa][holdingsIQ]: Cannot update OA`);
+      appLogger.error(`[${portalName}][oa][holdingsIQ]: Cannot update OA: ${err}`);
     }
     accessTypeStep.lineUpserted = lineUpserted;
     updateLatestStep(accessTypeStep); // ? Maybe not useful as insertStep is a ref
@@ -144,7 +146,7 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
   try {
     await updatePortals(index);
   } catch (err) {
-    appLogger.error('[holdingsIQ]: Cannot update portals');
+    appLogger.error(`[holdingsIQ]: Cannot update portals: ${err}`);
   }
 
   await redisClient.flushall();

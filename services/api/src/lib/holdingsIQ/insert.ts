@@ -166,25 +166,15 @@ export async function insertKbart2FileInElastic(
         firstOccurrence,
         IN2P3: false,
         INC: false,
-        'INC.label': '',
         INEE: false,
-        'INEE.label': '',
         INP: false,
-        'INP.label': '',
         INS2I: false,
-        'INS2I.label': '',
         INSB: false,
-        'INSB.label': '',
         INSHS: false,
-        'INSHS.label': '',
         INSIS: false,
-        'INSIS.label': '',
         INSMI: false,
-        'INSMI.label': '',
         INSU: false,
-        'INSU.label': '',
         INTEST: false,
-        'INTEST.label': '',
       },
       kbart2: {
         publication_title: record?.publication_title || null,
@@ -290,35 +280,13 @@ export async function insertPortalsInElastic(
 
     dataHasHoldingID.forEach((res) => {
       const id = `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`;
-      const record = { meta: { } as Record<string, boolean | string> };
+      const record = { meta: { } as Record<string, boolean> };
       portals.forEach((portal) => {
         record.meta[portal] = true;
-        record.meta[`${portal}.label`] = 'Disponible';
       });
       dataToInsert.push({ update: { _index: indexName, _id: id } });
       dataToInsert.push({ doc: record, doc_as_upsert: true });
     });
-  }
-
-  if (dataToInsert.length === 0) {
-    return 0;
-  }
-
-  const updatedDocs = await updateBulk<Holding>(dataToInsert);
-  return updatedDocs;
-}
-
-export async function insertFirstOccurrenceInElastic(
-  ids: string[],
-  indexName: string,
-) {
-  const dataToInsert: ESHoldingBulkAction[] = [];
-
-  for (const id of ids) {
-    dataToInsert.push(
-      { update: { _index: indexName, _id: id } },
-      { doc: { meta: { firstOccurrence: true } }, doc_as_upsert: true },
-    );
   }
 
   if (dataToInsert.length === 0) {
