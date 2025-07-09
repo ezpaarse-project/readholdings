@@ -75,11 +75,11 @@
     "cleanFile": {
       "schedule": "0 0 0 * * *",
       "active": true,
-      "applicationLogThreshold": 150,
-      "accessLogThreshold": 30,
-      "healthcheckLogThreshold": 30,
-      "holdingsIQThreshold": 1,
-      "HLMThreshold": 1
+      "applicationLogRetention": 150,
+      "accessLogRetention": 30,
+      "healthcheckLogRetention": 30,
+      "holdingsIQRetention": 1,
+      "HLMRetention": 1
     },
     "dataUpdate": {
       "schedule": "0 0 0 * * 0",
