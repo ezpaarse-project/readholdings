@@ -35,7 +35,7 @@ To set up this service, you can use environment variables. The config is display
 | name | default | description |
 | --- | --- | --- |
 | NODE_ENV | development | environment of node |
-| TIMEZONE | Europe/Paris | timezone of app used in cron |
+| TZ | Europe/Paris | timezone of app used in cron |
 | ELASTICSEARCH_NODES | http://elastic | elastic node separated by a comma |
 | ELASTICSEARCH_USERNAME | elastic | username of elastic super user |
 | ELASTICSEARCH_PASSWORD | changeme | password of elastic super user |
