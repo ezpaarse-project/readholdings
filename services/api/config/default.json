@@ -15,30 +15,18 @@
     "nodes": "http://elastic:9200",
     "username": "elastic",
     "password": "changeme",
-    "timeout": "5000"
+    "timeout": 5000
   },
   "redis":  {
     "host": "redis",
-    "port": "6379",
+    "port": 6379,
     "password": "changeme"
   },
   "holdingsIQ": {
     "baseURL": "https://api.ebsco.io/rm/rmaccounts"
   },
   "portals": {
-    "INSU": {
-      "apiKey": "changeme",
-      "custid": "changeme"
-    },
-    "INSMI": {
-      "apiKey": "changeme",
-      "custid": "changeme"
-    },
-    "INSHS": {
-      "apiKey": "changeme",
-      "custid": "changeme"
-    },
-    "INS2I": {
+    "INC": {
       "apiKey": "changeme",
       "custid": "changeme"
     },
@@ -46,15 +34,23 @@
       "apiKey": "changeme",
       "custid": "changeme"
     },
-    "INC": {
-      "apiKey": "changeme",
-      "custid": "changeme"
-    },
     "INEE": {
       "apiKey": "changeme",
       "custid": "changeme"
     },
+    "INSU": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INSHS": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
     "INSIS": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INS2I": {
       "apiKey": "changeme",
       "custid": "changeme"
     },
@@ -63,6 +59,10 @@
       "custid": "changeme"
     },
     "IN2P3": {
+      "apiKey": "changeme",
+      "custid": "changeme"
+    },
+    "INSMI": {
       "apiKey": "changeme",
       "custid": "changeme"
     },
@@ -75,11 +75,11 @@
     "cleanFile": {
       "schedule": "0 0 0 * * *",
       "active": true,
-      "applicationLogThreshold": 150,
-      "accessLogThreshold": 30,
-      "healthcheckLogThreshold": 30,
-      "holdingsIQThreshold": 1,
-      "HLMThreshold": 1
+      "applicationLogRetention": 150,
+      "accessLogRetention": 30,
+      "healthcheckLogRetention": 30,
+      "holdingsIQRetention": 1,
+      "HLMRetention": 1
     },
     "dataUpdate": {
       "schedule": "0 0 0 * * 0",
@@ -90,7 +90,7 @@
     "log": {
       "applicationDir": "./log/application",
       "accessDir": "./log/access",
-      "healthcheckDir": "./log/healthcheck"
+      "healthCheckDir": "./log/healthcheck"
     },
     "data": {
       "HLMDir": "./data/hlm",

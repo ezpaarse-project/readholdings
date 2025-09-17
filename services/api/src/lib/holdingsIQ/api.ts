@@ -1,14 +1,19 @@
-import axios from 'axios';
-import config from 'config';
+import axios, { AxiosError } from 'axios';
 
-import appLogger from '../logger/appLogger';
+import { config } from '~/lib/config';
+import appLogger from '~/lib/logger/appLogger';
 
 const holdingsIQ = axios.create({
   baseURL: config.holdingsIQ.baseURL,
   timeout: 20000,
 });
 
-export async function getExports(conf) {
+type ApiAuth = {
+  apiKey: string,
+  custid: string,
+};
+
+export async function getExports(conf: ApiAuth) {
   const { apiKey, custid } = conf;
 
   let res;
@@ -29,7 +34,7 @@ export async function getExports(conf) {
   return res?.data;
 }
 
-export async function getExportByID(conf, id) {
+export async function getExportByID(conf: ApiAuth, id: string) {
   const { apiKey, custid } = conf;
 
   let res;
@@ -50,7 +55,7 @@ export async function getExportByID(conf, id) {
   return res?.data;
 }
 
-export async function generateExport(conf, portal, type) {
+export async function generateExport(conf: ApiAuth, type: string) {
   const { apiKey, custid } = conf;
 
   let res;
@@ -72,13 +77,20 @@ export async function generateExport(conf, portal, type) {
     });
   } catch (err) {
     appLogger.error(`[holdingsIQ]: Cannot POST /${custid}/exports`);
+    if (err instanceof AxiosError) {
+      if (!err.response?.data) {
+        appLogger.error('[holdingsIQ]: Got no response');
+      } else {
+        appLogger.error(`[holdingsIQ]: Got "${err.response?.data?.message}"`);
+      }
+    }
     throw err;
   }
 
   return res?.data;
 }
 
-export async function deleteExportByID(conf, id) {
+export async function deleteExportByID(conf: ApiAuth, id: string) {
   const { apiKey, custid } = conf;
 
   let res;

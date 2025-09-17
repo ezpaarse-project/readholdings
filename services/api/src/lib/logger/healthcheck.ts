@@ -1,7 +1,13 @@
 import winston from 'winston';
+import type * as Transport from 'winston-transport';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
-import { paths } from 'config';
+import { mkdirSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+import { config } from '~/lib/config';
+
+const { paths } = config;
 
 const apacheFormat = winston.format.printf((info) => {
   const {
@@ -14,14 +20,16 @@ const apacheFormat = winston.format.printf((info) => {
   return `${info.timestamp} ${method} ${url} ${statusCode} ${userAgent} ${responseTime}`;
 });
 
-const transports = [];
+const transports: Transport[] = [];
 
 if (process.env.NODE_ENV === 'test') {
   transports.push(new winston.transports.Console());
 } else {
+  mkdirSync(resolve(paths.log.healthCheckDir), { recursive: true });
+
   transports.push(
     new DailyRotateFile({
-      filename: `${paths.log.healthcheckDir}/%DATE%-healthcheck.log`,
+      filename: `${paths.log.healthCheckDir}/%DATE%-healthcheck.log`,
       datePattern: 'YYYY-MM-DD',
     }),
   );

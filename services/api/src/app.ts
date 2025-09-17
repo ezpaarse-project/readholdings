@@ -40,13 +40,10 @@ import { logConfig, config } from '~/lib/config';
 const { paths } = config;
 
 const start = async () => {
-  // create log directory
+  // create data directories
   await mkdir(resolve(paths.data.HLMDir), { recursive: true });
   await mkdir(resolve(paths.data.holdingsIQDir), { recursive: true });
   await mkdir(resolve(paths.data.reportDir), { recursive: true });
-  await mkdir(resolve(paths.log.applicationDir), { recursive: true });
-  await mkdir(resolve(paths.log.accessDir), { recursive: true });
-  await mkdir(resolve(paths.log.healthcheckDir), { recursive: true });
 
   const fastify = Fastify();
 
@@ -126,7 +123,7 @@ const start = async () => {
   }
 
   try {
-    await initRedisClient();
+    initRedisClient();
     await startConnectionRedis();
   } catch (err) {
     appLogger.error('[fastify]: Cannot initiate redis client');

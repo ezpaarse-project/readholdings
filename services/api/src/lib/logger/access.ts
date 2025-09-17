@@ -1,7 +1,14 @@
 import winston from 'winston';
+import type * as Transport from 'winston-transport';
 import DailyRotateFile from 'winston-daily-rotate-file';
-import { paths } from 'config';
 import { format } from 'date-fns';
+
+import { mkdirSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+import { config } from '~/lib/config';
+
+const { paths } = config;
 
 const apacheFormat = winston.format.printf((info) => {
   const {
@@ -18,19 +25,15 @@ const apacheFormat = winston.format.printf((info) => {
   return `${ip || '-'} "-" [${timestamp}] "${method} ${url} HTTP/1.1" ${statusCode} - "-" "${responseTime}" "${userAgent || '-'}"`;
 });
 
-const transports = [];
+const transports: Transport[] = [];
 
-if (process.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
   transports.push(new winston.transports.Console());
-} else if (process.env.NODE_ENV === 'development') {
-  transports.push(new winston.transports.Console());
-  transports.push(
-    new DailyRotateFile({
-      filename: `${paths.log.accessDir}/%DATE%-access.log`,
-      datePattern: 'YYYY-MM-DD',
-    }),
-  );
-} else {
+}
+
+if (process.env.NODE_ENV !== 'test') {
+  mkdirSync(resolve(paths.log.accessDir), { recursive: true });
+
   transports.push(
     new DailyRotateFile({
       filename: `${paths.log.accessDir}/%DATE%-access.log`,

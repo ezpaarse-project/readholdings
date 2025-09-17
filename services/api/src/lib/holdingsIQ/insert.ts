@@ -1,12 +1,14 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
+import type { estypes as ES } from '@elastic/elasticsearch';
 import { parse } from 'csv-parse';
-import fs from 'fs';
+import { createReadStream } from 'fs';
 import path from 'path';
-import { paths } from 'config';
+
 import appLogger from '~/lib/logger/appLogger';
 import { bulk, updateBulk, refresh } from '~/lib/elastic';
 import { getClient } from '~/lib/redis';
+import { config } from '~/lib/config';
 
 import {
   transformCoverage,
@@ -14,11 +16,24 @@ import {
   transformEmbargo,
 } from '~/lib/holdingsIQ/transform';
 
-export async function insertStandardFileInElastic(portalName, filename, index, date) {
+import type { DeepPartial } from '~/type/utils';
+import type { Holding } from '~/models/holding';
+
+const { holdingsIQDir } = config.paths.data;
+
+type ESHoldingBulkAction = ES.BulkOperationContainer | ES.BulkUpdateAction<Holding>;
+
+export async function insertStandardFileInElastic(
+  portalName: string,
+  filename: string,
+  index: string,
+  date: string,
+): Promise<number> {
   const redisClient = getClient();
-  const filePath = path.resolve(paths.data.holdingsIQDir, filename);
-  const parser = fs.createReadStream(filePath).pipe(parse({
-    columns: (header) => header.map((h) => h.trim()),
+
+  const filePath = path.resolve(holdingsIQDir, filename);
+  const parser = createReadStream(filePath).pipe(parse({
+    columns: (header) => header.map((h: string) => h.trim()),
   }));
   appLogger.info(`[${portalName}][standard][csv]: read [${filename}]`);
 
@@ -27,7 +42,7 @@ export async function insertStandardFileInElastic(portalName, filename, index, d
   let records = [];
 
   for await (const record of parser) {
-    const standardRecord = {
+    const standardRecord: DeepPartial<Holding> = {
       meta: {
         BibCNRS: portalName,
         createdAt: date,
@@ -90,7 +105,7 @@ export async function insertStandardFileInElastic(portalName, filename, index, d
       },
     };
 
-    if (/DOAJ|DOAB/.test(record.PackageName)) {
+    if (/DOAJ|DOAB/.test(record?.PackageName)) {
       await redisClient.set(`oa-${record.KBID}`, '1');
     }
 
@@ -122,12 +137,16 @@ export async function insertStandardFileInElastic(portalName, filename, index, d
   return lineUpserted;
 }
 
-export async function insertKbart2FileInElastic(portalName, filename, index) {
+export async function insertKbart2FileInElastic(
+  portalName: string,
+  filename: string,
+  index: string,
+): Promise<number> {
   const redisClient = getClient();
 
-  const filePath = path.resolve(paths.data.holdingsIQDir, filename);
-  const parser = fs.createReadStream(filePath).pipe(parse({
-    columns: (header) => header.map((h) => h.trim()),
+  const filePath = path.resolve(holdingsIQDir, filename);
+  const parser = createReadStream(filePath).pipe(parse({
+    columns: (header) => header.map((h: string) => h.trim()),
   }));
   appLogger.info(`[${portalName}][kbart2][csv]: read [${filename}]`);
 
@@ -136,11 +155,15 @@ export async function insertKbart2FileInElastic(portalName, filename, index) {
   let records = [];
 
   for await (const record of parser) {
-    const holdingID = `${portalName}-${record?.vendor_id}-${record?.package_id}-${record?.title_id}`;
-    const kbart2Record = {
+    const holdingID = `${record?.vendor_id}_${record?.package_id}_${record?.title_id}_${record.date_first_issue_online}_${record.date_last_issue_online}_${record.embargo_info}`;
+    const firstOccurrence = !(await redisClient.exists(`holdingID_${holdingID}`));
+
+    const id = `${portalName}-${record?.vendor_id}-${record?.package_id}-${record?.title_id}`;
+    const kbart2Record: DeepPartial<Holding> = {
       meta: {
         access_type: 'P',
-        holdingID: `${record?.vendor_id}_${record?.package_id}_${record?.title_id}_${record.date_first_issue_online}_${record.date_last_issue_online}_${record.embargo_info}`,
+        holdingID,
+        firstOccurrence,
         IN2P3: false,
         INC: false,
         INEE: false,
@@ -189,10 +212,10 @@ export async function insertKbart2FileInElastic(portalName, filename, index) {
       },
     };
 
-    records.push({ update: { _index: index, _id: holdingID } });
+    records.push({ update: { _index: index, _id: id } });
     records.push({ doc: kbart2Record, doc_as_upsert: true });
 
-    await redisClient.set(`holdingID_${kbart2Record.meta.holdingID}`, 1);
+    await redisClient.set(`holdingID_${kbart2Record.meta?.holdingID}`, 1);
 
     if (records.length === 1000 * 2) {
       const dataToInsert = records.slice();
@@ -216,10 +239,11 @@ export async function insertKbart2FileInElastic(portalName, filename, index) {
 
   appLogger.info(`[${portalName}][kbart2][elastic]: refresh index [${index}] is started`);
   await refresh(index);
+  return lineUpdate;
 }
 
-export async function insertOAInElastic(ids, indexName) {
-  const records = [];
+export async function insertOAInElastic(ids: string[], indexName: string) {
+  const dataToInsert: ESHoldingBulkAction[] = [];
 
   for (let i = 0; i < ids.length; i += 1) {
     const id = ids[i];
@@ -229,16 +253,24 @@ export async function insertOAInElastic(ids, indexName) {
       },
     };
 
-    records.push({ update: { _index: indexName, _id: id } });
-    records.push({ doc: record, doc_as_upsert: true });
+    dataToInsert.push({ update: { _index: indexName, _id: id } });
+    dataToInsert.push({ doc: record, doc_as_upsert: true });
   }
-  const dataToInsert = records.slice();
-  const updatedDocs = await updateBulk(dataToInsert);
+
+  if (dataToInsert.length === 0) {
+    return 0;
+  }
+
+  const updatedDocs = await updateBulk<Holding>(dataToInsert);
   return updatedDocs;
 }
 
-export async function insertPortalsInElastic(holdingIDs, result, indexName) {
-  const records = [];
+export async function insertPortalsInElastic(
+  holdingIDs: string[],
+  result: Holding[],
+  indexName: string,
+) {
+  const dataToInsert: ESHoldingBulkAction[] = [];
 
   for (let i = 0; i < holdingIDs.length; i += 1) {
     const holdingID = holdingIDs[i];
@@ -248,16 +280,19 @@ export async function insertPortalsInElastic(holdingIDs, result, indexName) {
 
     dataHasHoldingID.forEach((res) => {
       const id = `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`;
-      const record = { meta: { } };
+      const record = { meta: { } as Record<string, boolean> };
       portals.forEach((portal) => {
         record.meta[portal] = true;
       });
-      records.push({ update: { _index: indexName, _id: id } });
-      records.push({ doc: record, doc_as_upsert: true });
+      dataToInsert.push({ update: { _index: indexName, _id: id } });
+      dataToInsert.push({ doc: record, doc_as_upsert: true });
     });
   }
 
-  const dataToInsert = records.slice();
-  const updatedDocs = await updateBulk(dataToInsert);
+  if (dataToInsert.length === 0) {
+    return 0;
+  }
+
+  const updatedDocs = await updateBulk<Holding>(dataToInsert);
   return updatedDocs;
 }

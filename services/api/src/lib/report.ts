@@ -1,8 +1,10 @@
 import path from 'path';
-import { paths } from 'config';
 import fsp from 'fs/promises';
 import { format } from 'date-fns';
+import { config } from '~/lib/config';
 import appLogger from '~/lib/logger/appLogger';
+
+const { reportDir } = config.paths.data;
 
 /**
  * Create report on the folder as name the date of process.
@@ -11,9 +13,9 @@ import appLogger from '~/lib/logger/appLogger';
  *
  * @returns
  */
-export async function createReport(state) {
+export async function createReport(state: unknown) {
   appLogger.info('[report]: create new report');
-  const filepath = path.resolve(paths.data.reportDir, `${format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSS")}.json`);
+  const filepath = path.resolve(reportDir, `${format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSS")}.json`);
   try {
     await fsp.writeFile(filepath, JSON.stringify(state, null, 2));
   } catch (err) {
@@ -27,15 +29,15 @@ export async function createReport(state) {
 /**
  * Get report
  *
- * @param {string} filename Report filename.
+ * @param filename Report filename.
  *
- * @returns {Promise<Object>} Report in json format.
+ * @returns Report in json format.
  */
-export async function getReport(filename) {
+export async function getReport(filename: string): Promise<object> {
   let report;
-  const pathfile = path.resolve(paths.data.reportDir, filename);
+  const pathfile = path.resolve(reportDir, filename);
   try {
-    report = await fsp.readFile(pathfile);
+    report = await fsp.readFile(pathfile, 'utf-8');
   } catch (err) {
     appLogger.error(`[report] Cannot read [${pathfile}]`, err);
     throw err;
@@ -58,7 +60,7 @@ export async function getReport(filename) {
 export async function getReports() {
   const reports = [];
 
-  let reportsFilename = await fsp.readdir(paths.data.reportDir);
+  let reportsFilename = await fsp.readdir(reportDir);
 
   reportsFilename = reportsFilename.sort((a, b) => {
     // remove .json

@@ -3,8 +3,8 @@
 import { parse } from 'csv-parse';
 import fs from 'fs';
 import path from 'path';
-import { paths } from 'config';
 import { format } from 'date-fns';
+import { config } from '~/lib/config';
 import appLogger from '~/lib/logger/appLogger';
 import { bulk, refresh, createIndex } from '~/lib/elastic';
 
@@ -12,11 +12,13 @@ import { transformCoverage, transformEmbargo } from '~/lib/holdingsIQ/transform'
 
 import holding from '~/../mapping/holding.json';
 
+const { HLMDir } = config.paths.data;
+
 /**
  *
  * @param data
  */
-export default async function insertCSVInElastic(data) {
+export default async function insertCSVInElastic(data: { portal: string, filename: string }[]) {
   const date = format(new Date(), 'yyyy-MM-dd');
   const index = `holdings-${date}`;
 
@@ -31,9 +33,9 @@ export default async function insertCSVInElastic(data) {
 
   for (let i = 0; i < data.length; i += 1) {
     const { portal, filename } = data[i];
-    const filePath = path.resolve(paths.data.HLMDir, filename);
+    const filePath = path.resolve(HLMDir, filename);
     const parser = fs.createReadStream(filePath).pipe(parse({
-      columns: (header) => header.map((h) => h.trim()),
+      columns: (header) => header.map((h: string) => h.trim()),
     }));
 
     appLogger.info(`[csv]: read [${filename}] ${i + 1}/${data.length} files`);

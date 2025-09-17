@@ -1,7 +1,9 @@
 import nodemailer from 'nodemailer';
-import { smtp, notifications } from 'config';
 
-import appLogger from './logger/appLogger';
+import { config } from '~/lib/config';
+import appLogger from '~/lib/logger/appLogger';
+
+const { smtp, notifications } = config;
 
 const transporter = nodemailer.createTransport(
   {
@@ -24,9 +26,9 @@ const mailOptions = {
 /**
  * Ping SMTP service.
  *
- * @returns {Promise<boolean>} ping
+ * @returns ping
  */
-export async function pingSMTP() {
+export async function pingSMTP(): Promise<boolean> {
   try {
     await transporter.verify();
   } catch (err) {
@@ -36,7 +38,7 @@ export async function pingSMTP() {
   return true;
 }
 
-async function sendMail(text, state) {
+async function sendMail(text: string, state: unknown) {
   mailOptions.html = `${mailOptions.html}<p>Message: ${text}</p><p>State: ${JSON.stringify(state, null, 2)}</p>`;
   return new Promise((resolve, reject) => {
     transporter.sendMail(mailOptions, (err, info) => {
@@ -49,7 +51,7 @@ async function sendMail(text, state) {
   });
 }
 
-export async function sendErrorMail(text, state) {
+export async function sendErrorMail(text: string, state: unknown) {
   try {
     await sendMail(text, state);
   } catch (err) {
