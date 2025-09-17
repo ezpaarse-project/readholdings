@@ -6,7 +6,7 @@ services:
       context: ./services/api
     container_name: readholdings-api-dev
     environment:
-      - NODE_ENV
+      - NODE_ENV=production
       # elastic
       - ELASTICSEARCH_NODES
       - ELASTICSEARCH_PORT
