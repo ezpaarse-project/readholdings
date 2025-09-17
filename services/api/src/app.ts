@@ -40,13 +40,10 @@ import { logConfig, config } from '~/lib/config';
 const { paths } = config;
 
 const start = async () => {
-  // create log directory
+  // create data directories
   await mkdir(resolve(paths.data.HLMDir), { recursive: true });
   await mkdir(resolve(paths.data.holdingsIQDir), { recursive: true });
   await mkdir(resolve(paths.data.reportDir), { recursive: true });
-  await mkdir(resolve(paths.log.applicationDir), { recursive: true });
-  await mkdir(resolve(paths.log.accessDir), { recursive: true });
-  await mkdir(resolve(paths.log.healthCheckDir), { recursive: true });
 
   const fastify = Fastify();
 
