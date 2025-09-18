@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 /**
  * Convert coverage to Array of string.
  *
@@ -173,6 +175,13 @@ export function transformEmbargo(embargo: string | undefined) {
   return number * ratio;
 }
 
+function transformDate(date: string) {
+  if (!date) {
+    return null;
+  }
+  return format(date, 'dd-MM-yyyy');
+}
+
 /**
  * Transform the result of getVendorsPackagesTitles for ezHLM format
  * @param {Array<Object>} data Data to be transformed
@@ -184,8 +193,10 @@ export function transformGetVendorsPackagesTitles(data) {
     VendorID: data?.customerResourcesList?.[0]?.vendorId,
     KBID: data?.titleId,
     PackageName: data?.customerResourcesList?.[0]?.packageName,
-    ManagedCoverageBegin: data?.customerResourcesList?.[0]?.managedCoverageList?.beginCoverage,
-    ManagedCoverageEnd: data?.customerResourcesList?.[0]?.managedCoverageList?.endCoverage,
+    ManagedCoverageBegin:
+      transformDate(data?.customerResourcesList?.[0]?.managedCoverageList?.beginCoverage),
+    ManagedCoverageEnd:
+      transformDate(data?.customerResourcesList?.[0]?.managedCoverageList?.endCoverage),
     CustomCoverageBegin: data?.customerResourcesList?.[0]?.customCoverageList?.beginCoverage,
     CustomCoverageEnd: data?.customerResourcesList?.[0]?.customCoverageList?.endCoverage,
     Publisher: data?.publisherName,
