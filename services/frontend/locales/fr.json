@@ -26,7 +26,7 @@
       "title": "Mise à jour via l'API Holdings IQ d'Ebsco"
     },
     "file": {
-      "title": "Liste des fichiers installés d'unpaywall",
+      "title": "Liste des fichiers installés de ReadHoldings",
       "reload": "Recharger les fichiers",
       "filename": "Nom du fichier",
       "filetype": "Type de fichier",
@@ -64,7 +64,7 @@
     "status": "Statut"
   },
   "error": {
-    "administration" :{
+    "administration": {
       "invalidPassword": "Mot de passe incorrect"
     },
     "hlm": {
@@ -74,16 +74,16 @@
       "get": "Impossible de récuperer la liste des fichiers",
       "delete": "Impossible de supprimer le fichier"
     },
-    "report":{
+    "report": {
       "get": "Impossible de récupérer les rapports de mises à jour"
     },
-    "status":{
+    "status": {
       "get": "Impossible de récupérer le status des mises à jour"
     },
-    "state":{
+    "state": {
       "get": "Impossible de récupérer l'état de la mise à jour"
     },
-    "holdingsIQ" : {
+    "holdingsIQ": {
       "update": "Impossible de lancer la mise à jour"
     },
     "index": {
@@ -97,7 +97,7 @@
     "file": {
       "deleted": "Le fichier a été supprimé"
     },
-    "holdingsIQ" : {
+    "holdingsIQ": {
       "update": "La mise à jour a commencé"
     }
   },
@@ -126,5 +126,5 @@
   "detail": "Détail",
   "development": "développement",
   "integration": "integration",
-  "noData": "Aucune données"  
+  "noData": "Aucune données"
 }
