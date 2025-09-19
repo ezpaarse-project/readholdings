@@ -1,34 +1,24 @@
 <template>
-  <v-list nav dense>
-    <v-list-item
-      v-for="route in routers"
-      :key="route.path"
-      link
-      router
-      :to="{ path: route.path }"
-      ripple
-      :title="route.text"
-    >
-      <template #prepend>
-        <v-icon :icon="route.icon" />
-      </template>
-    </v-list-item>
+  <v-list-item
+    v-for="route in routers"
+    :key="route.path"
+    :title="route.text"
+    :to="route.path"
+    :prepend-icon="route.icon"
+  />
 
-    <v-list-item link router :to="{ path: '/report' }" ripple :title="t('menu.report')">
-      <template #prepend>
-        <v-icon icon="mdi-list-status" />
-      </template>
-    </v-list-item>
-  </v-list>
+  <v-list-item
+    :title="$t('menu.report')"
+    to="/report"
+    prepend-icon="mdi-list-status"
+  />
 </template>
 
 <script setup>
-
 const { t } = useI18n();
 
 const routers = computed(() => [
   { text: t('menu.home'), icon: 'mdi-view-dashboard', path: '/' },
   { text: 'openAPI', icon: 'mdi-api', path: '/open-api' },
 ]);
-
 </script>

@@ -1,30 +1,22 @@
 <template>
   <div class="pa-2 text-center">
-    <v-btn small text icon @click="updateTheme">
-      <v-tooltip activator="parent" location="top">
-        <span v-if="theme.global.current.value.dark" v-text="t('theme.light')" />
-        <span v-else v-text="t('theme.dark')" />
-      </v-tooltip>
-      <v-icon v-if="theme.global.current.value.dark">
-        mdi-white-balance-sunny
-      </v-icon>
-      <v-icon v-else>
-        mdi-weather-night
-      </v-icon>
-    </v-btn>
+    <v-btn
+      v-tooltip="isDark ? $t('theme.light') : $t('theme.dark')"
+      :icon="isDark ? 'mdi-white-balance-sunny' : 'mdi-weather-night'"
+      size="small"
+      @click="toggleDarkTheme()"
+    />
   </div>
 </template>
 
 <script setup>
-
 import { useTheme } from 'vuetify';
-
-const { t } = useI18n();
 
 const theme = useTheme();
 
-function updateTheme() {
-  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark';
-}
+const isDark = computed(() => theme.global.current.value.dark);
 
+function toggleDarkTheme() {
+  theme.global.name.value = isDark.value ? 'light' : 'dark';
+}
 </script>

@@ -7,12 +7,17 @@
     fixed
     disable-resize-watcher
     disable-route-watcher
+    class="nav-bar"
     @input="updateVisible($event)"
   >
-    <SkeletonMenuListRouter />
-    <SkeletonMenuAdminMenu />
-    <SkeletonMenuLangMenu />
+    <v-list :opened="['admin', 'lang']">
+      <SkeletonMenuListRouter />
+      <SkeletonMenuAdminMenu />
+      <SkeletonMenuLangMenu />
+    </v-list>
+
     <v-spacer />
+
     <template #append>
       <SkeletonMenuThemeButton />
       <SkeletonMenuGithubButton />
@@ -34,3 +39,10 @@ async function updateVisible() {
   emit('updated');
 }
 </script>
+
+<style scoped>
+.nav-bar :deep(.v-list-item-title) {
+  font-size: 0.8125em;
+  font-weight: 500;
+}
+</style>

@@ -1,44 +1,24 @@
 <template>
-  <v-list-item v-if="!isAdmin" link router :to="{ path: '/administration' }" ripple>
-    <template #prepend>
-      <v-icon icon="mdi-security" />
+  <v-list-item
+    v-if="!adminStore.isAdmin"
+    :title="$t('administration.title')"
+    to="/administration"
+    prepend-icon="mdi-security"
+  />
+
+  <v-list-group v-else value="admin">
+    <template #activator="{ props }">
+      <v-list-item
+        :title="$t('administration.title')"
+        prepend-icon="mdi-security"
+        v-bind="props"
+      />
     </template>
-    <v-list-item-title class="custom-font-style">
-      {{ t('administration.title') }}
-    </v-list-item-title>
-  </v-list-item>
-  <v-list v-else v-model:opened="open">
-    <v-list-group value="Admin">
-      <template #activator="{ props }">
-        <v-list-item v-bind="props">
-          <template #prepend>
-            <v-icon icon="mdi-security" />
-          </template>
-          <v-list-item-title class="custom-font-style">
-            {{ t('administration.title') }}
-          </v-list-item-title>
-        </v-list-item>
-      </template>
-      <SkeletonMenuAdminList />
-    </v-list-group>
-  </v-list>
+
+    <SkeletonMenuAdminList />
+  </v-list-group>
 </template>
 
 <script setup>
-
-const { t } = useI18n();
-
 const adminStore = useAdminStore();
-
-const isAdmin = computed(() => adminStore.isAdmin);
-
-const open = ref(['Admin']);
-
 </script>
-
-<style>
-.custom-font-style {
-  font-size: 0.8125em;
-  font-weight: 500;
-}
-</style>
