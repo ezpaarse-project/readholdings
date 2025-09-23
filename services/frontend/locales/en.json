@@ -53,6 +53,74 @@
     "config": {
       "frontend": "Frontend configuration",
       "api": "API configuration"
+    },
+    "extraction": {
+      "title": "Extraction",
+      "status": {
+        "toolbar": "Extraction status",
+        "title": {
+          "success": "Succes",
+          "idle": "Waiting",
+          "running": "Running",
+          "stopped": "Stopped",
+          "error": "Error",
+          "unknown": "Unknown"
+        },
+        "meaning": {
+          "success": "Extraction succeed ! You can download it from the list at the bottom of this page",
+          "idle": "No extraction are ongoing, you can start one from the form below",
+          "running": "An extraction is ongoing... You can wait a few minutes or come back later",
+          "stopped": "An extraction was stopped. You can start another one from the form below",
+          "error": "An error occured during the extraction ! More details are available on top"
+        }
+      },
+      "files": {
+        "title": "Previous extractions"
+      },
+      "form": {
+        "title": "New extraction",
+        "index": "Index to extract from",
+        "fields": "Fields to extract",
+        "name": "Comment on extraction (added to filename)",
+        "delimiter": "Separator",
+        "escape": "Escape (if data contains séparator)",
+        "encoding": "File encoding",
+        "start": "Start an extraction"
+      },
+      "filters": {
+        "title": "Filters ({n})",
+        "title:new": "Create filter",
+        "title:edit": "Edit filter",
+        "add": "Add a filter",
+        "description:import": "Copy filters from Kibana and past them in the following area.",
+        "empty": "No filters are defined.",
+        "raw": "DSL Query",
+        "field": "@:$ezreeport.field",
+        "value": "Value(s)",
+        "value:hint": "Empty value",
+        "isNot": "Invert filter",
+        "foundFilters": "Found {n} filter|Found {n} filters",
+        "name": "Name of filter",
+        "nameTemplate": {
+          "exists": "{field} exists",
+          "exists:not": "{field} doesn't exists",
+          "values": "{0}|{0}, {1}|{0}, {1}, etc.",
+          "is": "{field} is {valueText}",
+          "is:not": "{field} is not {valueText}"
+        },
+        "type": "Filter type",
+        "types": {
+          "exists": "exists",
+          "is": "is",
+          "in": "is one of"
+        },
+        "hints": {
+          "type": "The type of filter depends on the number of values:",
+          "type:exists": "If no value is present, the filter will check the existence of the field",
+          "type:is": "If a single value is present, the filter will check if the field has exactly this value",
+          "type:in": "If multiple values are present, the filter will check if the field contains at least one of the values"
+        }
+      }
     }
   },
   "report": {
@@ -64,7 +132,7 @@
     "status": "Status"
   },
   "error": {
-    "administration" :{
+    "administration": {
       "invalidPassword": "Invalid password"
     },
     "hlm": {
@@ -77,13 +145,13 @@
     "report": {
       "get": "Cannot get update reports"
     },
-    "status":{
+    "status": {
       "get": "Cannot get update status"
     },
-    "state":{
+    "state": {
       "get": "Cannot get update state"
     },
-    "holdingsIQ" : {
+    "holdingsIQ": {
       "update": "Cannot start update"
     },
     "index": {
@@ -97,7 +165,7 @@
     "file": {
       "deleted": "File is deleted"
     },
-    "holdingsIQ" : {
+    "holdingsIQ": {
       "update": "The update has begun"
     }
   },
@@ -126,5 +194,6 @@
   "detail": "Detail",
   "development": "development",
   "integration": "integration",
-  "noData": "No data available"
+  "noData": "No data available",
+  "addMultiValue": "Add a value"
 }

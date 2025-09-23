@@ -45,10 +45,16 @@
     </template>
   </v-list-item>
 
-  <v-list-item
+  <!-- <v-list-item
     title="HLM"
     prepend-icon="mdi-upload"
     to="/administration/hlm"
+  /> -->
+
+  <v-list-item
+    :title="$t('administration.extraction.title')"
+    prepend-icon="mdi-download"
+    to="/administration/extraction"
   />
 
   <v-list-item
