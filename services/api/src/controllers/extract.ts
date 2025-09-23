@@ -94,7 +94,7 @@ function startExtraction(params: ExtractionParams) {
     .catch((err) => {
       // Mark state as error
       state.status = 'error';
-      state.error = err;
+      state.error = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
 
       appLogger.error('[extract] Error happened while extracting', err);
     }).finally(() => {
