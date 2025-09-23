@@ -1,4 +1,5 @@
 import { join, resolve } from 'node:path';
+import { createReadStream } from 'node:fs';
 
 import type { FastifyRequest, FastifyReply } from 'fastify';
 
@@ -172,7 +173,9 @@ export async function getExtractionController(
 ): Promise<void> {
   const { filename } = request.params;
 
-  // TODO: serve file
+  const stream = createReadStream(join(extractDir, filename));
+
+  return reply.code(200).send(stream);
 }
 
 export async function deleteExtractionController(
