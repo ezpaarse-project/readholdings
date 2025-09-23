@@ -1,19 +1,19 @@
 import { PassThrough } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
-// import { unlink } from 'node:fs/promises';
+import { unlink } from 'node:fs/promises';
 
 import { stringify } from 'csv-stringify';
 
 import type { Holding } from '~/models/holding';
 
+import appLogger from '~/lib/logger/appLogger';
 import {
   count,
   scrollSearch,
   filtersToESQuery,
   type ESFilter,
 } from '~/lib/elastic';
-// import appLogger from '~/lib/logger/appLogger';
 
 export type ExtractionParams = {
   // Extraction specific
@@ -77,30 +77,22 @@ export async function extractToCSV(params: ExtractionParams & {
     params.onProgress(total, current);
   });
 
-  // const file = createWriteStream(params.filepath, params.encoding?.toLowerCase() || 'utf8');
-  // // Delete file and throw error if aborted
-  // params.signal?.addEventListener('abort', async () => {
-  //   try {
-  //     await unlink(params.filepath);
-  //   } catch (err) {
-  //     appLogger.warn(`[extract] Unable to delete [${params.filepath}] after aborting extract`);
-  //   }
-
-  //   throw new Error(params.signal?.reason ?? 'Aborted');
-  // });
-
-  // Initialize scroller
-  const scroller = scrollSearch<Holding>(params.index, {
-    _source: (params.fields?.length ?? 0) > 0 ? params.fields : undefined,
-    query,
-  }, params.signal);
+  // Delete file if an error occur
+  const file = createWriteStream(params.filepath, params.encoding || 'utf8');
+  file.on('error', async () => {
+    try {
+      await unlink(params.filepath);
+    } catch (err) {
+      appLogger.warn(`[extract] Unable to delete [${params.filepath}] after aborting extract`);
+    }
+  });
 
   // Transform data from scroller into csv lines, notify to update the state then writes it
   return pipeline(
     scroller,
     transformer,
     notifier,
-    createWriteStream(params.filepath, params.encoding || 'utf8'),
+    file,
     { signal: params.signal },
   );
 }
