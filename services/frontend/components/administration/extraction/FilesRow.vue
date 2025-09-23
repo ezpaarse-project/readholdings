@@ -14,6 +14,21 @@
           prepend-icon="mdi-download"
           @click="downloadFile(file)"
         >
+          <template #prepend>
+            <v-icon
+              v-if="!loadingMap.get(file.filename)"
+              icon="mdi-download"
+            />
+            <v-progress-circular
+              v-else
+              color="primary"
+              width="2"
+              size="21"
+              indeterminate
+              class="mr-8"
+            />
+          </template>
+
           <template #append>
             <v-btn
               :disabled="state.status === 'running'"
@@ -22,7 +37,7 @@
               icon="mdi-delete"
               color="red"
               class="ml-1"
-              @click="deleteFile(file)"
+              @click.stop="deleteFile(file)"
             />
           </template>
         </v-list-item>
@@ -62,8 +77,30 @@ const snackStore = useSnacksStore();
 
 const { password } = storeToRefs(useAdminStore());
 
-async function downloadFile(file) {
+const loadingMap = ref(new Map());
 
+async function downloadFile({ filename }) {
+  loadingMap.value.set(filename, true);
+  try {
+    const blob = await $fetch(`/extract/files/${filename}`, {
+      method: 'GET',
+      headers: {
+        'X-API-KEY': password.value,
+      },
+      responseType: 'blob',
+    });
+
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.target = '_blank';
+    link.download = filename;
+
+    link.click(); // Click is synchronous
+    URL.revokeObjectURL(link.href);
+  } catch (err) {
+    snackStore.error(t('error.extraction.unableToGetFile'));
+  }
+  loadingMap.value.set(filename, false);
 }
 
 async function deleteFile({ filename }) {

@@ -7,6 +7,7 @@
 
       <v-alert
         v-if="state.error"
+        :title="$t('administration.extraction.status.error')"
         :text="state.error.message"
         type="error"
         class="mb-4"
