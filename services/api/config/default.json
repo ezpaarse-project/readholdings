@@ -17,7 +17,7 @@
     "password": "changeme",
     "timeout": 5000
   },
-  "redis":  {
+  "redis": {
     "host": "redis",
     "port": 6379,
     "password": "changeme"
@@ -79,7 +79,8 @@
       "accessLogRetention": 30,
       "healthcheckLogRetention": 30,
       "holdingsIQRetention": 1,
-      "HLMRetention": 1
+      "HLMRetention": 1,
+      "extractRetention": 7
     },
     "dataUpdate": {
       "schedule": "0 0 0 * * 0",
@@ -95,7 +96,8 @@
     "data": {
       "HLMDir": "./data/hlm",
       "holdingsIQDir": "./data/holdings",
-      "reportDir": "./data/report"
+      "reportDir": "./data/report",
+      "extractDir": "./data/extracts"
     }
   }
 }

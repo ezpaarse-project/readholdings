@@ -73,7 +73,9 @@ export async function uploadFile(part: MultipartFile) {
  *
  * @returns list of files sorted by modification date.
  */
-async function orderRecentFiles(dir: string): Promise<Array<{ filename: string; stat: Stats; }>> {
+export async function orderRecentFiles(
+  dir: string,
+): Promise<Array<{ filename: string; stat: Stats; }>> {
   const filenames = await fsp.readdir(dir);
 
   const files = await Promise.all(

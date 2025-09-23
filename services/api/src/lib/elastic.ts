@@ -114,12 +114,62 @@ export async function search<T = any>(
   return res.body.hits.hits.map((hit) => hit._source);
 }
 
-export async function* scrollSearch<T = any>(
+/**
+ *
+ */
+export async function count(
+  indexName: string,
+  body: ES.CountRequest['body'],
+  signal?: AbortSignal,
+): Promise<number> {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
+  // If the signal is already aborted, immediately throw in order to reject the promise.
+  if (signal?.aborted) {
+    throw new Error(signal?.reason);
+  }
+
+  try {
+    const request = elasticClient.count<ES.CountResponse>({
+      index: indexName,
+      body,
+    });
+
+    // Stop request and throw error if aborted
+    signal?.addEventListener('abort', () => {
+      request.abort();
+      throw new Error(signal.reason);
+    });
+
+    return (await request).body.count;
+  } catch (err) {
+    appLogger.error(`[elastic]: Cannot request elastic in index [${indexName}]`, err);
+    throw err;
+  }
+}
+
+/**
+ * Search labs document using a scoll
+ *
+ * @param indexName Index name.
+ * @param body Config of elastic request
+ *
+ * @returns Iterable over documents
+ */
+export async function* scrollSearch<T = unknown>(
   indexName: string,
   body: ES.SearchRequest['body'],
+  signal?: AbortSignal,
 ): AsyncIterable<ES.SearchHit<T | undefined>> {
   if (!elasticClient) {
     throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
+  // If the signal is already aborted, immediately throw in order to reject the promise.
+  if (signal?.aborted) {
+    throw new Error(signal?.reason);
   }
 
   try {
@@ -127,6 +177,12 @@ export async function* scrollSearch<T = any>(
       index: indexName,
       body,
     });
+
+    // Throw error if aborted
+    signal?.addEventListener('abort', () => {
+      throw new Error(signal.reason);
+    });
+
     // eslint-disable-next-line no-restricted-syntax
     for await (const res of results) {
       // eslint-disable-next-line no-underscore-dangle
@@ -374,4 +430,54 @@ export async function getReadHoldingsIndices() {
 
   const res = await elasticClient.cat.indices<ES.CatIndicesResponse>({ format: 'json', index: 'holdings*,-.*' });
   return res.body;
+}
+
+export type ESFilter = {
+  name: string,
+  isNot: boolean,
+} & ({
+  field: string,
+  value?: string | string[],
+} | { raw: Record<string, Record<string, unknown>> });
+
+function filterToES(filter: ESFilter): ES.QueryDslQueryContainer {
+  if ('raw' in filter) {
+    return filter.raw;
+  }
+
+  if (!filter.value) {
+    return { exists: { field: filter.field } };
+  }
+
+  return {
+    bool: {
+      filter: [{
+        terms: {
+          [filter.field]: Array.isArray(filter.value) ? filter.value : [filter.value],
+        },
+      }],
+    },
+  };
+}
+
+export function filtersToESQuery(filters: ESFilter[]): ES.QueryDslQueryContainer {
+  const must: ES.QueryDslQueryContainer[] = [];
+  const mustNot: ES.QueryDslQueryContainer[] = [];
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const filter of filters) {
+    const item = filterToES(filter);
+    if (filter.isNot) {
+      mustNot.push(item);
+    } else {
+      must.push(item);
+    }
+  }
+
+  return {
+    bool: {
+      filter: must,
+      must_not: mustNot,
+    },
+  };
 }

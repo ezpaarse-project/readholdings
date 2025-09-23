@@ -39,6 +39,12 @@ async function task(this: Cron): Promise<void> {
     cronConfig.HLMRetention,
   );
   appLogger.info(`[cron][${this.name}]: ${deletedHLMFiles?.join(',')} (${deletedHLMFiles.length}) HLM files are deleted`);
+
+  const deletedExtractsFiles = await deleteOldFiles(
+    paths.data.extractDir,
+    cronConfig.extractRetention,
+  );
+  appLogger.info(`[cron][${this.name}]: ${deletedExtractsFiles?.join(',')} (${deletedExtractsFiles.length}) extracts files are deleted`);
 }
 
 const deleteFileCron = new Cron('cleanFile', cronConfig.schedule, task, cronConfig.active);

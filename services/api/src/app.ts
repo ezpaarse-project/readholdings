@@ -30,6 +30,7 @@ import reportRouter from '~/routes/report';
 import stateRouter from '~/routes/state';
 import statusRouter from '~/routes/status';
 import filesRouter from '~/routes/file';
+import extractRouter from '~/routes/extract';
 import openAPIRouter from '~/routes/openapi';
 
 import cleanFileCron from '~/cron/cleanFile';
@@ -44,6 +45,7 @@ const start = async () => {
   await mkdir(resolve(paths.data.HLMDir), { recursive: true });
   await mkdir(resolve(paths.data.holdingsIQDir), { recursive: true });
   await mkdir(resolve(paths.data.reportDir), { recursive: true });
+  await mkdir(resolve(paths.data.extractDir), { recursive: true });
 
   const fastify = Fastify();
 
@@ -106,6 +108,7 @@ const start = async () => {
   await fastify.register(stateRouter, { prefix: '/state' });
   await fastify.register(statusRouter, { prefix: '/status' });
   await fastify.register(filesRouter, { prefix: '/files' });
+  await fastify.register(extractRouter, { prefix: '/extract' });
   await fastify.register(openAPIRouter, { prefix: '/' });
 
   const address = await fastify.listen({ port: 3000, host: '::' });
