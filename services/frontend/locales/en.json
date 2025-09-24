@@ -58,6 +58,9 @@
       "title": "Extraction",
       "status": {
         "toolbar": "Extraction status",
+        "progress": "{current} / {total} documents extracted",
+        "eta": "Time left (estimate)",
+        "took": "Extraction duration",
         "title": {
           "success": "Succes",
           "idle": "Waiting",
@@ -71,7 +74,7 @@
           "idle": "No extraction are ongoing, you can start one from the form below",
           "running": "An extraction is ongoing... You can wait a few minutes or come back later",
           "stopped": "An extraction was stopped. You can start another one from the form below",
-          "error": "An error occured during the extraction ! More details are available on top"
+          "error": "An error occured during the extraction ! More details are available below"
         }
       },
       "files": {
@@ -89,7 +92,8 @@
         "delimiter": "Separator",
         "escape": "Escape (if data contains séparator)",
         "encoding": "File encoding",
-        "start": "Start an extraction"
+        "start": "Start an extraction",
+        "stop": "Stop the extraction"
       },
       "filters": {
         "title": "Filters ({n})",

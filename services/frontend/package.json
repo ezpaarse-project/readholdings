@@ -25,6 +25,7 @@
     "@mdi/font": "^7.4.47",
     "@nuxtjs/i18n": "^8.0.0-rc.2",
     "@pinia/nuxt": "^0.5.1",
+    "date-fns": "^4.1.0",
     "highlight.js": "^11.10.0",
     "pinia": "^2.1.7",
     "pretty-bytes": "^7.1.0",

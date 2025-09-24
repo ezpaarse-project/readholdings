@@ -59,6 +59,8 @@
       "status": {
         "toolbar": "Status de l'extraction",
         "progress": "{current} / {total} documents extraits",
+        "eta": "Temps restant (estimation)",
+        "took": "Durée d'extraction",
         "title": {
           "success": "Succès",
           "idle": "En attente",
@@ -72,7 +74,7 @@
           "idle": "Aucune extraction est en cours, vous pouvez en lancer une depuis le formulaire ci-dessous",
           "running": "Une extraction est en cours... Veuillez patienter quelques minutes ou revenir plus tard",
           "stopped": "Une extraction a été stoppée. Vous pouvez en lancer une autre depuis le formulaire ci-dessous",
-          "error": "Une erreur est survenue durant une extraction ! Les détails sont disponibles ci-dessus"
+          "error": "Une erreur est survenue durant une extraction ! Les détails sont disponibles ci-dessous"
         }
       },
       "files": {
@@ -90,7 +92,8 @@
         "delimiter": "Séparateur",
         "escape": "Échappement (si les données contiennent le séparateur)",
         "encoding": "Encodage du fichier",
-        "start": "Démarrer une extraction"
+        "start": "Démarrer une extraction",
+        "stop": "Arrêter l'extraction"
       },
       "filters": {
         "title": "Filtres ({n})",

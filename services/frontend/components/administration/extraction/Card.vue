@@ -61,6 +61,7 @@ const {
     try {
       return await $fetch(...params);
     } catch (err) {
+      console.error(err);
       snackStore.error(t('error.extraction.status'));
       throw err;
     }

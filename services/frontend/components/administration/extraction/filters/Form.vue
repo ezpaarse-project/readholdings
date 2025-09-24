@@ -148,7 +148,7 @@
         :text="$t('administration.extraction.filters.add')"
         :disabled="disabled"
         append-icon="mdi-plus"
-        variant="flat"
+        variant="outlined"
         color="green"
         @click="openForm()"
       />

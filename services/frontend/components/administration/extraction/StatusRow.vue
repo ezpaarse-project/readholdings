@@ -1,62 +1,100 @@
 <template>
   <v-row>
-    <v-col>
-      <h4 class="mb-2">
-        {{ $t('administration.extraction.status.toolbar') }}
-      </h4>
+    <v-col cols="4">
+      <v-card
+        :title="statusChip.text"
+        :subtitle="$t('administration.extraction.status.toolbar')"
+        variant="flat"
+      >
+        <template #prepend>
+          <v-avatar
+            v-tooltip:top="statusChip.tooltip"
+            :icon="statusChip.icon"
+            :class="[`bg-${statusChip.color}`, `mr-2`]"
+            style="border-radius: 10%;"
+          />
+        </template>
 
+        <template v-if="state.status === 'running'" #append>
+          <v-btn
+            v-tooltip:top="$t('administration.extraction.form.stop')"
+            icon="mdi-stop"
+            color="red"
+            density="comfortable"
+            @click="stopGeneration()"
+          />
+        </template>
+
+        <template v-if="state.progress.percent > 0 || state.status !== 'idle'" #text>
+          <div class="position-relative">
+            <v-progress-linear
+              v-tooltip:top="progress.tooltip"
+              :model-value="progress.value"
+              :indeterminate="state.progress.percent === 0"
+              :color="statusChip.color"
+              height="8"
+              rounded
+            />
+
+            <div
+              :class="['progress--value', `text-${statusChip.color}`]"
+              :style="{ width: `${progress.value}%`, minWidth: `${progress.text.length}em` }"
+            >
+              {{ progress.text }}
+            </div>
+          </div>
+        </template>
+      </v-card>
+    </v-col>
+
+    <v-col cols="4">
+      <v-card
+        v-if="took"
+        :title="took"
+        :subtitle="$t('administration.extraction.status.took')"
+        variant="flat"
+      >
+        <template #prepend>
+          <v-avatar
+            icon="mdi-clock-outline"
+            class="bg-grey mr-2"
+            style="border-radius: 10%;"
+          />
+        </template>
+      </v-card>
+    </v-col>
+
+    <v-col cols="4">
+      <v-card
+        v-if="state.status === 'running' && estimatedTime"
+        :title="estimatedTime"
+        :subtitle="$t('administration.extraction.status.eta')"
+        variant="flat"
+      >
+        <template #prepend>
+          <v-avatar
+            icon="mdi-timer-outline"
+            class="bg-green mr-2"
+            style="border-radius: 10%;"
+          />
+        </template>
+      </v-card>
+    </v-col>
+
+    <v-col v-if="state.error" cols="12">
       <v-alert
-        v-if="state.error"
         :title="$t('administration.extraction.status.error')"
         :text="state.error.message"
         type="error"
         class="mb-4"
       />
-
-      <div class="d-flex align-center ga-4">
-        <v-chip
-          v-tooltip:top="statusChip.tooltip"
-          :prepend-icon="statusChip.icon"
-          :color="statusChip.color"
-          :text="statusChip.text"
-          size="large"
-        />
-
-        <div
-          v-if="state.progress.percent > 0 || state.status !== 'idle'"
-          v-tooltip:top="progress.tooltip"
-          style="flex: 1; position: relative;"
-        >
-          <v-progress-linear
-            :model-value="progress.value"
-            :indeterminate="state.progress.percent === 0"
-            color="primary"
-            height="8"
-            rounded
-          />
-
-          <div
-            class="position-absolute text-center text-primary"
-            :style="{ width: `${progress.value}%`, minWidth: `${progress.text.length}em` }"
-          >
-            {{ progress.text }}
-          </div>
-        </div>
-
-        <v-btn
-          v-if="state.status === 'running'"
-          v-tooltip:top="$t('administration.extraction.status.stop')"
-          icon="mdi-stop"
-          color="red"
-          density="comfortable"
-          @click="stopGeneration()"
-        />
-      </div>
     </v-col>
   </v-row>
 </template>
 
 <script setup>
+import { formatDistance } from 'date-fns';
+
 const props = defineProps({
   state: {
     type: Object,
@@ -73,6 +111,7 @@ const emit = defineEmits({
 });
 
 const { t, locale } = useI18n();
+const { locale: dateLocale } = useDateLocale();
 const { $fetch } = useNuxtApp();
 const snackStore = useSnacksStore();
 
@@ -143,6 +182,36 @@ const progress = computed(() => ({
   }),
 }));
 
+const took = computed(() => {
+  const { startedAt, endedAt } = props.state;
+  if (!startedAt) {
+    return undefined;
+  }
+
+  return formatDistance(
+    startedAt,
+    endedAt ?? new Date(),
+    { locale: dateLocale.value, includeSeconds: true },
+  );
+});
+
+const estimatedTime = computed(() => {
+  const { total, current, speed } = props.state.progress;
+
+  const toDo = total - current;
+  const remainingMs = (1 / (speed || 1)) * toDo;
+
+  if (Number.isNaN(remainingMs)) {
+    return undefined;
+  }
+
+  return formatDistance(
+    0,
+    remainingMs,
+    { locale: dateLocale.value, includeSeconds: true },
+  );
+});
+
 async function stopGeneration() {
   if (props.state.status !== 'running') {
     return;
@@ -162,3 +231,12 @@ async function stopGeneration() {
   }
 }
 </script>
+
+<style lang="css" scoped>
+.progress--value {
+  position: absolute;
+  text-align: center;
+  /* transition extracted from vuetify CSS */
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+</style>
