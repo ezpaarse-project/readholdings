@@ -21,7 +21,11 @@ type ExtractStatus =
 
 const state = {
   status: 'idle' as ExtractStatus,
-  progress: 0,
+  progress: {
+    percent: 0,
+    current: 0,
+    total: 0,
+  },
   error: null as Error | null,
   abortController: null as AbortController | null,
 };
@@ -49,7 +53,7 @@ const getState = () => ({
 function startExtraction(params: ExtractionParams) {
   // Reset state
   state.status = 'idle';
-  state.progress = 0;
+  state.progress = { percent: 0, current: 0, total: 0 };
   state.error = null;
 
   // Setup abort controller
@@ -74,24 +78,34 @@ function startExtraction(params: ExtractionParams) {
 
     onProgress: (total, current) => {
       // Update state with progress
-      state.progress = current / total;
+      state.progress = {
+        current,
+        total,
+        percent: current / total,
+      };
 
-      // Log progress every 10% (+ first line written)
-      if (current === 0 || state.progress - lastProgress >= 0.1) {
-        const percent = state.progress.toLocaleString(undefined, { style: 'percent' });
+      // Log progress every 10%
+      if (state.progress.percent - lastProgress >= 0.1) {
+        const percent = state.progress.percent.toLocaleString(undefined, { style: 'percent' });
         appLogger.verbose(`[extract] Extraction to [${filepath}] still going... Found [${total}] records, written [${current}] (${percent})`);
-        lastProgress = state.progress;
+        lastProgress = state.progress.percent;
       }
     },
   })
     .then(() => {
       // Mark state as complete
       state.status = 'idle';
-      state.progress = 1;
+      state.progress.current = state.progress.total;
+      state.progress.percent = 1;
 
       appLogger.info(`[extract] Extraction of data to [${filepath}] complete !`);
     })
     .catch((err) => {
+      // Don't mark start as error if we're aborting
+      if (err.name === 'AbortError') {
+        return;
+      }
+
       // Mark state as error
       state.status = 'error';
       state.error = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
@@ -118,6 +132,7 @@ function stopExtraction() {
   if (state.abortController) {
     state.status = 'stopped';
     state.abortController.abort();
+    appLogger.warn('[extract] Aborting extraction !');
   }
 
   return getState();
