@@ -28,9 +28,10 @@ const state = {
     speed: 0,
   },
   error: null as Error | null,
-  abortController: null as AbortController | null,
+  filename: null as string | null,
   startedAt: null as Date | null,
   endedAt: null as Date | null,
+  abortController: null as AbortController | null,
 };
 
 /**
@@ -76,7 +77,8 @@ function startExtraction(params: ExtractionParams) {
   if (params.name) {
     filename += `.${params.name}`;
   }
-  const filepath = resolve(config.paths.data.extractDir, `${filename}.csv`);
+  state.filename = `${filename}.csv`;
+  const filepath = resolve(config.paths.data.extractDir, state.filename);
 
   let lastProgress = 0;
   appLogger.info(`[extract] Extracting data to [${filepath}]...`);
