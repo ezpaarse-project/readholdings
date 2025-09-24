@@ -58,6 +58,7 @@
       "title": "Extraction",
       "status": {
         "toolbar": "Status de l'extraction",
+        "progress": "{current} / {total} documents extraits",
         "title": {
           "success": "Succès",
           "idle": "En attente",
@@ -75,7 +76,11 @@
         }
       },
       "files": {
-        "title": "Précédentes extractions"
+        "title": "Précédentes extractions",
+        "noExtraction": {
+          "title": "Aucune extraction disponible",
+          "description": "Il n'y a pas d'extractions disponible, vous pouvez en lancer une depuis le formulaire ci-dessus"
+        }
       },
       "form": {
         "title": "Nouvelle extraction",

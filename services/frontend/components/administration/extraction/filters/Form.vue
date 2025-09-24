@@ -24,7 +24,7 @@
           prepend-icon="mdi-filter-plus"
           variant="outlined"
         >
-          <template v-if="!disableAdvanced" #append>
+          <template #append>
             <v-btn
               v-tooltip="$t('administration.extraction.filters.advanced')"
               :color="isRawMode ? 'orange' : 'grey'"
@@ -36,7 +36,7 @@
           </template>
 
           <template #text>
-            <v-form v-model="isValid">
+            <v-form v-model="isValid" :disabled="disabled">
               <template v-if="isRawMode">
                 <v-row>
                   <v-col>
@@ -146,6 +146,7 @@
     <v-col cols="12">
       <v-btn
         :text="$t('administration.extraction.filters.add')"
+        :disabled="disabled"
         append-icon="mdi-plus"
         variant="flat"
         color="green"
@@ -161,7 +162,7 @@ const props = defineProps({
     type: Array,
     default: () => undefined,
   },
-  disableAdvanced: {
+  disabled: {
     type: Boolean,
     default: false,
   },

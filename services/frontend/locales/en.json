@@ -75,7 +75,11 @@
         }
       },
       "files": {
-        "title": "Previous extractions"
+        "title": "Previous extractions",
+        "noExtraction": {
+          "title": "No extraction available",
+          "description": "There's no extraction available, you can start one from the form on top"
+        }
       },
       "form": {
         "title": "New extraction",

@@ -13,25 +13,45 @@
         class="mb-4"
       />
 
-      <v-chip
-        v-tooltip="statusChip.tooltip"
-        :prepend-icon="statusChip.icon"
-        :color="statusChip.color"
-        :text="statusChip.text"
-        size="large"
-      />
+      <div class="d-flex align-center ga-4">
+        <v-chip
+          v-tooltip:top="statusChip.tooltip"
+          :prepend-icon="statusChip.icon"
+          :color="statusChip.color"
+          :text="statusChip.text"
+          size="large"
+        />
 
-      <v-progress-circular
-        v-if="state.progress > 0 || state.status !== 'idle'"
-        color="primary"
-        :model-value="progress.value"
-        :indeterminate="state.progress === 0"
-        width="2"
-        size="64"
-        class="ml-4"
-      >
-        {{ progress.text }}
-      </v-progress-circular>
+        <div
+          v-if="state.progress.percent > 0 || state.status !== 'idle'"
+          v-tooltip:top="progress.tooltip"
+          style="flex: 1; position: relative;"
+        >
+          <v-progress-linear
+            :model-value="progress.value"
+            :indeterminate="state.progress.percent === 0"
+            color="primary"
+            height="8"
+            rounded
+          />
+
+          <div
+            class="position-absolute text-center text-primary"
+            :style="{ width: `${progress.value}%`, minWidth: `${progress.text.length}em` }"
+          >
+            {{ progress.text }}
+          </div>
+        </div>
+
+        <v-btn
+          v-if="state.status === 'running'"
+          v-tooltip:top="$t('administration.extraction.status.stop')"
+          icon="mdi-stop"
+          color="red"
+          density="comfortable"
+          @click="stopGeneration()"
+        />
+      </div>
     </v-col>
   </v-row>
 </template>
@@ -64,7 +84,7 @@ const statusChip = computed(() => {
 
   switch (props.state.status) {
     case 'idle':
-      if (props.state.progress && props.isWatching) {
+      if (props.state.progress.percent > 0 && props.isWatching) {
         return {
           color: 'success',
           icon: 'mdi-check',
@@ -115,12 +135,16 @@ const statusChip = computed(() => {
 });
 
 const progress = computed(() => ({
-  value: props.state.progress * 100,
-  text: props.state.progress.toLocaleString(locale.value, { style: 'percent' }),
+  value: props.state.progress.percent * 100,
+  text: props.state.progress.percent.toLocaleString(locale.value, { style: 'percent' }),
+  tooltip: t('administration.extraction.status.progress', {
+    current: props.state.progress.current.toLocaleString(locale.value),
+    total: props.state.progress.total.toLocaleString(locale.value),
+  }),
 }));
 
-async function cancelGeneration() {
-  if (props.state.status === 'running') {
+async function stopGeneration() {
+  if (props.state.status !== 'running') {
     return;
   }
 
