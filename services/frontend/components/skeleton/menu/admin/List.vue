@@ -34,6 +34,8 @@
   <v-list-item
     title="Kibana"
     :href="runtimeConfig.public.kibanaURL"
+    target="_blank"
+    rel="noopener noreferrer"
   >
     <template #prepend>
       <v-avatar
