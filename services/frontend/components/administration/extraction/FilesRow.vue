@@ -11,12 +11,14 @@
           :key="file.filename"
           :title="file.filename"
           :subtitle="pretty(file.stat.size, { locale })"
-          prepend-icon="mdi-download"
+          :disabled="state.filename === file.filename"
           @click="downloadFile(file)"
         >
           <template #prepend>
+            <v-icon v-if="state.filename === file.filename" icon="mdi-dots-horizontal" />
+
             <v-badge
-              v-if="!loadingMap.get(file.filename)"
+              v-else-if="!loadingMap.get(file.filename)"
               :model-value="newFiles.has(file.filename)"
               color="primary"
               floating
@@ -37,7 +39,7 @@
 
           <template #append>
             <v-btn
-              :disabled="state.status === 'running'"
+              :disabled="state.filename === file.filename"
               density="comfortable"
               variant="text"
               icon="mdi-delete"
