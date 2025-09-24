@@ -120,30 +120,18 @@ export async function search<T = any>(
 export async function count(
   indexName: string,
   body: ES.CountRequest['body'],
-  signal?: AbortSignal,
 ): Promise<number> {
   if (!elasticClient) {
     throw new Error('[elastic]: Elastic client is not initialized');
   }
 
-  // If the signal is already aborted, immediately throw in order to reject the promise.
-  if (signal?.aborted) {
-    throw new Error(signal?.reason);
-  }
-
   try {
-    const request = elasticClient.count<ES.CountResponse>({
+    const response = await elasticClient.count<ES.CountResponse>({
       index: indexName,
       body,
     });
 
-    // Stop request and throw error if aborted
-    signal?.addEventListener('abort', () => {
-      request.abort();
-      throw new Error(signal.reason);
-    });
-
-    return (await request).body.count;
+    return response.body.count;
   } catch (err) {
     appLogger.error(`[elastic]: Cannot request elastic in index [${indexName}]`, err);
     throw err;
@@ -178,13 +166,13 @@ export async function* scrollSearch<T = unknown>(
       body,
     });
 
-    // Throw error if aborted
-    signal?.addEventListener('abort', () => {
-      throw new Error(signal.reason);
-    });
-
     // eslint-disable-next-line no-restricted-syntax
     for await (const res of results) {
+      // Reject promise if aborted
+      if (signal?.aborted) {
+        throw new Error(signal.reason);
+      }
+
       // eslint-disable-next-line no-underscore-dangle
       yield* res.body.hits.hits;
     }

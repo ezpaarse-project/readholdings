@@ -25,9 +25,12 @@ const state = {
     percent: 0,
     current: 0,
     total: 0,
+    speed: 0,
   },
   error: null as Error | null,
   abortController: null as AbortController | null,
+  startedAt: null as Date | null,
+  endedAt: null as Date | null,
 };
 
 /**
@@ -52,22 +55,31 @@ const getState = () => ({
  */
 function startExtraction(params: ExtractionParams) {
   // Reset state
-  state.status = 'idle';
-  state.progress = { percent: 0, current: 0, total: 0 };
   state.error = null;
+  state.endedAt = null;
+  state.progress = {
+    percent: 0,
+    speed: 0,
+    current: 0,
+    total: 0,
+  };
+  // Update state
+  state.status = 'running';
+  state.startedAt = new Date();
 
   // Setup abort controller
   const abort = new AbortController();
   state.abortController = abort;
 
   // Get filename
-  let filename = new Date().toISOString();
+  let filename = state.startedAt.toISOString();
   if (params.name) {
     filename += `.${params.name}`;
   }
   const filepath = resolve(config.paths.data.extractDir, `${filename}.csv`);
 
   let lastProgress = 0;
+  appLogger.info(`[extract] Extracting data to [${filepath}]...`);
 
   // Starts extraction
   // Don't await as process will be handled in the background
@@ -81,6 +93,7 @@ function startExtraction(params: ExtractionParams) {
       state.progress = {
         current,
         total,
+        speed: current / (new Date().getTime() - (state.startedAt?.getTime() ?? 0)),
         percent: current / total,
       };
 
@@ -114,11 +127,9 @@ function startExtraction(params: ExtractionParams) {
     }).finally(() => {
       // Remove abort controller reference
       state.abortController = null;
+      // Update date
+      state.endedAt = new Date();
     });
-
-  // Update state
-  state.status = 'running';
-  appLogger.info(`[extract] Extracting data to [${filepath}]...`);
 
   return getState();
 }
