@@ -33,11 +33,6 @@
       "delete": "Delete file",
       "deleteMessage": "Are you sure you want to delete this file: {filename} ? (irreversible action)"
     },
-    "hlm": {
-      "title": "HLM files import",
-      "fileInput": "Files input",
-      "portal": "Portal"
-    },
     "elastic": {
       "title": "Information about indices",
       "noIndex": "No index",
@@ -67,9 +62,6 @@
     "administration" :{
       "invalidPassword": "Invalid password"
     },
-    "hlm": {
-      "import": "Cannot import files"
-    },
     "file": {
       "get": "Cannot get files",
       "delete": "Cannot delete file"
@@ -91,9 +83,6 @@
     }
   },
   "info": {
-    "hlm": {
-      "imported": "Inserting data in progress"
-    },
     "file": {
       "deleted": "File is deleted"
     },

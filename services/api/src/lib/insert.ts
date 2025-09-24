@@ -4,15 +4,12 @@ import { parse } from 'csv-parse';
 import fs from 'fs';
 import path from 'path';
 import { format } from 'date-fns';
-import { config } from '~/lib/config';
 import appLogger from '~/lib/logger/appLogger';
 import { bulk, refresh, createIndex } from '~/lib/elastic';
 
 import { transformCoverage, transformEmbargo } from '~/lib/holdingsIQ/transform';
 
 import holding from '~/../mapping/holding.json';
-
-const { HLMDir } = config.paths.data;
 
 /**
  *

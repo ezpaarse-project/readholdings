@@ -33,11 +33,6 @@
       "delete": "Suppression du fichier",
       "deleteMessage": "Êtes-vous sûr de vouloir supprimer ce fichier: {filename} ? (action irréversible)"
     },
-    "hlm": {
-      "title": "Importer des fichiers HLM",
-      "fileInput": "Dépot de fichier",
-      "portal": "Portail"
-    },
     "elastic": {
       "title": "Informations sur les index",
       "noIndex": "Aucun index",
@@ -67,9 +62,6 @@
     "administration": {
       "invalidPassword": "Mot de passe incorrect"
     },
-    "hlm": {
-      "import": "Impossible d'importer les fichiers"
-    },
     "file": {
       "get": "Impossible de récuperer la liste des fichiers",
       "delete": "Impossible de supprimer le fichier"
@@ -91,9 +83,6 @@
     }
   },
   "info": {
-    "hlm": {
-      "imported": "Insertion des données en cours"
-    },
     "file": {
       "deleted": "Le fichier a été supprimé"
     },

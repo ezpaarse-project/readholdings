@@ -78,8 +78,7 @@
       "applicationLogRetention": 150,
       "accessLogRetention": 30,
       "healthcheckLogRetention": 30,
-      "holdingsIQRetention": 1,
-      "HLMRetention": 1
+      "holdingsIQRetention": 1
     },
     "dataUpdate": {
       "schedule": "0 0 0 * * 0",
@@ -93,7 +92,6 @@
       "healthCheckDir": "./log/healthcheck"
     },
     "data": {
-      "HLMDir": "./data/hlm",
       "holdingsIQDir": "./data/holdings",
       "reportDir": "./data/report"
     }

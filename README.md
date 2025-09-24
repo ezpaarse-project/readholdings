@@ -77,16 +77,16 @@ The tools you need to let readholdings run are :
 npm i
 
 # Execute this one time
-docker-compose -f docker-compose.debug.yml run --rm elastic chown -R elasticsearch /usr/share/elasticsearch/ 
+docker compose -f docker-compose-dev.yml run --rm elastic chown -R elasticsearch /usr/share/elasticsearch/ 
 
 # Start ReadHoldings as daemon
-docker-compose -f docker-compose.debug.yml up -d
+docker compose -f docker-compose-dev.yml up -d
 
 # Stop ReadHoldings
-docker-compose -f docker-compose.debug.yml stop
+docker compose -f docker-compose-dev.yml stop
 
 # Get the status of ReadHoldings services
-docker-compose -f docker-compose.debug.yml ps
+docker compose -f docker-compose-dev.yml ps
 ```
 
 ### Deployment

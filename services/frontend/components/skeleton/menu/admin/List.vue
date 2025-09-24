@@ -48,12 +48,6 @@
   </v-list-item>
 
   <v-list-item
-    title="HLM"
-    prepend-icon="mdi-upload"
-    to="/administration/hlm"
-  />
-
-  <v-list-item
     title="Config"
     prepend-icon="mdi-code-json"
     to="/administration/config"

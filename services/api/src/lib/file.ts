@@ -1,14 +1,8 @@
-import type { MultipartFile } from '@fastify/multipart';
-
 import fsp from 'fs/promises';
-import { createWriteStream, type Stats } from 'fs';
-import { join, extname, resolve } from 'path';
-import { pipeline } from 'stream/promises';
+import { type Stats } from 'fs';
+import { join, resolve } from 'path';
 
 import appLogger from '~/lib/logger/appLogger';
-import { config } from '~/lib/config';
-
-const { HLMDir } = config.paths.data;
 
 /**
  * Deletes files in a directory that are older than n time.
@@ -44,26 +38,6 @@ export async function deleteOldFiles(directory: string, age: number) {
   await Promise.all(promises);
 
   return deletedFiles;
-}
-
-/**
- *
- * @param parts
- */
-export async function uploadFile(part: MultipartFile) {
-  if (!part) {
-    return;
-  }
-
-  const fileType: string = part.mimetype;
-  const fileExtension: string = extname(part.filename).toLowerCase();
-
-  // Verify that the file is a CSV
-  if (fileType !== 'text/csv' || fileExtension !== '.csv') {
-    throw new Error(`Invalid file type: ${part.filename}`);
-  }
-
-  await pipeline(part.file, createWriteStream(`${HLMDir}/${part.filename}`));
 }
 
 /**
