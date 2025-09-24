@@ -3,6 +3,7 @@ import { pipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
 import { unlink } from 'node:fs/promises';
 
+import type { estypes as ES } from '@elastic/elasticsearch';
 import { stringify } from 'csv-stringify';
 
 import type { Holding } from '~/models/holding';
@@ -38,6 +39,68 @@ export type ExtractionParams = {
 };
 
 /**
+ * Flat deep object into a record of 1 level
+ *
+ * @param object The object to Flat
+ *
+ * @return The flat object
+ */
+function flatObject(object: object): Record<string, unknown> {
+  const entries = Object.entries(object);
+
+  const res: [string, unknown][] = [];
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const [key, value] of entries) {
+    if (value == null) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      // throw new Error(`${key} is an array, which is unsupported`);
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    switch (typeof value) {
+      case 'function':
+      case 'symbol':
+        throw new Error(`${key} is a ${typeof value}, which is unsupported`);
+
+      case 'object':
+        res.push(
+          ...Object.entries(flatObject(value))
+            .map(([subkey, subvalue]): [string, unknown] => [`${key}.${subkey}`, subvalue]),
+        );
+        break;
+
+      default:
+        res.push([key, value]);
+        break;
+    }
+  }
+
+  return Object.fromEntries(res);
+}
+
+/**
+ * Transform ES hits into flat objects
+ *
+ * @param iterable ES hits iterable
+ */
+async function* holdingFlattener(
+  iterable: AsyncIterable<ES.SearchHit<Holding | undefined>>,
+): AsyncIterable<Record<string, unknown>> {
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const document of iterable) {
+    if (document._source) {
+      yield flatObject(document._source);
+    }
+  }
+}
+
+/**
  * Extract data from elastic index into a CSV
  *
  * @param params Params needed to extract data
@@ -62,14 +125,16 @@ export async function extractToCSV(params: ExtractionParams & {
   const query = filtersToESQuery(params.filters ?? []);
 
   // Get total of document we need to extract
-  const total = await count(params.index, { query }, params.signal);
+  const total = await count(params.index, { query });
+  appLogger.info(`[extract] Found [${total}] records to extract`);
 
-  const transformer = stringify({
+  const csvTransformer = stringify({
     header: true,
     delimiter: params.delimiter || ',',
     escape: params.escape || '"',
   });
 
+  // Setup progress notifier
   let current = -1; // Starts with -1 cause the first line is the CSV headers
   const notifier = new PassThrough();
   notifier.on('data', () => {
@@ -83,14 +148,25 @@ export async function extractToCSV(params: ExtractionParams & {
     try {
       await unlink(params.filepath);
     } catch (err) {
-      appLogger.warn(`[extract] Unable to delete [${params.filepath}] after aborting extract`);
+      appLogger.warn(`[extract] Unable to delete [${params.filepath}] after extract error`);
     }
   });
+
+  // Initialize scroller
+  const scroller = scrollSearch<Holding>(
+    params.index,
+    {
+      _source: (params.fields?.length ?? 0) > 0 ? params.fields : undefined,
+      query,
+    },
+    params.signal,
+  );
 
   // Transform data from scroller into csv lines, notify to update the state then writes it
   return pipeline(
     scroller,
-    transformer,
+    holdingFlattener,
+    csvTransformer,
     notifier,
     file,
     { signal: params.signal },
