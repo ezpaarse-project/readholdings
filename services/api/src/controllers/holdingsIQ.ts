@@ -6,12 +6,6 @@ import { getWorkInProgress } from '~/lib/status';
 
 import update from '~/lib/update';
 
-/**
- * Controller to upload HLM files.
- *
- * @param _request
- * @param reply
- */
 export default async function updateController(
   request: FastifyRequest,
   reply: FastifyReply,
