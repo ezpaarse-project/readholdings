@@ -279,6 +279,11 @@ export async function insertPortalsInElastic(
     const portals = dataHasHoldingID.map((res) => res.meta.BibCNRS);
 
     dataHasHoldingID.forEach((res) => {
+      // Skip records without VendorID, PackageID and KBID
+      if (!res.standard.VendorID || !res.standard.PackageID || !res.standard.KBID) {
+        return;
+      }
+
       const id = `${res.meta.BibCNRS}-${res.standard.VendorID}-${res.standard.PackageID}-${res.standard.KBID}`;
       const record = { meta: { } as Record<string, boolean> };
       portals.forEach((portal) => {
