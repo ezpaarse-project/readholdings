@@ -49,7 +49,10 @@
           class="mb-2"
         />
 
-        <AdministrationExtractionFiltersForm v-model="filters" />
+        <AdministrationExtractionFiltersForm
+          v-model="filters"
+          :disabled="state.status === 'running'"
+        />
       </v-col>
     </v-row>
 
@@ -102,7 +105,7 @@
         <v-btn
           :text="$t('administration.extraction.form.start')"
           :loading="startLoading"
-          :disabled="!isValid"
+          :disabled="!isValid || state.status === 'running'"
           prepend-icon="mdi-play"
           color="primary"
           type="submit"

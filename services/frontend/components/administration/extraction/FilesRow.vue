@@ -15,10 +15,16 @@
           @click="downloadFile(file)"
         >
           <template #prepend>
-            <v-icon
+            <v-badge
               v-if="!loadingMap.get(file.filename)"
-              icon="mdi-download"
-            />
+              :model-value="newFiles.has(file.filename)"
+              color="primary"
+              floating
+              dot
+            >
+              <v-icon icon="mdi-download" />
+            </v-badge>
+
             <v-progress-circular
               v-else
               color="primary"
@@ -77,7 +83,13 @@ const snackStore = useSnacksStore();
 
 const { password } = storeToRefs(useAdminStore());
 
+const originalFilenames = ref(new Set(props.files.map((file) => file.filename)));
 const loadingMap = ref(new Map());
+
+const newFiles = computed(() => {
+  const filenames = new Set(props.files.map((file) => file.filename));
+  return filenames.difference(originalFilenames.value);
+});
 
 async function downloadFile({ filename }) {
   loadingMap.value.set(filename, true);
@@ -97,6 +109,7 @@ async function downloadFile({ filename }) {
 
     link.click(); // Click is synchronous
     URL.revokeObjectURL(link.href);
+    originalFilenames.value.add(filename);
   } catch (err) {
     snackStore.error(t('error.extraction.unableToGetFile'));
   }
@@ -112,8 +125,8 @@ async function deleteFile({ filename }) {
       },
     });
 
-    const newFiles = props.files.filter((f) => f.filename !== filename);
-    emit('update:files', newFiles);
+    const updatedFiles = props.files.filter((f) => f.filename !== filename);
+    emit('update:files', updatedFiles);
   } catch (err) {
     snackStore.error(t('error.extraction.unableToDeleteFile'));
   }
