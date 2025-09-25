@@ -57,8 +57,8 @@
                     <v-combobox
                       v-model="field"
                       :label="$t('administration.extraction.filters.field')"
-                      :items="[]"
-                      :rules="[(v) => !!v || $t('fieldIsRequired')]"
+                      :items="fieldsItems"
+                      :rules="[(v) => !!v || $t('required')]"
                       :return-object="false"
                       prepend-icon="mdi-form-textbox"
                       variant="underlined"
@@ -110,7 +110,7 @@
                   <v-text-field
                     v-model="name"
                     :label="$t('administration.extraction.filters.name')"
-                    :rules="[(v) => !!v || $t('fieldIsRequired')]"
+                    :rules="[(v) => !!v || $t('required')]"
                     prepend-icon="mdi-rename"
                     variant="underlined"
                     required
@@ -157,10 +157,16 @@
 </template>
 
 <script setup>
+import { elasticTypeAliases, elasticTypeIcons } from '@/lib/elastic';
+
 const props = defineProps({
   modelValue: {
     type: Array,
     default: () => undefined,
+  },
+  mapping: {
+    type: Object,
+    default: () => ({}),
   },
   disabled: {
     type: Boolean,
@@ -201,6 +207,21 @@ const filterType = computed(() => {
     return t('administration.extraction.filters.types.in');
   }
   return t('administration.extraction.filters.types.is');
+});
+
+const fieldsItems = computed(() => {
+  if (!props.mapping) {
+    return [];
+  }
+
+  return Object.entries(props.mapping).map(([key, type]) => ({
+    value: key,
+    title: key,
+    props: {
+      subtitle: type,
+      appendIcon: elasticTypeIcons.get(elasticTypeAliases.get(type) || ''),
+    },
+  }));
 });
 
 function updateFilters() {

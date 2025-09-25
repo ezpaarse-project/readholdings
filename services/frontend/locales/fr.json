@@ -88,6 +88,7 @@
         "title": "Nouvelle extraction",
         "index": "Index à extraire",
         "fields": "Champs à extraire",
+        "fields:placeholder": "Tous",
         "name": "Commentaire de l'extraction (ajouté au nom de fichier)",
         "delimiter": "Séparateur",
         "escape": "Échappement (si les données contiennent le séparateur)",

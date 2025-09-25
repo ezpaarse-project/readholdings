@@ -30,8 +30,9 @@
         <v-autocomplete
           v-model="fields"
           :label="$t('administration.extraction.form.fields')"
-          :items="[]"
-          :loading="false"
+          :placeholder="$t('administration.extraction.form.fields:placeholder')"
+          :items="fieldsItems"
+          :loading="mappingStatus === 'pending' && 'primary'"
           :rules="[(v) => !!v || $t('required')]"
           prepend-icon="mdi-format-list-bulleted"
           variant="underlined"
@@ -51,6 +52,7 @@
 
         <AdministrationExtractionFiltersForm
           v-model="filters"
+          :mapping="mapping"
           :disabled="state.status === 'running'"
         />
       </v-col>
@@ -116,6 +118,8 @@
 </template>
 
 <script setup>
+import { elasticTypeAliases, elasticTypeIcons } from '@/lib/elastic';
+
 const props = defineProps({
   state: {
     type: Object,
@@ -140,7 +144,7 @@ const ENCODINGS = [
   // 'HEX',
 ];
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { $fetch } = useNuxtApp();
 const snackStore = useSnacksStore();
 
@@ -178,18 +182,58 @@ const {
   },
 });
 
+const {
+  data: mapping,
+  status: mappingStatus,
+  // refresh: mappingRefresh,
+} = await useFetch(() => `/elastic/indices/${index.value}`, {
+  method: 'GET',
+  headers: {
+    'X-API-KEY': password.value,
+  },
+  immediate: false,
+  // Catch error and prints it in a snack
+  $fetch: async (...params) => {
+    try {
+      return await $fetch(...params);
+    } catch (err) {
+      snackStore.error(t('error.extraction.status'));
+      throw err;
+    }
+  },
+});
+
 const indexItems = computed(() => {
   if (!indices.value) {
     return [];
   }
 
-  return indices.value.map((item) => ({
-    value: item.uuid,
-    title: item.index,
-    props: {
-      subtitle: item['store.size'],
-    },
-  }));
+  return indices.value
+    .sort((itemA, itemB) => itemA.index.localeCompare(itemB.index, locale.value))
+    .map((item) => ({
+      value: item.index,
+      title: item.index,
+      props: {
+        subtitle: item['store.size'],
+      },
+    }));
+});
+
+const fieldsItems = computed(() => {
+  if (!mapping.value) {
+    return [];
+  }
+
+  return Object.entries(mapping.value)
+    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB, locale.value))
+    .map(([key, type]) => ({
+      value: key,
+      title: key,
+      props: {
+        subtitle: type,
+        appendIcon: elasticTypeIcons.get(elasticTypeAliases.get(type) || ''),
+      },
+    }));
 });
 
 async function startGeneration() {
@@ -224,13 +268,13 @@ async function startGeneration() {
   startLoading.value = false;
 }
 
+// Auto select latest index
 watch(indexItems, () => {
   if (!indexItems.value || indexItems.value.length < 0) {
     return;
   }
 
   // Get latest index
-  const names = indexItems.value.map(({ title }) => title).sort();
-  index.value = names.at(-1) ?? '';
+  index.value = indexItems.value.at(-1)?.title ?? '';
 }, { once: true });
 </script>

@@ -88,6 +88,7 @@
         "title": "New extraction",
         "index": "Index to extract from",
         "fields": "Fields to extract",
+        "fields:placeholder": "All",
         "name": "Comment on extraction (added to filename)",
         "delimiter": "Separator",
         "escape": "Escape (if data contains séparator)",
