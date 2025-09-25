@@ -89,7 +89,8 @@
         "index": "Index à extraire",
         "fields": "Champs à extraire",
         "fields:placeholder": "Tous",
-        "name": "Commentaire de l'extraction (ajouté au nom de fichier)",
+        "fields:invalid": "L'un des champs précisé n'existe pas",
+        "comment": "Commentaire de l'extraction (ajouté au nom de fichier)",
         "delimiter": "Séparateur",
         "escape": "Échappement (si les données contiennent le séparateur)",
         "encoding": "Encodage du fichier",
@@ -127,6 +128,14 @@
           "type:exists": "Si aucune valeur n'est présente, le filtre vérifiera l'existence du champ",
           "type:is": "Si une seule valeur est présente, le filtre vérifiera si le champ à exactement cette valeur",
           "type:in": "Si plusieurs valeurs sont présentes, le filtre vérifiera si le champ contient au moins une des valeurs"
+        }
+      },
+      "savedParams": {
+        "title": "Paramètrage sauvegardés",
+        "name": "Nom du paramètrage",
+        "noParams": {
+          "title": "Aucun paramètrage sauvegardé",
+          "description": "Aucun paramètrage n'est sauvegardé, vous pouvez sauvegarder le paramètrage actuel en utilisant le formulaire ci-dessus"
         }
       }
     }

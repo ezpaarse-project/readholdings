@@ -33,10 +33,12 @@
           :placeholder="$t('administration.extraction.form.fields:placeholder')"
           :items="fieldsItems"
           :loading="mappingStatus === 'pending' && 'primary'"
-          :rules="[(v) => !!v || $t('required')]"
+          :rules="fieldsRules"
           prepend-icon="mdi-format-list-bulleted"
           variant="underlined"
           multiple
+          chips
+          closable-chips
         />
       </v-col>
     </v-row>
@@ -61,8 +63,8 @@
     <v-row>
       <v-col>
         <v-text-field
-          v-model="name"
-          :label="$t('administration.extraction.form.name')"
+          v-model="comment"
+          :label="$t('administration.extraction.form.comment')"
           prepend-icon="mdi-form-textbox"
           variant="underlined"
         />
@@ -103,7 +105,21 @@
     </v-row>
 
     <v-row>
-      <v-col cols="12" class="d-flex justify-end">
+      <v-col cols="6" class="d-flex justify-start">
+        <AdministrationExtractionSavedParamsMenu v-model:params="currentParams">
+          <template #activator="{ props: menu }">
+            <v-btn
+              :text="$t('administration.extraction.savedParams.title')"
+              :disabled="state.status === 'running'"
+              prepend-icon="mdi-content-save-settings"
+              variant="outlined"
+              v-bind="menu"
+            />
+          </template>
+        </AdministrationExtractionSavedParamsMenu>
+      </v-col>
+
+      <v-col cols="6" class="d-flex justify-end">
         <v-btn
           :text="$t('administration.extraction.form.start')"
           :loading="startLoading"
@@ -156,7 +172,7 @@ const startLoading = shallowRef(false);
 const index = shallowRef('');
 const fields = ref([]);
 const filters = ref([]);
-const name = shallowRef('');
+const comment = shallowRef('');
 const delimiter = shallowRef(';');
 const escape = shallowRef('"');
 const encoding = shallowRef('UTF-8');
@@ -203,6 +219,31 @@ const {
   },
 });
 
+const currentParams = computed({
+  get: () => ({
+    comment: comment.value,
+    encoding: encoding.value.toLowerCase(),
+
+    index: index.value,
+    fields: fields.value,
+    filters: filters.value,
+
+    delimiter: delimiter.value,
+    escape: escape.value,
+  }),
+  set: (value) => {
+    comment.value = value.comment ?? '';
+    encoding.value = value.encoding?.toUpperCase() ?? 'UTF-8';
+
+    index.value = value.index;
+    fields.value = value.fields ?? [];
+    filters.value = value.filters ?? [];
+
+    delimiter.value = value.delimiter ?? ';';
+    escape.value = value.escape ?? '"';
+  },
+});
+
 const indexItems = computed(() => {
   if (!indices.value) {
     return [];
@@ -236,6 +277,18 @@ const fieldsItems = computed(() => {
     }));
 });
 
+const fieldsRules = computed(() => [
+  (values) => {
+    if (!values || values.length === 0) {
+      return true;
+    }
+    if (values.every((field) => fieldsItems.value.find((item) => item.value === field))) {
+      return true;
+    }
+    return t('administration.extraction.form.fields:invalid');
+  },
+]);
+
 async function startGeneration() {
   if (props.state.status === 'running' || !isValid.value) {
     return;
@@ -248,17 +301,7 @@ async function startGeneration() {
       headers: {
         'X-API-KEY': password.value,
       },
-      body: {
-        name: name.value,
-        encoding: encoding.value.toLowerCase(),
-
-        index: index.value,
-        fields: fields.value,
-        filters: filters.value,
-
-        delimiter: delimiter.value,
-        escape: escape.value,
-      },
+      body: { ...currentParams.value },
     });
 
     emit('update:state', newState);

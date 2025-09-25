@@ -189,7 +189,7 @@ const hasNameChanged = shallowRef(false);
 const field = shallowRef('');
 /** @type {Ref<string[]>} */
 const values = ref([]);
-const name = shallowRef('');
+const comment = shallowRef('');
 const isNot = shallowRef(false);
 const rawFilterJSON = shallowRef('');
 
@@ -233,7 +233,7 @@ function openForm(filter) {
   editingFilter.value = filter && { ...filter };
 
   field.value = filter?.field || '';
-  name.value = filter?.name || '';
+  comment.value = filter?.name || '';
   isNot.value = filter?.isNot || false;
 
   let rawJSON = '';
@@ -253,7 +253,7 @@ function openForm(filter) {
 }
 
 function submitFilter() {
-  const filter = { name: name.value, isNot: isNot.value };
+  const filter = { name: comment.value, isNot: isNot.value };
   if (!isRawMode.value) {
     let filterValue = values.value;
     if (filterValue.length === 1) { ([filterValue] = filterValue); }
@@ -319,7 +319,7 @@ watch(computed(() => [field.value, values.value, isNot.value]), () => {
 
   const n = generateFilterName();
   if (n) {
-    name.value = n;
+    comment.value = n;
   }
 }, { deep: true });
 </script>

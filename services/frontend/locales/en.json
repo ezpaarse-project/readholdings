@@ -89,7 +89,8 @@
         "index": "Index to extract from",
         "fields": "Fields to extract",
         "fields:placeholder": "All",
-        "name": "Comment on extraction (added to filename)",
+        "fields:invalid": "One of the fields doesn't exist",
+        "comment": "Comment on extraction (added to filename)",
         "delimiter": "Separator",
         "escape": "Escape (if data contains séparator)",
         "encoding": "File encoding",
@@ -128,6 +129,14 @@
           "type:exists": "If no value is present, the filter will check the existence of the field",
           "type:is": "If a single value is present, the filter will check if the field has exactly this value",
           "type:in": "If multiple values are present, the filter will check if the field contains at least one of the values"
+        }
+      },
+      "savedParams": {
+        "title": "Saved params",
+        "name": "Params name",
+        "noParams": {
+          "title": "No saved params",
+          "description": "No params are save, you can save the current params using the form on top"
         }
       }
     }
