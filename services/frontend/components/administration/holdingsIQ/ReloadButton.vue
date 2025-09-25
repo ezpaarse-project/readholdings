@@ -1,31 +1,19 @@
 <template>
-  <v-tooltip location="bottom">
-    <template #activator="activator">
-      <v-btn
-        v-bind="activator.props"
-        icon="mdi-reload"
-        :disabled="props.loading"
-        @click.stop="getState()"
-      />
-    </template>
-    {{ t("report.reloadState") }}
-  </v-tooltip>
+  <v-btn
+    v-tooltip:bottom="$t('report.reloadState')"
+    :disabled="loading"
+    icon="mdi-reload"
+    variant="text"
+    @click.stop="$emit('getState')"
+  />
 </template>
 
 <script setup>
-
-const { t } = useI18n();
-
-const props = defineProps({
+defineProps({
   loading: { type: Boolean, default: false },
 });
 
-const emit = defineEmits({
+defineEmits({
   getState: () => true,
 });
-
-function getState() {
-  emit('getState');
-}
-
 </script>
