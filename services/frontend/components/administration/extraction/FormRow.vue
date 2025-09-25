@@ -47,6 +47,7 @@
       <v-col>
         <v-field
           :label="$t('administration.extraction.filters.title', filters.length)"
+          :disabled="state.status === 'running'"
           prepend-inner-icon="mdi-filter"
           variant="plain"
           class="mb-2"
