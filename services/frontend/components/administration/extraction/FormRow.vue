@@ -176,7 +176,7 @@ const {
     try {
       return await $fetch(...params);
     } catch (err) {
-      snackStore.error(t('error.extraction.status'));
+      snackStore.error(t('error.extraction.index.get', { err: err.message }));
       throw err;
     }
   },
@@ -197,7 +197,7 @@ const {
     try {
       return await $fetch(...params);
     } catch (err) {
-      snackStore.error(t('error.extraction.status'));
+      snackStore.error(t('error.extraction.index.mapping.get', { err: err.message }));
       throw err;
     }
   },
@@ -263,7 +263,7 @@ async function startGeneration() {
 
     emit('update:state', newState);
   } catch (err) {
-    snackStore.error(t('error.extraction.unableToStart'));
+    snackStore.error(t('error.extraction.start', { err: err.message }));
   }
   startLoading.value = false;
 }

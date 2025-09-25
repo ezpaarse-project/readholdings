@@ -163,7 +163,22 @@
       "update": "Impossible de lancer la mise à jour"
     },
     "index": {
-      "delete": "Impossible de supprimer l'index"
+      "get": "Impossible de récupérer la liste des indexs: {err}",
+      "delete": "Impossible de supprimer l'index",
+      "mapping": {
+        "get": "Impossible de récupérer le mapping de l'index: {err}"
+      }
+    },
+    "extraction": {
+      "start": "Impossible de démarrer une extraction: {err}",
+      "stop": "Impossible de stopper l'extraction: {err}",
+      "status": {
+        "get": "Impossible de récupérer le status de l'extraction: {err}"
+      },
+      "file": {
+        "get": "Impossible de télécharger l'extraction: {err}",
+        "delete": "Impossible de supprimer l'extration: {err}"
+      }
     }
   },
   "info": {

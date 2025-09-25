@@ -163,8 +163,24 @@
     "holdingsIQ": {
       "update": "Cannot start update"
     },
+
     "index": {
-      "delete": "Cannot delete index"
+      "get": "Cannot get indices list: {err}",
+      "delete": "Cannot delete index",
+      "mapping": {
+        "get": "Cannot get index mapping: {err}"
+      }
+    },
+    "extraction": {
+      "start": "Cannot start extraction: {err}",
+      "stop": "Cannot stop extraction: {err}",
+      "status": {
+        "get": "Cannot get status of extraction: {err}"
+      },
+      "file": {
+        "get": "Cannot download extraction: {err}",
+        "delete": "Cannot delete extration: {err}"
+      }
     }
   },
   "info": {

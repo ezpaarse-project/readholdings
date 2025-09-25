@@ -113,7 +113,7 @@ async function downloadFile({ filename }) {
     URL.revokeObjectURL(link.href);
     originalFilenames.value.add(filename);
   } catch (err) {
-    snackStore.error(t('error.extraction.unableToGetFile'));
+    snackStore.error(t('error.extraction.file.get', { err: err.message }));
   }
   loadingMap.value.set(filename, false);
 }
@@ -130,7 +130,7 @@ async function deleteFile({ filename }) {
     const updatedFiles = props.files.filter((f) => f.filename !== filename);
     emit('update:files', updatedFiles);
   } catch (err) {
-    snackStore.error(t('error.extraction.unableToDeleteFile'));
+    snackStore.error(t('error.extraction.file.delete', { err: err.message }));
   }
 }
 </script>

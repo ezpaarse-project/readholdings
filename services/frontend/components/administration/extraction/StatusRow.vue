@@ -227,7 +227,7 @@ async function stopGeneration() {
 
     emit('update:state', newState);
   } catch (err) {
-    snackStore.error(t('error.extraction.unableToStop'));
+    snackStore.error(t('error.extraction.stop', { err: err.message }));
   }
 }
 </script>
