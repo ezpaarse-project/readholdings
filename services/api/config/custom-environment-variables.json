@@ -78,8 +78,7 @@
       "applicationLogRetention": { "__name": "CRON_CLEAN_LOG_APPLICATION_RETENTION", "__format": "number" },
       "accessLogRetention": { "__name": "CRON_CLEAN_LOG_ACCESS_RETENTION", "__format": "number" },
       "healthcheckLogRetention": { "__name": "CRON_CLEAN_LOG_HEALTHCHECK_RETENTION", "__format": "number" },
-      "holdingsIQRetention": { "__name": "CRON_CLEAN_HOLDINGSIQ_RETENTION", "__format": "number" },
-      "HLMRetention": { "__name": "CRON_CLEAN_HLM_RETENTION", "__format": "number" }
+      "holdingsIQRetention": { "__name": "CRON_CLEAN_HOLDINGSIQ_RETENTION", "__format": "number" }
     },
     "dataUpdate": {
       "schedule": "CRON_DATA_UPDATE_SCHEDULE",

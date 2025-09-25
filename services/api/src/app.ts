@@ -24,7 +24,6 @@ import pingRouter from '~/routes/ping';
 import adminRouter from '~/routes/admin';
 import configRouter from '~/routes/config';
 import elasticRouter from '~/routes/elastic';
-import HLMRouter from '~/routes/hlm';
 import holdingsIQRouter from '~/routes/holdingsIQ';
 import reportRouter from '~/routes/report';
 import stateRouter from '~/routes/state';
@@ -42,7 +41,6 @@ const { paths } = config;
 
 const start = async () => {
   // create data directories
-  await mkdir(resolve(paths.data.HLMDir), { recursive: true });
   await mkdir(resolve(paths.data.holdingsIQDir), { recursive: true });
   await mkdir(resolve(paths.data.reportDir), { recursive: true });
   await mkdir(resolve(paths.data.extractDir), { recursive: true });
@@ -103,7 +101,6 @@ const start = async () => {
   await fastify.register(adminRouter, { prefix: '/login' });
   await fastify.register(configRouter, { prefix: '/config' });
   await fastify.register(elasticRouter, { prefix: '/elastic' });
-  await fastify.register(HLMRouter, { prefix: '/hlm' });
   await fastify.register(holdingsIQRouter, { prefix: '/holdingsIQ' });
   await fastify.register(reportRouter, { prefix: '/reports' });
   await fastify.register(stateRouter, { prefix: '/state' });

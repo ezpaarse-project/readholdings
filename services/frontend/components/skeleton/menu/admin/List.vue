@@ -34,6 +34,8 @@
   <v-list-item
     title="Kibana"
     :href="runtimeConfig.public.kibanaURL"
+    target="_blank"
+    rel="noopener noreferrer"
   >
     <template #prepend>
       <v-avatar
@@ -44,12 +46,6 @@
       />
     </template>
   </v-list-item>
-
-  <!-- <v-list-item
-    title="HLM"
-    prepend-icon="mdi-upload"
-    to="/administration/hlm"
-  /> -->
 
   <v-list-item
     :title="$t('administration.extraction.title')"
