@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { elasticsearch } from 'config';
+
+import { config } from '~/lib/config';
 
 import {
   ping as pingElastic,
@@ -7,7 +8,10 @@ import {
   getReadHoldingsIndices,
   checkIndex,
   removeIndex,
+  getIndexMapping,
 } from '~/lib/elastic';
+
+const { elasticsearch } = config;
 
 /**
  * Controller to ping elastic.
@@ -22,7 +26,8 @@ export async function pingElasticController(
   await pingElastic();
   const endTime = Date.now();
   const responseTime = endTime - request.startTime;
-  reply.code(200)
+
+  return reply.code(200)
     .send({ message: 'Pong', responseTime, nodes: elasticsearch.nodes })
     .headers({ 'x-response-time': responseTime });
 }
@@ -38,7 +43,8 @@ export async function startConnectionElasticController(
   reply: FastifyReply,
 ): Promise<void> {
   await initElasticClient();
-  reply.code(200).send();
+
+  return reply.code(200).send();
 }
 
 /**
@@ -52,7 +58,24 @@ export async function getIndicesController(
   reply: FastifyReply,
 ): Promise<void> {
   const indices = await getReadHoldingsIndices();
-  reply.code(200).send(indices);
+
+  return reply.code(200).send(indices);
+}
+
+/**
+ * Controller to get Index mapping.
+ *
+ * @param request
+ * @param reply
+ */
+export async function getIndexMappingController(
+  request: FastifyRequest<{ Params: { indexName: string } }>,
+  reply: FastifyReply,
+): Promise<void> {
+  const { indexName } = request.params;
+  const mapping = await getIndexMapping(indexName);
+
+  return reply.code(200).send(mapping);
 }
 
 /**
@@ -62,15 +85,17 @@ export async function getIndicesController(
  * @param reply
  */
 export async function deleteIndexController(
-  request: FastifyRequest,
+  request: FastifyRequest<{ Params: { indexName: string } }>,
   reply: FastifyReply,
 ): Promise<void> {
   const { indexName } = request.params;
+
   const isExist: boolean = await checkIndex(indexName);
+
   if (!isExist) {
-    reply.code(404).send();
-  } else {
-    await removeIndex(indexName);
-    reply.code(204).send();
+    return reply.code(404).send();
   }
+
+  await removeIndex(indexName);
+  return reply.code(204).send();
 }

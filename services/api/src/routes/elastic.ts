@@ -4,6 +4,7 @@ import {
   getIndicesController,
   pingElasticController,
   startConnectionElasticController,
+  getIndexMappingController,
   deleteIndexController,
 } from '~/controllers/elastic';
 
@@ -59,7 +60,25 @@ const router: FastifyPluginAsync = async (fastify) => {
   });
 
   /**
-   * Route to get indices.
+   * Route to get index mapping
+   * Admin only.
+   */
+  fastify.route({
+    method: 'GET',
+    url: '/indices/:indexName',
+    schema: {},
+    config: {
+      rateLimit: {
+        max: 60,
+        timeWindow: '1 minute',
+      },
+    },
+    preHandler: admin,
+    handler: getIndexMappingController,
+  });
+
+  /**
+   * Route to delete index.
    * Admin only.
    */
   fastify.route({

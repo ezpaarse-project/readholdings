@@ -391,25 +391,8 @@ export async function createIndex(indexName: string, mapping: any): Promise<void
   }
 }
 
-export async function getIndexSettings(index: string) {
-  if (!elasticClient) {
-    throw new Error('[elastic]: Elastic client is not initialized');
-  }
-
-  try {
-    const { body } = await elasticClient.indices.getSettings<ES.IndicesGetSettingsResponse>({
-      index,
-    });
-    return body[index];
-  } catch (err) {
-    appLogger.error(`[elastic]: Cannot request settings of index [${index}]`, err);
-    throw err;
-  }
-}
-
 /**
  * Get indices on elastic.
- *
  */
 export async function getReadHoldingsIndices() {
   if (!elasticClient) {
@@ -420,6 +403,65 @@ export async function getReadHoldingsIndices() {
   return res.body;
 }
 
+/**
+ * Simplify mapping by flattening object using dot notation
+ *
+ * @param properties Elastic raw mapping
+ *
+ * @returns Map of dot notation keys and type as value
+ */
+function simplifyMapping(
+  properties: Record<string, ES.MappingProperty>,
+): Record<string, string> {
+  const res: Record<string, string> = {};
+  // eslint-disable-next-line no-restricted-syntax
+  for (const [field, mapping] of Object.entries(properties)) {
+    if (mapping.type) {
+      res[field] = mapping.type;
+    }
+
+    if (mapping.properties) {
+      const sub = simplifyMapping(mapping.properties);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [subField, type] of Object.entries(sub)) {
+        res[`${field}.${subField}`] = type;
+      }
+    }
+  }
+
+  return res;
+}
+
+/**
+ * Get mapping of an index
+ *
+ * @param indexName Name of the index
+ *
+ * @returns The js-like index mapping
+ */
+export async function getIndexMapping(indexName: string): Promise<Record<string, string>> {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
+  try {
+    const { body } = await elasticClient.indices.getMapping<ES.IndicesGetMappingResponse>({
+      index: indexName,
+    });
+
+    // Keep all the keys of all the indices
+    const mappings = Object.values(body).map((index) => index.mappings.properties ?? {});
+    const globalMapping = Object.assign({}, ...mappings);
+    return simplifyMapping(globalMapping);
+  } catch (err) {
+    appLogger.error(`[elastic]: Cannot get mapping of index [${indexName}]`);
+    throw err;
+  }
+}
+
+/**
+ * Simplified version of ES filter
+ */
 export type ESFilter = {
   name: string,
   isNot: boolean,
@@ -428,6 +470,13 @@ export type ESFilter = {
   value?: string | string[],
 } | { raw: Record<string, Record<string, unknown>> });
 
+/**
+ * Transform filter into a partial ES query
+ *
+ * @param filters Filter to transform
+ *
+ * @returns The ES query
+ */
 function filterToES(filter: ESFilter): ES.QueryDslQueryContainer {
   if ('raw' in filter) {
     return filter.raw;
@@ -448,6 +497,13 @@ function filterToES(filter: ESFilter): ES.QueryDslQueryContainer {
   };
 }
 
+/**
+ * Transform filters into ES query
+ *
+ * @param filters List of filters to transform
+ *
+ * @returns The ES query
+ */
 export function filtersToESQuery(filters: ESFilter[]): ES.QueryDslQueryContainer {
   const must: ES.QueryDslQueryContainer[] = [];
   const mustNot: ES.QueryDslQueryContainer[] = [];
