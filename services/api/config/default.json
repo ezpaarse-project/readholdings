@@ -97,7 +97,8 @@
       "HLMDir": "./data/hlm",
       "holdingsIQDir": "./data/holdings",
       "reportDir": "./data/report",
-      "extractDir": "./data/extracts"
+      "extractDir": "./data/extracts",
+      "extractParamsDir": "./data/extract-params"
     }
   }
 }

@@ -46,6 +46,7 @@ const start = async () => {
   await mkdir(resolve(paths.data.holdingsIQDir), { recursive: true });
   await mkdir(resolve(paths.data.reportDir), { recursive: true });
   await mkdir(resolve(paths.data.extractDir), { recursive: true });
+  await mkdir(resolve(paths.data.extractParamsDir), { recursive: true });
 
   const fastify = Fastify();
 

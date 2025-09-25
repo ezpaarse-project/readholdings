@@ -7,9 +7,15 @@ import { config } from '~/lib/config';
 import { deleteFile, orderRecentFiles } from '~/lib/file';
 import appLogger from '~/lib/logger/appLogger';
 
-import { extractToCSV, type ExtractionParams } from '~/lib/extract';
+import {
+  extractToCSV,
+  readSavedParamsAsJSON,
+  writeSavedParamsAsJSON,
+  type ExtractionParams,
+  type SavedExtractionParams,
+} from '~/lib/extract';
 
-const { extractDir } = config.paths.data;
+const { extractDir, extractParamsDir } = config.paths.data;
 
 // #region State
 
@@ -74,8 +80,8 @@ function startExtraction(params: ExtractionParams) {
 
   // Get filename
   let filename = state.startedAt.toISOString();
-  if (params.name) {
-    filename += `.${params.name}`;
+  if (params.comment) {
+    filename += `.${params.comment}`;
   }
   state.filename = `${filename}.csv`;
   const filepath = resolve(config.paths.data.extractDir, state.filename);
@@ -212,8 +218,69 @@ export async function deleteExtractionController(
 ): Promise<void> {
   const { filename } = request.params;
 
-  // TODO: catch errors that aren't not found
+  // TODO: throw errors that aren't not found
   await deleteFile(join(extractDir, filename));
+
+  return reply.code(204).send();
+}
+
+export async function getExtractionSavedParamsController(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
+  const files = await orderRecentFiles(extractParamsDir);
+
+  const savedParamsList = await Promise.all(
+    files.map(async ({ filename }) => {
+      const filepath = resolve(extractParamsDir, filename);
+      try {
+        return await readSavedParamsAsJSON(filepath);
+      } catch (err) {
+        appLogger.warn(`[extraction][saved-params] Unable to read saved params [${filepath}]`, err);
+        return undefined;
+      }
+    }),
+  );
+
+  return reply.code(200).send(
+    savedParamsList
+      .filter((params) => !!params)
+      .sort((paramsA, paramsB) => paramsA.name.localeCompare(paramsB.name)),
+  );
+}
+
+export async function updateExtractionSavedParamsController(
+  request: FastifyRequest<{ Params: { name: string }, Body: ExtractionParams }>,
+  reply: FastifyReply,
+): Promise<void> {
+  const { name } = request.params;
+
+  const filename = name.toLowerCase().replace(/\s/g, '-');
+  const filepath = resolve(extractParamsDir, `${filename}.json`);
+
+  let savedParams: SavedExtractionParams;
+  try {
+    savedParams = await writeSavedParamsAsJSON({ ...request.body, name }, filepath);
+    appLogger.info(`[extraction][saved-params] Saved params wrote to [${filepath}]`);
+  } catch (err) {
+    appLogger.error(`[extraction][saved-params] Unable to write saved params [${filepath}]`, err);
+    throw err;
+  }
+
+  return reply.status(200).send(savedParams);
+}
+
+export async function deleteExtractionSavedParamsController(
+  request: FastifyRequest<{ Params: { name: string } }>,
+  reply: FastifyReply,
+): Promise<void> {
+  const { name } = request.params;
+
+  const filename = name.toLowerCase().replace(/\s/g, '-');
+  const filepath = resolve(extractParamsDir, `${filename}.json`);
+
+  // TODO: throw errors that aren't not found
+  await deleteFile(filepath);
 
   return reply.code(204).send();
 }

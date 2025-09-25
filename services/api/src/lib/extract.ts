@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
-import { unlink } from 'node:fs/promises';
+import { unlink, readFile, writeFile } from 'node:fs/promises';
 
 import type { estypes as ES } from '@elastic/elasticsearch';
 import { stringify } from 'csv-stringify';
@@ -18,8 +18,8 @@ import {
 
 export type ExtractionParams = {
   // Extraction specific
-  /** Name of the extraction */
-  name?: string,
+  /** Comment about the extraction */
+  comment?: string,
   /** Encoding of the output file */
   encoding?: BufferEncoding,
 
@@ -36,6 +36,13 @@ export type ExtractionParams = {
   delimiter?: string,
   /** Character to use when needing to escape a field */
   escape?: string,
+};
+
+export type SavedExtractionParams = Omit<ExtractionParams, 'index'> & {
+  /** Name of the extraction */
+  name: string,
+  /** Last update of the params */
+  updatedAt: Date,
 };
 
 /**
@@ -171,4 +178,49 @@ export async function extractToCSV(params: ExtractionParams & {
     file,
     { signal: params.signal },
   );
+}
+
+/**
+ * Read file and parse it as extraction params
+ *
+ * @param filepath Path to the file
+ *
+ * @returns Extraction params present in the file, index is omitted as index is daily
+ */
+export async function readSavedParamsAsJSON(
+  filepath: string,
+): Promise<SavedExtractionParams> {
+  const file = await readFile(filepath, 'utf-8');
+  const content = JSON.parse(file);
+
+  return {
+    // Default parameters
+    encoding: 'utf-8',
+    delimiter: ';',
+    escape: '"',
+    // Content of the params
+    ...content,
+  };
+}
+
+/**
+ * Write extraction params as a file
+ *
+ * @param params Extraction params, index is omitted as index is daily
+ * @param filepath Path to the file
+ */
+export async function writeSavedParamsAsJSON(
+  params: ExtractionParams & { name: string },
+  filepath: string,
+): Promise<SavedExtractionParams> {
+  const savedParams = {
+    ...params,
+    updatedAt: new Date(),
+    index: undefined,
+  };
+
+  const content = JSON.stringify(savedParams);
+  await writeFile(filepath, content, 'utf-8');
+
+  return savedParams;
 }

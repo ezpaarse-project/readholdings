@@ -8,6 +8,9 @@ import {
   startExtractionController,
   stopExtractionController,
   deleteExtractionController,
+  getExtractionSavedParamsController,
+  updateExtractionSavedParamsController,
+  deleteExtractionSavedParamsController,
 } from '~/controllers/extract';
 
 const router: FastifyPluginAsync = async (fastify) => {
@@ -69,6 +72,42 @@ const router: FastifyPluginAsync = async (fastify) => {
     schema: {},
     preHandler: admin,
     handler: deleteExtractionController,
+  });
+
+  /**
+   * Route to get extraction saved params
+   * Admin only.
+   */
+  fastify.route({
+    method: 'GET',
+    url: '/saved-params',
+    schema: {},
+    preHandler: admin,
+    handler: getExtractionSavedParamsController,
+  });
+
+  /**
+   * Route to save extraction params
+   * Admin only.
+   */
+  fastify.route({
+    method: 'PUT',
+    url: '/saved-params/:name',
+    schema: {},
+    preHandler: admin,
+    handler: updateExtractionSavedParamsController,
+  });
+
+  /**
+   * Route to delete extraction saved params
+   * Admin only.
+   */
+  fastify.route({
+    method: 'DELETE',
+    url: '/saved-params/:name',
+    schema: {},
+    preHandler: admin,
+    handler: deleteExtractionSavedParamsController,
   });
 };
 
