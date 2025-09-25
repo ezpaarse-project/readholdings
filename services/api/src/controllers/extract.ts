@@ -178,8 +178,7 @@ export async function startExtractionController(
   reply: FastifyReply,
 ): Promise<void> {
   if (state.status === 'running') {
-    // TODO: make it looks like an error
-    return reply.code(409).send({});
+    return reply.code(409).send({ message: 'Extraction is already running' });
   }
 
   return reply.code(200).send({
@@ -192,8 +191,7 @@ export async function stopExtractionController(
   reply: FastifyReply,
 ): Promise<void> {
   if (state.status !== 'running') {
-    // TODO: make it looks like an error
-    return reply.code(409).send({});
+    return reply.code(409).send({ message: 'Extraction is not running' });
   }
 
   return reply.code(200).send({
@@ -218,7 +216,6 @@ export async function deleteExtractionController(
 ): Promise<void> {
   const { filename } = request.params;
 
-  // TODO: throw errors that aren't not found
   await deleteFile(join(extractDir, filename));
 
   return reply.code(204).send();
@@ -279,7 +276,6 @@ export async function deleteExtractionSavedParamsController(
   const filename = name.toLowerCase().replace(/\s/g, '-');
   const filepath = resolve(extractParamsDir, `${filename}.json`);
 
-  // TODO: throw errors that aren't not found
   await deleteFile(filepath);
 
   return reply.code(204).send();
