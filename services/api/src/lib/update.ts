@@ -130,7 +130,7 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
     }
 
     // #region Update OA
-    const accessTypeStep = addStep(portalName, '[elastic][insert][access_type]', 'KBART2');
+    const accessTypeStep = addStep(`portal:${portalName}`, '[elastic][insert][access_type]', 'KBART2');
     let lineUpserted;
     try {
       lineUpserted = await updateOA(portalName, index);
@@ -143,11 +143,13 @@ export default async function update(portal?: keyof Portals, forceDownload = fal
     // #endregion Update OA
   }
 
+  addStep('task:portals-update', '[elastic][insert][portals]', 'KBART2');
   try {
     await updatePortals(index);
   } catch (err) {
     appLogger.error(`[holdingsIQ]: Cannot update portals: ${err}`);
   }
+  endLatestStep();
 
   await redisClient.flushall();
 
