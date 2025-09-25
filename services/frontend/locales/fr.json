@@ -101,6 +101,7 @@
         "title": "Filtres ({n})",
         "title:new": "Créer un filtre",
         "title:edit": "Éditer un filtre",
+        "advanced": "Filtre avancé",
         "add": "Ajouter un filtre",
         "empty": "Aucun filtre n'est défini.",
         "raw": "Requête DSL",

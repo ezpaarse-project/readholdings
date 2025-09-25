@@ -193,6 +193,8 @@ function changeCurrentParams(item) {
     updatedAt: undefined,
     name: undefined,
   });
+
+  isOpen.value = false;
 }
 
 // Refresh data when menu is opened

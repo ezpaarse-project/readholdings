@@ -7,6 +7,7 @@
           :key="key"
           :text="filter.name"
           :color="filter.isNot ? 'red' : 'blue'"
+          :disabled="disabled"
           density="compact"
           closable
           class="mr-2"
@@ -189,7 +190,7 @@ const hasNameChanged = shallowRef(false);
 const field = shallowRef('');
 /** @type {Ref<string[]>} */
 const values = ref([]);
-const comment = shallowRef('');
+const name = shallowRef('');
 const isNot = shallowRef(false);
 const rawFilterJSON = shallowRef('');
 
@@ -226,14 +227,14 @@ const fieldsItems = computed(() => {
 
 function updateFilters() {
   const vals = Array.from(filterMap.value.values());
-  emit('update:modelValue', vals.length > 0 ? vals : undefined);
+  emit('update:modelValue', vals);
 }
 
 function openForm(filter) {
   editingFilter.value = filter && { ...filter };
 
   field.value = filter?.field || '';
-  comment.value = filter?.name || '';
+  name.value = filter?.name || '';
   isNot.value = filter?.isNot || false;
 
   let rawJSON = '';
@@ -253,7 +254,7 @@ function openForm(filter) {
 }
 
 function submitFilter() {
-  const filter = { name: comment.value, isNot: isNot.value };
+  const filter = { name: name.value, isNot: isNot.value };
   if (!isRawMode.value) {
     let filterValue = values.value;
     if (filterValue.length === 1) { ([filterValue] = filterValue); }
@@ -319,7 +320,7 @@ watch(computed(() => [field.value, values.value, isNot.value]), () => {
 
   const n = generateFilterName();
   if (n) {
-    comment.value = n;
+    name.value = n;
   }
 }, { deep: true });
 </script>

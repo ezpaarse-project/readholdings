@@ -101,6 +101,7 @@
         "title": "Filters ({n})",
         "title:new": "Create filter",
         "title:edit": "Edit filter",
+        "advanced": "Advanced filter",
         "add": "Add a filter",
         "description:import": "Copy filters from Kibana and past them in the following area.",
         "empty": "No filters are defined.",
