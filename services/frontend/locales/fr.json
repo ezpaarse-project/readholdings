@@ -99,6 +99,7 @@
         "advanced": "Filtre avancé",
         "add": "Ajouter un filtre",
         "empty": "Aucun filtre n'est défini.",
+        "description:import": "Copiez les filtres depuis Kibana et collez-les dans la zone suivante.",
         "raw": "Requête DSL",
         "field": "Champ",
         "value": "Valeur(s)",
