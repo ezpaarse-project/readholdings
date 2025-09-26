@@ -183,7 +183,6 @@
     "holdingsIQ": {
       "update": "Cannot start update"
     },
-
     "index": {
       "get": "Cannot get indices list: {err}",
       "delete": "Cannot delete index",
