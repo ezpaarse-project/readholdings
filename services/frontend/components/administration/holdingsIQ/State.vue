@@ -3,7 +3,7 @@
     <v-row>
       <v-col v-if="state.createdAt" cols="4">
         <v-card
-          :title="state.createdAt"
+          :title="format(state.createdAt, 'PPPpp', { locale: dateLocale })"
           :subtitle="$t('administration.holdingsIQ.createdAt')"
           variant="flat"
           density="compact"
@@ -139,6 +139,7 @@ const props = defineProps({
 
 const { $fetch } = useNuxtApp();
 const { t } = useI18n();
+const { locale: dateLocale } = useDateLocale();
 
 const loading = shallowRef(false);
 const state = ref({});
