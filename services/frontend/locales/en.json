@@ -23,7 +23,25 @@
       "config": "Config"
     },
     "holdingsIQ": {
-      "title": "Update via Ebsco Holdings IQ API"
+      "title": "Update via Ebsco Holdings IQ API",
+      "noUpdate": {
+        "title": "No update were applied !",
+        "text": "Start one with the button \"Update\" located on the top right of this page."
+      },
+      "status:title": "Status",
+      "status": {
+        "done": "Done",
+        "inProgress": "In progress",
+        "error": "Error"
+      },
+      "types": {
+        "portal": "Portal",
+        "task": "Task"
+      },
+      "tasks": {
+        "portals-update": "Portals update"
+      },
+      "createdAt": "Started at"
     },
     "file": {
       "title": "List of installed files from unpaywall",
@@ -59,7 +77,7 @@
     "status": "Status"
   },
   "error": {
-    "administration" :{
+    "administration": {
       "invalidPassword": "Invalid password"
     },
     "file": {
@@ -69,13 +87,13 @@
     "report": {
       "get": "Cannot get update reports"
     },
-    "status":{
+    "status": {
       "get": "Cannot get update status"
     },
-    "state":{
+    "state": {
       "get": "Cannot get update state"
     },
-    "holdingsIQ" : {
+    "holdingsIQ": {
       "update": "Cannot start update"
     },
     "index": {
@@ -86,7 +104,7 @@
     "file": {
       "deleted": "File is deleted"
     },
-    "holdingsIQ" : {
+    "holdingsIQ": {
       "update": "The update has begun"
     }
   },

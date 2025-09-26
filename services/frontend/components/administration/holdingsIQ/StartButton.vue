@@ -1,11 +1,15 @@
 <template>
-  <v-btn :loading="loading" :disabled="props.status" @click.stop="startUpdate()">
-    {{ t("update") }}
-  </v-btn>
+  <v-btn
+    :text="$t('update')"
+    :loading="loading"
+    :disabled="status"
+    prepend-icon="mdi-download-circle"
+    color="primary"
+    @click.stop="startUpdate()"
+  />
 </template>
 
 <script setup>
-
 const emit = defineEmits(['update']);
 
 const { t } = useI18n();
@@ -15,11 +19,11 @@ const { $fetch } = useNuxtApp();
 
 const { password } = storeToRefs(adminStore);
 
-const props = defineProps({
+defineProps({
   status: { type: Boolean, default: false },
 });
 
-const loading = ref(false);
+const loading = shallowRef(false);
 
 async function startUpdate() {
   loading.value = true;
@@ -42,5 +46,4 @@ async function startUpdate() {
 
   emit('update');
 }
-
 </script>

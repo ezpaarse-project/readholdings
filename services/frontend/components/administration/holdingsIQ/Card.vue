@@ -1,18 +1,25 @@
 <template>
-  <v-card>
-    <v-toolbar color="secondary" dark flat dense>
-      <v-toolbar-title>
-        {{ t('administration.holdingsIQ.title') }}
-      </v-toolbar-title>
+  <v-card :loading="loading && 'primary'">
+    <v-card-title class="d-flex align-center bg-secondary">
+      {{ t('administration.holdingsIQ.title') }}
       <v-spacer />
-      <AdministrationHoldingsIQReloadButton :loading="loading" @get-state="updateState()" />
-    </v-toolbar>
-    <v-card-actions class="d-flex justify-center">
-      <AdministrationHoldingsIQStartButton :status="status" />
-    </v-card-actions>
 
-    <v-card-text>
-      <AdministrationHoldingsIQState ref="stateRef" :status="status" />
+      <AdministrationHoldingsIQStartButton
+        :status="status"
+        class="mr-4"
+      />
+
+      <AdministrationHoldingsIQReloadButton
+        :loading="loading"
+        @get-state="updateState()"
+      />
+    </v-card-title>
+
+    <v-card-text class="mt-2">
+      <AdministrationHoldingsIQState
+        ref="stateRef"
+        :status="status"
+      />
     </v-card-text>
   </v-card>
 </template>
