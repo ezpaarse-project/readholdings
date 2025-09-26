@@ -80,7 +80,6 @@
       "healthcheckLogRetention": 30,
       "holdingsIQRetention": 1,
       "extractRetention": 7
-      "holdingsIQRetention": 1
     },
     "dataUpdate": {
       "schedule": "0 0 0 * * 0",
