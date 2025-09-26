@@ -96,7 +96,7 @@ export async function downloadAndInsertFile(
 
   const fileExists = forceDownload ? false : existsSync(resolve(holdingsIQDir, filename));
   if (!fileExists) {
-    addStep(portalName, '[holdingsIQ][download]', type);
+    addStep(`portal:${portalName}`, '[holdingsIQ][download]', type);
     try {
       id = await generateAndDownloadExport(
         portalConfig,
@@ -113,7 +113,7 @@ export async function downloadAndInsertFile(
     appLogger.info(`[${portalName}][${type}][holdingsIQ]: File [${filename}] already exists`);
   }
 
-  const insertStep = addStep(portalName, '[elastic][insert]', type);
+  const insertStep = addStep(`portal:${portalName}`, '[elastic][insert]', type);
   let lineUpserted;
   try {
     lineUpserted = await inserters[type](portalName, filename, index, date);
@@ -129,7 +129,7 @@ export async function downloadAndInsertFile(
     return;
   }
 
-  addStep(portalName, '[holdingsIQ][delete]', type);
+  addStep(`portal:${portalName}`, '[holdingsIQ][delete]', type);
   try {
     await deleteExportByID(portalConfig, id);
   } catch (err) {

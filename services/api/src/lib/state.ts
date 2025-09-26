@@ -1,7 +1,7 @@
 import appLogger from '~/lib/logger/appLogger';
 
 type Step = Record<string, unknown> & {
-  portal: string;
+  key: string;
   name: string;
   fileType: string;
   startDate: Date;
@@ -44,9 +44,9 @@ export function fail() {
   state.status = 'error';
 }
 
-export function addStep(portal: string, name: string, fileType: string) {
+export function addStep(key: string, name: string, fileType: string) {
   const step: Step = {
-    portal,
+    key,
     name,
     fileType,
     startDate: new Date(),

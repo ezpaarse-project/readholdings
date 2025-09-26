@@ -23,7 +23,25 @@
       "config": "Config"
     },
     "holdingsIQ": {
-      "title": "Update via Ebsco Holdings IQ API"
+      "title": "Update via Ebsco Holdings IQ API",
+      "noUpdate": {
+        "title": "No update were applied !",
+        "text": "Start one with the button \"Update\" located on the top right of this page."
+      },
+      "status:title": "Status",
+      "status": {
+        "done": "Done",
+        "inProgress": "In progress",
+        "error": "Error"
+      },
+      "types": {
+        "portal": "Portal",
+        "task": "Task"
+      },
+      "tasks": {
+        "portals-update": "Portals update"
+      },
+      "createdAt": "Started at"
     },
     "file": {
       "title": "List of installed files from unpaywall",

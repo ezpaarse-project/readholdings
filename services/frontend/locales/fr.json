@@ -23,7 +23,25 @@
       "config": "Config"
     },
     "holdingsIQ": {
-      "title": "Mise à jour via l'API Holdings IQ d'Ebsco"
+      "title": "Mise à jour via l'API Holdings IQ d'Ebsco",
+      "noUpdate": {
+        "title": "Aucune mise à jour n'a été effectuée !",
+        "text": "Lancez en une avec le bouton \"Mettre à jour\" situé en en haut à droite de cette page."
+      },
+      "status:title": "Status",
+      "status": {
+        "done": "Terminé",
+        "inProgress": "En cours",
+        "error": "Erreur"
+      },
+      "types": {
+        "portal": "Portail",
+        "task": "Tâche"
+      },
+      "tasks": {
+        "portals-update": "Mise à jour des portails"
+      },
+      "createdAt": "Démarré le"
     },
     "file": {
       "title": "Liste des fichiers installés de ReadHoldings",
