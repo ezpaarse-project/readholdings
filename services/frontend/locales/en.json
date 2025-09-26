@@ -66,6 +66,93 @@
     "config": {
       "frontend": "Frontend configuration",
       "api": "API configuration"
+    },
+    "extraction": {
+      "title": "Extraction",
+      "status": {
+        "toolbar": "Extraction status",
+        "progress": "{current} / {total} documents extracted",
+        "eta": "Time left (estimate)",
+        "took": "Extraction duration",
+        "title": {
+          "success": "Succes",
+          "idle": "Waiting",
+          "running": "Running",
+          "stopped": "Stopped",
+          "error": "Error",
+          "unknown": "Unknown"
+        },
+        "meaning": {
+          "success": "Extraction succeed ! You can download it from the list at the bottom of this page",
+          "idle": "No extraction are ongoing, you can start one from the form below",
+          "running": "An extraction is ongoing... You can wait a few minutes or come back later",
+          "stopped": "An extraction was stopped. You can start another one from the form below",
+          "error": "An error occured during the extraction ! More details are available below"
+        }
+      },
+      "files": {
+        "title": "Previous extractions",
+        "noExtraction": {
+          "title": "No extraction available",
+          "description": "There's no extraction available, you can start one from the form on top"
+        }
+      },
+      "form": {
+        "title": "New extraction",
+        "index": "Index to extract from",
+        "fields": "Fields to extract",
+        "fields:placeholder": "All",
+        "fields:invalid": "One of the fields doesn't exist",
+        "comment": "Comment on extraction (added to filename)",
+        "delimiter": "Separator",
+        "escape": "Escape (if data contains séparator)",
+        "encoding": "File encoding",
+        "start": "Start an extraction",
+        "stop": "Stop the extraction"
+      },
+      "filters": {
+        "title": "Filters ({n})",
+        "title:new": "Create filter",
+        "title:edit": "Edit filter",
+        "advanced": "Advanced filter",
+        "add": "Add a filter",
+        "description:import": "Copy filters from Kibana and past them in the following area.",
+        "empty": "No filters are defined.",
+        "raw": "DSL Query",
+        "field": "@:$ezreeport.field",
+        "value": "Value(s)",
+        "value:hint": "Empty value",
+        "isNot": "Invert filter",
+        "foundFilters": "Found {n} filter|Found {n} filters",
+        "name": "Name of filter",
+        "nameTemplate": {
+          "exists": "{field} exists",
+          "exists:not": "{field} doesn't exists",
+          "values": "{0}|{0}, {1}|{0}, {1}, etc.",
+          "is": "{field} is {valueText}",
+          "is:not": "{field} is not {valueText}"
+        },
+        "type": "Filter type",
+        "types": {
+          "exists": "exists",
+          "is": "is",
+          "in": "is one of"
+        },
+        "hints": {
+          "type": "The type of filter depends on the number of values:",
+          "type:exists": "If no value is present, the filter will check the existence of the field",
+          "type:is": "If a single value is present, the filter will check if the field has exactly this value",
+          "type:in": "If multiple values are present, the filter will check if the field contains at least one of the values"
+        }
+      },
+      "savedParams": {
+        "title": "Saved params",
+        "name": "Params name",
+        "noParams": {
+          "title": "No saved params",
+          "description": "No params are save, you can save the current params using the form on top"
+        }
+      }
     }
   },
   "report": {
@@ -96,8 +183,24 @@
     "holdingsIQ": {
       "update": "Cannot start update"
     },
+
     "index": {
-      "delete": "Cannot delete index"
+      "get": "Cannot get indices list: {err}",
+      "delete": "Cannot delete index",
+      "mapping": {
+        "get": "Cannot get index mapping: {err}"
+      }
+    },
+    "extraction": {
+      "start": "Cannot start extraction: {err}",
+      "stop": "Cannot stop extraction: {err}",
+      "status": {
+        "get": "Cannot get status of extraction: {err}"
+      },
+      "file": {
+        "get": "Cannot download extraction: {err}",
+        "delete": "Cannot delete extration: {err}"
+      }
     }
   },
   "info": {
@@ -133,5 +236,6 @@
   "detail": "Detail",
   "development": "development",
   "integration": "integration",
-  "noData": "No data available"
+  "noData": "No data available",
+  "addMultiValue": "Add a value"
 }

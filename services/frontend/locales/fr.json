@@ -66,6 +66,93 @@
     "config": {
       "frontend": "Configutation de l'interface web",
       "api": "Configutation de l'API"
+    },
+    "extraction": {
+      "title": "Extraction",
+      "status": {
+        "toolbar": "Status de l'extraction",
+        "progress": "{current} / {total} documents extraits",
+        "eta": "Temps restant (estimation)",
+        "took": "Durée d'extraction",
+        "title": {
+          "success": "Succès",
+          "idle": "En attente",
+          "running": "En cours",
+          "stopped": "Stoppée",
+          "error": "En erreur",
+          "unknown": "Inconnu"
+        },
+        "meaning": {
+          "success": "L'extraction est un succès ! Vous pouvez la télécharger depuis la liste en bas de cette page",
+          "idle": "Aucune extraction est en cours, vous pouvez en lancer une depuis le formulaire ci-dessous",
+          "running": "Une extraction est en cours... Veuillez patienter quelques minutes ou revenir plus tard",
+          "stopped": "Une extraction a été stoppée. Vous pouvez en lancer une autre depuis le formulaire ci-dessous",
+          "error": "Une erreur est survenue durant une extraction ! Les détails sont disponibles ci-dessous"
+        }
+      },
+      "files": {
+        "title": "Précédentes extractions",
+        "noExtraction": {
+          "title": "Aucune extraction disponible",
+          "description": "Il n'y a pas d'extractions disponible, vous pouvez en lancer une depuis le formulaire ci-dessus"
+        }
+      },
+      "form": {
+        "title": "Nouvelle extraction",
+        "index": "Index à extraire",
+        "fields": "Champs à extraire",
+        "fields:placeholder": "Tous",
+        "fields:invalid": "L'un des champs précisé n'existe pas",
+        "comment": "Commentaire de l'extraction (ajouté au nom de fichier)",
+        "delimiter": "Séparateur",
+        "escape": "Échappement (si les données contiennent le séparateur)",
+        "encoding": "Encodage du fichier",
+        "start": "Démarrer une extraction",
+        "stop": "Arrêter l'extraction"
+      },
+      "filters": {
+        "title": "Filtres ({n})",
+        "title:new": "Créer un filtre",
+        "title:edit": "Éditer un filtre",
+        "advanced": "Filtre avancé",
+        "add": "Ajouter un filtre",
+        "empty": "Aucun filtre n'est défini.",
+        "description:import": "Copiez les filtres depuis Kibana et collez-les dans la zone suivante.",
+        "raw": "Requête DSL",
+        "field": "Champ",
+        "value": "Valeur(s)",
+        "value:hint": "Valeur vide",
+        "isNot": "Inverser le filtre",
+        "foundFilters": "{n} filtre trouvé|{n} filtres trouvés",
+        "name": "Nom du filtre",
+        "nameTemplate": {
+          "exists": "{field} existe",
+          "exists:not": "{field} n'existe pas",
+          "values": "{0}|{0}, {1}|{0}, {1}, etc.",
+          "is": "{field} est {valueText}",
+          "is:not": "{field} n'est pas {valueText}"
+        },
+        "type": "Type de filtre",
+        "types": {
+          "exists": "existe (exists)",
+          "is": "est (is)",
+          "in": "inclus dans (is one of)"
+        },
+        "hints": {
+          "type": "Le type de filtre dépend du nombre de valeurs:",
+          "type:exists": "Si aucune valeur n'est présente, le filtre vérifiera l'existence du champ",
+          "type:is": "Si une seule valeur est présente, le filtre vérifiera si le champ à exactement cette valeur",
+          "type:in": "Si plusieurs valeurs sont présentes, le filtre vérifiera si le champ contient au moins une des valeurs"
+        }
+      },
+      "savedParams": {
+        "title": "Paramètrage sauvegardés",
+        "name": "Nom du paramètrage",
+        "noParams": {
+          "title": "Aucun paramètrage sauvegardé",
+          "description": "Aucun paramètrage n'est sauvegardé, vous pouvez sauvegarder le paramètrage actuel en utilisant le formulaire ci-dessus"
+        }
+      }
     }
   },
   "report": {
@@ -97,7 +184,22 @@
       "update": "Impossible de lancer la mise à jour"
     },
     "index": {
-      "delete": "Impossible de supprimer l'index"
+      "get": "Impossible de récupérer la liste des indexs: {err}",
+      "delete": "Impossible de supprimer l'index",
+      "mapping": {
+        "get": "Impossible de récupérer le mapping de l'index: {err}"
+      }
+    },
+    "extraction": {
+      "start": "Impossible de démarrer une extraction: {err}",
+      "stop": "Impossible de stopper l'extraction: {err}",
+      "status": {
+        "get": "Impossible de récupérer le status de l'extraction: {err}"
+      },
+      "file": {
+        "get": "Impossible de télécharger l'extraction: {err}",
+        "delete": "Impossible de supprimer l'extration: {err}"
+      }
     }
   },
   "info": {
@@ -133,5 +235,6 @@
   "detail": "Détail",
   "development": "développement",
   "integration": "integration",
-  "noData": "Aucune données"
+  "noData": "Aucune données",
+  "addMultiValue": "Ajouter une valeur"
 }

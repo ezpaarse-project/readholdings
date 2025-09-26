@@ -33,6 +33,12 @@ async function task(this: Cron): Promise<void> {
     cronConfig.holdingsIQRetention,
   );
   appLogger.info(`[cron][${this.name}]: ${deletedHoldingsIQFiles?.join(',')} (${deletedHoldingsIQFiles.length}) HoldingsIQ files are deleted`);
+
+  const deletedExtractsFiles = await deleteOldFiles(
+    paths.data.extractDir,
+    cronConfig.extractRetention,
+  );
+  appLogger.info(`[cron][${this.name}]: ${deletedExtractsFiles?.join(',')} (${deletedExtractsFiles.length}) extracts files are deleted`);
 }
 
 const deleteFileCron = new Cron('cleanFile', cronConfig.schedule, task, cronConfig.active);

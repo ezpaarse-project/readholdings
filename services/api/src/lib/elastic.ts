@@ -114,12 +114,50 @@ export async function search<T = any>(
   return res.body.hits.hits.map((hit) => hit._source);
 }
 
-export async function* scrollSearch<T = any>(
+/**
+ *
+ */
+export async function count(
+  indexName: string,
+  body: ES.CountRequest['body'],
+): Promise<number> {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
+  try {
+    const response = await elasticClient.count<ES.CountResponse>({
+      index: indexName,
+      body,
+    });
+
+    return response.body.count;
+  } catch (err) {
+    appLogger.error(`[elastic]: Cannot request elastic in index [${indexName}]`, err);
+    throw err;
+  }
+}
+
+/**
+ * Search labs document using a scoll
+ *
+ * @param indexName Index name.
+ * @param body Config of elastic request
+ *
+ * @returns Iterable over documents
+ */
+export async function* scrollSearch<T = unknown>(
   indexName: string,
   body: ES.SearchRequest['body'],
+  signal?: AbortSignal,
 ): AsyncIterable<ES.SearchHit<T | undefined>> {
   if (!elasticClient) {
     throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
+  // If the signal is already aborted, immediately throw in order to reject the promise.
+  if (signal?.aborted) {
+    throw new Error(signal?.reason);
   }
 
   try {
@@ -127,8 +165,14 @@ export async function* scrollSearch<T = any>(
       index: indexName,
       body,
     });
+
     // eslint-disable-next-line no-restricted-syntax
     for await (const res of results) {
+      // Reject promise if aborted
+      if (signal?.aborted) {
+        throw new Error(signal.reason);
+      }
+
       // eslint-disable-next-line no-underscore-dangle
       yield* res.body.hits.hits;
     }
@@ -347,25 +391,8 @@ export async function createIndex(indexName: string, mapping: any): Promise<void
   }
 }
 
-export async function getIndexSettings(index: string) {
-  if (!elasticClient) {
-    throw new Error('[elastic]: Elastic client is not initialized');
-  }
-
-  try {
-    const { body } = await elasticClient.indices.getSettings<ES.IndicesGetSettingsResponse>({
-      index,
-    });
-    return body[index];
-  } catch (err) {
-    appLogger.error(`[elastic]: Cannot request settings of index [${index}]`, err);
-    throw err;
-  }
-}
-
 /**
  * Get indices on elastic.
- *
  */
 export async function getReadHoldingsIndices() {
   if (!elasticClient) {
@@ -374,4 +401,127 @@ export async function getReadHoldingsIndices() {
 
   const res = await elasticClient.cat.indices<ES.CatIndicesResponse>({ format: 'json', index: 'holdings*,-.*' });
   return res.body;
+}
+
+/**
+ * Simplify mapping by flattening object using dot notation
+ *
+ * @param properties Elastic raw mapping
+ *
+ * @returns Map of dot notation keys and type as value
+ */
+function simplifyMapping(
+  properties: Record<string, ES.MappingProperty>,
+): Record<string, string> {
+  const res: Record<string, string> = {};
+  // eslint-disable-next-line no-restricted-syntax
+  for (const [field, mapping] of Object.entries(properties)) {
+    if (mapping.type) {
+      res[field] = mapping.type;
+    }
+
+    if (mapping.properties) {
+      const sub = simplifyMapping(mapping.properties);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [subField, type] of Object.entries(sub)) {
+        res[`${field}.${subField}`] = type;
+      }
+    }
+  }
+
+  return res;
+}
+
+/**
+ * Get mapping of an index
+ *
+ * @param indexName Name of the index
+ *
+ * @returns The js-like index mapping
+ */
+export async function getIndexMapping(indexName: string): Promise<Record<string, string>> {
+  if (!elasticClient) {
+    throw new Error('[elastic]: Elastic client is not initialized');
+  }
+
+  try {
+    const { body } = await elasticClient.indices.getMapping<ES.IndicesGetMappingResponse>({
+      index: indexName,
+    });
+
+    // Keep all the keys of all the indices
+    const mappings = Object.values(body).map((index) => index.mappings.properties ?? {});
+    const globalMapping = Object.assign({}, ...mappings);
+    return simplifyMapping(globalMapping);
+  } catch (err) {
+    appLogger.error(`[elastic]: Cannot get mapping of index [${indexName}]`);
+    throw err;
+  }
+}
+
+/**
+ * Simplified version of ES filter
+ */
+export type ESFilter = {
+  name: string,
+  isNot: boolean,
+} & ({
+  field: string,
+  value?: string | string[],
+} | { raw: Record<string, Record<string, unknown>> });
+
+/**
+ * Transform filter into a partial ES query
+ *
+ * @param filters Filter to transform
+ *
+ * @returns The ES query
+ */
+function filterToES(filter: ESFilter): ES.QueryDslQueryContainer {
+  if ('raw' in filter) {
+    return filter.raw;
+  }
+
+  if (!filter.value) {
+    return { exists: { field: filter.field } };
+  }
+
+  return {
+    bool: {
+      filter: [{
+        terms: {
+          [filter.field]: Array.isArray(filter.value) ? filter.value : [filter.value],
+        },
+      }],
+    },
+  };
+}
+
+/**
+ * Transform filters into ES query
+ *
+ * @param filters List of filters to transform
+ *
+ * @returns The ES query
+ */
+export function filtersToESQuery(filters: ESFilter[]): ES.QueryDslQueryContainer {
+  const must: ES.QueryDslQueryContainer[] = [];
+  const mustNot: ES.QueryDslQueryContainer[] = [];
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const filter of filters) {
+    const item = filterToES(filter);
+    if (filter.isNot) {
+      mustNot.push(item);
+    } else {
+      must.push(item);
+    }
+  }
+
+  return {
+    bool: {
+      filter: must,
+      must_not: mustNot,
+    },
+  };
 }
