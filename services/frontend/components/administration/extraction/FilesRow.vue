@@ -39,7 +39,7 @@
 
           <template #append>
             <v-btn
-              :disabled="state.filename === file.filename"
+              :disabled="state.progress.percent !== 1 && state.filename === file.filename"
               density="comfortable"
               variant="text"
               icon="mdi-delete"
