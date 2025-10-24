@@ -1,7 +1,10 @@
+import path from 'node:path';
 import { PassThrough } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { createWriteStream } from 'node:fs';
+import fs from 'node:fs';
 import { unlink, readFile, writeFile } from 'node:fs/promises';
+
+import { config } from '~/lib/config';
 
 import type { estypes as ES } from '@elastic/elasticsearch';
 import { stringify } from 'csv-stringify';
@@ -15,6 +18,40 @@ import {
   filtersToESQuery,
   type ESFilter,
 } from '~/lib/elastic';
+
+type ExtractStatus =
+  | 'idle'
+  | 'running'
+  | 'error'
+  | 'stopped';
+
+const state = {
+  status: 'idle' as ExtractStatus,
+  progress: {
+    percent: 0,
+    current: 0,
+    total: 0,
+    speed: 0,
+  },
+  error: null as Error | null,
+  filename: null as string | null,
+  startedAt: null as Date | null,
+  endedAt: null as Date | null,
+  abortController: null as AbortController | null,
+};
+
+/**
+ * Get current extraction state
+ *
+ * @returns The extraction state
+ */
+export function getState () {
+  return {
+    ...state,
+    // Omit abort controller
+    abortController: undefined,
+  };
+};
 
 export type ExtractionParams = {
   // Extraction specific
@@ -150,7 +187,7 @@ export async function extractToCSV(params: ExtractionParams & {
   });
 
   // Delete file if an error occur
-  const file = createWriteStream(params.filepath, params.encoding || 'utf8');
+  const file = fs.createWriteStream(params.filepath, params.encoding || 'utf8');
   file.on('error', async () => {
     try {
       await unlink(params.filepath);
@@ -179,6 +216,114 @@ export async function extractToCSV(params: ExtractionParams & {
     { signal: params.signal },
   );
 }
+
+
+/**
+ * Starts an extraction in the background
+ *
+ * ! Override any pending extraction
+ *
+ * @param params Params for the extraction
+ *
+ * @returns The new extraction state
+ */
+export function startExtraction(params: ExtractionParams) {
+  // Reset state
+  state.error = null;
+  state.endedAt = null;
+  state.progress = {
+    percent: 0,
+    speed: 0,
+    current: 0,
+    total: 0,
+  };
+  // Update state
+  state.status = 'running';
+  state.startedAt = new Date();
+
+  // Setup abort controller
+  const abort = new AbortController();
+  state.abortController = abort;
+
+  // Get filename
+  let filename = state.startedAt.toISOString();
+  if (params.comment) {
+    filename += `.${params.comment}`;
+  }
+  state.filename = `${filename}.csv`;
+  const filepath = path.resolve(config.paths.data.extractDir, state.filename);
+
+  let lastProgress = 0;
+  appLogger.info(`[extract] Extracting data to [${filepath}]...`);
+
+  // Starts extraction
+  // Don't await as process will be handled in the background
+  extractToCSV({
+    ...params,
+    filepath,
+    signal: abort.signal,
+
+    onProgress: (total, current) => {
+      // Update state with progress
+      state.progress = {
+        current,
+        total,
+        speed: current / (new Date().getTime() - (state.startedAt?.getTime() ?? 0)),
+        percent: current / total,
+      };
+
+      // Log progress every 10%
+      if (state.progress.percent - lastProgress >= 0.1) {
+        const percent = state.progress.percent.toLocaleString(undefined, { style: 'percent' });
+        appLogger.verbose(`[extract] Extraction to [${filepath}] still going... Found [${total}] records, written [${current}] (${percent})`);
+        lastProgress = state.progress.percent;
+      }
+    },
+  })
+    .then(() => {
+      // Mark state as complete
+      state.status = 'idle';
+      state.progress.current = state.progress.total;
+      state.progress.percent = 1;
+
+      appLogger.info(`[extract] Extraction of data to [${filepath}] complete !`);
+    })
+    .catch((err) => {
+      // Don't mark start as error if we're aborting
+      if (err.name === 'AbortError') {
+        return;
+      }
+
+      // Mark state as error
+      state.status = 'error';
+      state.error = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+
+      appLogger.error('[extract] Error happened while extracting', err);
+    }).finally(() => {
+      // Remove abort controller reference
+      state.abortController = null;
+      // Update date
+      state.endedAt = new Date();
+    });
+
+  return getState();
+}
+
+/**
+ * Stops any extraction, if there is one
+ *
+ * @returns The new extraction state
+ */
+export function stopExtraction() {
+  if (state.abortController) {
+    state.status = 'stopped';
+    state.abortController.abort();
+    appLogger.warn('[extract] Aborting extraction !');
+  }
+
+  return getState();
+}
+
 
 /**
  * Read file and parse it as extraction params
@@ -223,4 +368,4 @@ export async function writeSavedParamsAsJSON(
   await writeFile(filepath, content, 'utf-8');
 
   return savedParams;
-}
+};

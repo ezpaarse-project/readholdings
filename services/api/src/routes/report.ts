@@ -1,7 +1,14 @@
-import type { FastifyPluginAsync } from 'fastify';
+import path from 'path';
+import fs from 'fs';
 
-import { getReportsController, getReportByFilenameController } from '~/controllers/report';
+import { getReport, getReports } from '~/lib/report';
+
 import all from '~/plugins/all';
+
+import type { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify';
+
+import { config } from '~/lib/config';
+const { paths } = config;
 
 const router: FastifyPluginAsync = async (fastify) => {
   fastify.route({
@@ -9,7 +16,15 @@ const router: FastifyPluginAsync = async (fastify) => {
     url: '/',
     schema: {},
     preHandler: all,
-    handler: getReportsController,
+    handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+      const { latest } = request.query;
+      let reports = await getReports();
+    
+      if (latest) {
+        [reports] = reports;
+      }
+      reply.code(200).send(reports);
+    }
   });
 
   fastify.route({
@@ -17,7 +32,18 @@ const router: FastifyPluginAsync = async (fastify) => {
     url: '/:filename',
     schema: {},
     preHandler: all,
-    handler: getReportByFilenameController,
+    handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+      const { filename } = request.params;
+
+      try {
+        await fs.existsSync(path.resolve(paths.data.reportDir, filename));
+      } catch (err) {
+        return reply.code(404).send({ message: `Report [${filename}] not found` });
+      }
+    
+      const report = await getReport(filename);
+      reply.code(200).send(report);
+    }
   });
 };
 

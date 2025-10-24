@@ -1,7 +1,9 @@
-import type { FastifyPluginAsync } from 'fastify';
+import type { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify';
 
-import { getStatusController, setStatusController } from '~/controllers/status';
+import { getWorkInProgress, setWorkInProgress } from '~/lib/status';
+
 import all from '~/plugins/all';
+import admin from '~/plugins/admin';
 
 const router: FastifyPluginAsync = async (fastify) => {
   fastify.route({
@@ -9,15 +11,22 @@ const router: FastifyPluginAsync = async (fastify) => {
     url: '/',
     schema: {},
     preHandler: all,
-    handler: getStatusController,
+    handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+      const wip = await getWorkInProgress();
+      reply.code(200).send(wip);
+    }
   });
 
   fastify.route({
     method: 'POST',
     url: '/',
     schema: {},
-    preHandler: all,
-    handler: setStatusController,
+    preHandler: admin,
+    handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+      const status = request.body;
+      setWorkInProgress(status);
+      reply.code(200).send(status);
+    }
   });
 };
 

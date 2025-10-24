@@ -1,7 +1,7 @@
-import type { FastifyPluginAsync } from 'fastify';
+import type { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
 import admin from '~/plugins/admin';
 
-import getConfigController from '~/controllers/config';
+import { getConfig } from '~/lib/config';
 
 const router: FastifyPluginAsync = async (fastify) => {
   fastify.route({
@@ -15,7 +15,10 @@ const router: FastifyPluginAsync = async (fastify) => {
       },
     },
     preHandler: admin,
-    handler: getConfigController,
+    handler: async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+      const config = await getConfig();
+      reply.code(200).send(config);
+    }
   });
 };
 

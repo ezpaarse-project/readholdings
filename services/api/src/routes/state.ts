@@ -1,6 +1,7 @@
-import type { FastifyPluginAsync } from 'fastify';
+import type { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify';
 
-import stateController from '~/controllers/state';
+import { getState } from '~/lib/state';
+
 import all from '~/plugins/all';
 
 const router: FastifyPluginAsync = async (fastify) => {
@@ -9,7 +10,10 @@ const router: FastifyPluginAsync = async (fastify) => {
     url: '/',
     schema: {},
     preHandler: all,
-    handler: stateController,
+    handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+      const state = await getState();
+      reply.code(200).send(state);
+    }
   });
 };
 
