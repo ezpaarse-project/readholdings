@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 
 import type { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify';
+import { adminRoute } from '~/routes/helper';
 
 import { deleteFile, orderRecentFiles } from '~/lib/file';
 import appLogger from '~/lib/logger/appLogger';
@@ -26,11 +27,14 @@ const router: FastifyPluginAsync = async (fastify) => {
    * Route to get status of extraction
    * Admin only.
    */
-  fastify.route({
+  fastify.route(adminRoute({
     method: 'GET',
-    url: '/',
-    schema: {},
-    preHandler: admin,
+    url: '/extract',
+    schema: {
+      tags: ['extract'],
+      summary: 'Get status of elastic extraction',
+      description: 'Get status of elastic extraction',
+    },
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const files = await orderRecentFiles(extractDir);
 
@@ -39,17 +43,20 @@ const router: FastifyPluginAsync = async (fastify) => {
         files,
       });
     }
-  });
+  }));
 
   /**
    * Route to start extraction
    * Admin only.
    */
-  fastify.route({
+  fastify.route(adminRoute({
     method: 'POST',
-    url: '/_start',
-    schema: {},
-    preHandler: admin,
+    url: '/extract/_start',
+    schema: {
+      tags: ['extract'],
+      summary: 'Start elastic extraction',
+      description: 'Start elastic extraction',
+    },
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const state = getState();
     
@@ -67,17 +74,20 @@ const router: FastifyPluginAsync = async (fastify) => {
 
       return reply.code(200).send(tt);
     }
-  });
+  }));
 
   /**
    * Route to cancel extraction
    * Admin only.
    */
-  fastify.route({
+  fastify.route(adminRoute({
     method: 'POST',
-    url: '/_stop',
-    schema: {},
-    preHandler: admin,
+    url: '/extract/_stop',
+    schema: {
+      tags: ['extract'],
+      summary: 'Stop elastic extraction',
+      description: 'Stop elastic extraction',
+    },
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const state = getState();
   
@@ -89,17 +99,20 @@ const router: FastifyPluginAsync = async (fastify) => {
         state: stopExtraction(),
       });
     }
-  });
+  }));
 
   /**
    * Route to get extraction result
    * Admin only.
    */
-  fastify.route({
+  fastify.route(adminRoute({
     method: 'GET',
-    url: '/files/:filename',
-    schema: {},
-    preHandler: admin,
+    url: '/extract/files/:filename',
+    schema: {
+      tags: ['extract'],
+      summary: 'Get extraction result',
+      description: 'Get extraction result',
+    },
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const { filename } = request.params;
 
@@ -107,17 +120,20 @@ const router: FastifyPluginAsync = async (fastify) => {
 
       return reply.code(200).send(stream);
     }
-  });
+  }));
 
   /**
    * Route to delete extraction result
    * Admin only.
    */
-  fastify.route({
+  fastify.route(adminRoute({
     method: 'DELETE',
-    url: '/files/:filename',
-    schema: {},
-    preHandler: admin,
+    url: '/extract/files/:filename',
+    schema: {
+      tags: ['extract'],
+      summary: 'Delete extraction result',
+      description: 'Delete extraction result',
+    },
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const { filename } = request.params;
 
@@ -125,17 +141,20 @@ const router: FastifyPluginAsync = async (fastify) => {
 
       return reply.code(204).send();
     }
-  });
+  }));
 
   /**
    * Route to get extraction saved params
    * Admin only.
    */
-  fastify.route({
+  fastify.route(adminRoute({
     method: 'GET',
-    url: '/saved-params',
-    schema: {},
-    preHandler: admin,
+    url: '/extract/saved-params',
+    schema: {
+      tags: ['extract'],
+      summary: 'Get extraction saved params',
+      description: 'Get extraction saved params',
+    },
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const files = await orderRecentFiles(extractParamsDir);
 
@@ -157,17 +176,20 @@ const router: FastifyPluginAsync = async (fastify) => {
           .sort((paramsA, paramsB) => paramsA.name.localeCompare(paramsB.name)),
       );
     }
-  });
+  }));
 
   /**
    * Route to save extraction params
    * Admin only.
    */
-  fastify.route({
+  fastify.route(adminRoute({
     method: 'PUT',
-    url: '/saved-params/:name',
-    schema: {},
-    preHandler: admin,
+    url: '/extract/saved-params/:name',
+    schema: {
+      tags: ['extract'],
+      summary: 'Save extraction params',
+      description: 'Save extraction params',
+    },
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const { name } = request.params;
 
@@ -185,17 +207,20 @@ const router: FastifyPluginAsync = async (fastify) => {
 
       return reply.status(200).send(savedParams);
     }
-  });
+  }));
 
   /**
    * Route to delete extraction saved params
    * Admin only.
    */
-  fastify.route({
+  fastify.route(adminRoute({
     method: 'DELETE',
-    url: '/saved-params/:name',
-    schema: {},
-    preHandler: admin,
+    url: '/extract/saved-params/:name',
+    schema: {
+      tags: ['extract'],
+      summary: 'Delete extraction saved params',
+      description: 'Delete extraction saved params',
+    },
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const { name } = request.params;
 
@@ -206,7 +231,7 @@ const router: FastifyPluginAsync = async (fastify) => {
 
       return reply.code(204).send();
     }
-  });
+  }));
 };
 
 export default router;

@@ -11,7 +11,16 @@ const router: FastifyPluginAsync = async (fastify) => {
   fastify.route({
     method: 'GET',
     url: '/healthcheck',
-    schema: {},
+    schema: {
+      tags: ['ping'],
+      summary: 'Healthcheck',
+      description: 'Healthcheck',
+      response: {
+        204: {
+          description: 'No content',
+        },
+      }
+    },
     preHandler: [
       all,
       (request: FastifyRequest, reply: FastifyReply, done: (err?: Error) => void) => {

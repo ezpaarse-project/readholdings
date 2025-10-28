@@ -6,7 +6,18 @@ const router: FastifyPluginAsync = async (fastify) => {
   fastify.route({
     method: 'GET',
     url: '/',
-    schema: {},
+    schema: {
+      tags: ['ping'],
+      summary: 'Ping readholdings api service',
+      description: 'Ping readholdings api service',
+      response: {
+        200: {
+          description: 'OK',
+          type: 'string',
+          example: 'readholdings api service',
+        },
+      }
+    },
     preHandler: all,
     handler: async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       reply.code(200).send('readholdings api service');
@@ -16,7 +27,21 @@ const router: FastifyPluginAsync = async (fastify) => {
   fastify.route({
     method: 'GET',
     url: '/ping',
-    schema: {},
+    schema: {
+      tags: ['ping'],
+      summary: 'Ping readholdings api service',
+      description: 'Ping readholdings api service',
+      response: {
+        200: {
+          description: 'OK',
+          type: 'object',
+          properties: {
+            message: { type: 'string' },
+            responseTime: { type: 'number' },
+          },
+        },
+      }
+    },
     preHandler: all,
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const endTime = Date.now();

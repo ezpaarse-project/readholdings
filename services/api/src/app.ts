@@ -14,10 +14,11 @@ import {
 } from '~/lib/elastic';
 import {
   initClient as initRedisClient,
-  startConnectionRedis,
 } from './lib/redis';
 
 import rateLimiter from '~/plugins/rateLimit';
+
+import openapiPlugin from '~/plugins/openapi';
 
 import healthcheckRouter from '~/routes/healthcheck';
 import pingRouter from '~/routes/ping';
@@ -30,7 +31,6 @@ import stateRouter from '~/routes/state';
 import statusRouter from '~/routes/status';
 import filesRouter from '~/routes/file';
 import extractRouter from '~/routes/extract';
-import openAPIRouter from '~/routes/openapi';
 
 import cleanFileCron from '~/cron/cleanFile';
 import updateDataCron from '~/cron/updateData';
@@ -96,18 +96,18 @@ const start = async () => {
   await fastify.register(rateLimiter);
 
   // routes
+  fastify.register(openapiPlugin)
   await fastify.register(healthcheckRouter, { prefix: '/' });
   await fastify.register(pingRouter, { prefix: '/' });
-  await fastify.register(adminRouter, { prefix: '/login' });
-  await fastify.register(configRouter, { prefix: '/config' });
+  await fastify.register(adminRouter, { prefix: '/' });
+  await fastify.register(configRouter, { prefix: '/' });
   await fastify.register(elasticRouter, { prefix: '/elastic' });
   await fastify.register(holdingsIQRouter, { prefix: '/holdingsIQ' });
-  await fastify.register(reportRouter, { prefix: '/reports' });
-  await fastify.register(stateRouter, { prefix: '/state' });
-  await fastify.register(statusRouter, { prefix: '/status' });
-  await fastify.register(filesRouter, { prefix: '/files' });
-  await fastify.register(extractRouter, { prefix: '/extract' });
-  await fastify.register(openAPIRouter, { prefix: '/' });
+  await fastify.register(reportRouter, { prefix: '/' });
+  await fastify.register(stateRouter, { prefix: '/' });
+  await fastify.register(statusRouter, { prefix: '/' });
+  await fastify.register(filesRouter, { prefix: '/' });
+  await fastify.register(extractRouter, { prefix: '/' });
 
   const address = await fastify.listen({ port: 3000, host: '::' });
   appLogger.info(`[fastify]: listening at [${address}]`);
@@ -125,7 +125,6 @@ const start = async () => {
 
   try {
     initRedisClient();
-    await startConnectionRedis();
   } catch (err) {
     appLogger.error('[fastify]: Cannot initiate redis client');
   }

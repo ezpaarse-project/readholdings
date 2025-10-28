@@ -2,24 +2,40 @@ import type { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify';
 
 import update from '~/lib/update';
 
-import admin from '~/plugins/admin';
+import { adminRoute } from '~/routes/helper';
 import { getWorkInProgress } from '~/lib/status';
 
 import { config } from '~/lib/config';
 const { portals } = config;
 
 const router: FastifyPluginAsync = async (fastify) => {
-  fastify.route({
+  fastify.route(adminRoute({
     method: 'POST',
     url: '/update',
-    schema: {},
+    schema: {
+      tags: ['update'],
+      summary: 'Start job to update holdingsIQ index',
+      description: 'Start job to update holdingsIQ index',
+      querystring: {
+        type: 'object',
+        properties: {
+          portal: { type: 'string' },
+          forceDownload: { type: 'boolean' },
+        },
+      },
+      response: {
+        202: {
+          description: 'Accepted',
+          type: 'null',
+        },
+      }
+    },
     config: {
       rateLimit: {
         max: 60,
         timeWindow: '1 minute',
       },
     },
-    preHandler: admin,
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const wip = getWorkInProgress();
       if (wip) {
@@ -38,7 +54,7 @@ const router: FastifyPluginAsync = async (fastify) => {
       // TODO return ID;
       reply.code(202);
     }
-  });
+  }));
 };
 
 export default router;

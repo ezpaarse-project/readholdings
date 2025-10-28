@@ -1,4 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
+import { adminRoute } from '~/routes/helper';
 import admin from '~/plugins/admin';
 
 const router: FastifyPluginAsync = async (fastify) => {
@@ -6,10 +7,14 @@ const router: FastifyPluginAsync = async (fastify) => {
    * Route to check if you are admin.
    * Admin only.
    */
-  fastify.route({
+  fastify.route(adminRoute({
     method: 'POST',
-    url: '/',
-    schema: {},
+    url: '/login',
+    schema: {
+      tags: ['admin'],
+      summary: 'Check if you are admin',
+      description: 'Check if you are admin with x-api-key header',
+    },
     config: {
       rateLimit: {
         max: 60,
@@ -17,7 +22,7 @@ const router: FastifyPluginAsync = async (fastify) => {
       },
     },
     handler: admin,
-  });
+  }));
 };
 
 export default router;

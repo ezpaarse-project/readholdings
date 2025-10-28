@@ -5,12 +5,13 @@
 <script setup>
 
 import { SwaggerUIBundle } from 'swagger-ui-dist';
+import 'swagger-ui-dist/swagger-ui.css';
 
 const { $fetch } = useNuxtApp();
 
 onMounted(() => {
   SwaggerUIBundle({
-    url: `${$fetch.baseURL}/openapi.yml`,
+    url: `${$fetch.baseURL}/docs/json`,
     dom_id: '#swagger',
     deepLinking: false,
   });

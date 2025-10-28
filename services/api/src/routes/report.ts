@@ -4,6 +4,7 @@ import fs from 'fs';
 import { getReport, getReports } from '~/lib/report';
 
 import all from '~/plugins/all';
+import { jobUpdateState } from '~/routes/responses';
 
 import type { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify';
 
@@ -13,8 +14,28 @@ const { paths } = config;
 const router: FastifyPluginAsync = async (fastify) => {
   fastify.route({
     method: 'GET',
-    url: '/',
-    schema: {},
+    url: '/reports',
+    schema: {
+      tags: ['report'],
+      summary: 'Get all filename of reports',
+      description: 'Get all filename of reports',
+      querystring: {
+        type: 'object',
+        properties: {
+          latest: { type: 'boolean' },
+        },
+      },
+      response: {
+        200: {
+          description: 'OK',
+          type: 'array',
+          items: {
+            type: 'string',
+            example: '[1999-05-22-json, 1999-08-22-json]'
+          },
+        }
+      }
+    },
     preHandler: all,
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const { latest } = request.query;
@@ -29,8 +50,23 @@ const router: FastifyPluginAsync = async (fastify) => {
 
   fastify.route({
     method: 'GET',
-    url: '/:filename',
-    schema: {},
+    url: '/reports/:filename',
+    schema: {
+      tags: ['report'],
+      summary: 'Get the content of report by filename',
+      description: 'Get the content of report by filename on JSON format',
+      params: {
+        type: 'object',
+        properties: {
+          filename: { type: 'string' },
+        },
+      },
+      response: {
+        200: {
+          ...jobUpdateState
+        }
+      }
+    },
     preHandler: all,
     handler: async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       const { filename } = request.params;
