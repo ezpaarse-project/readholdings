@@ -4,7 +4,7 @@ services:
   api:
     build:
       context: ./services/api
-    container_name: readholdings-api-dev
+    container_name: readholdings-api
     environment:
       - NODE_ENV=production
       # elastic
@@ -36,7 +36,7 @@ services:
       - INTEST_CUSTID
     command: "npm start"
     ports:
-      - ${API_PORT:-59701}:3000
+      - 59701:3000
     depends_on:
       elastic:
         condition: service_healthy
@@ -54,9 +54,9 @@ services:
   frontend:
     build:
       context: ./services/frontend
-    container_name: readholdings-frontend-dev
+    container_name: readholdings-frontend
     ports:
-      - ${FRONTEND_PORT:-59706}:3000
+      - 59706:3000
       - 24678:24678
     environment:
       - NODE_ENV
@@ -74,9 +74,26 @@ services:
       timeout: 10s
       retries: 5
 
+  redis:
+    image: redis:8.2.2
+    container_name: readholdings-redis
+    command: redis-server --requirepass "${REDIS_PASSWORD:-changeme}"
+    volumes:
+      - ./data/redis:/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli --pass changeme ping | grep PONG"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.22
-    container_name: readholdings-elastic-dev
+    container_name: readholdings-elastic
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
@@ -101,7 +118,7 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.17.22
-    container_name: readholdings-kibana-dev
+    container_name: readholdings-kibana
     environment:
       - ELASTICSEARCH_HOSTS="http://elastic:9200"
       - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME:-elastic}
@@ -122,3 +139,4 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+      
