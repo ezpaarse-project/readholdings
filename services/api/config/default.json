@@ -79,7 +79,8 @@
       "accessLogRetention": 30,
       "healthcheckLogRetention": 30,
       "holdingsIQRetention": 1,
-      "extractRetention": 7
+      "extractRetention": 7,
+      "reportRetention": 15
     },
     "dataUpdate": {
       "schedule": "0 0 0 * * 0",
