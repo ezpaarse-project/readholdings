@@ -1,5 +1,10 @@
 {
   "language": "Langue",
+  "home": {
+    "text1": "Readholdings est une application conçue pour offrir une vue d'ensemble unifiée des dix fonds documentaires du portail BibCNRS. Elle complète l'outil HLM fourni par EBSCOhost, en proposant des tableaux de bord dynamiques et interactifs sur Kibana.",
+    "text2": "Les données, stockées dans des index Elasticsearch, sont mises à jour quotidiennement. Certains champs sont enrichis et ajustés afin d'améliorer la qualité des informations. Une sauvegarde annuelle est également conservée.",
+    "text3": "L'application permet en outre d'exporter les données des index Elasticsearch au format CSV, facilitant ainsi leur intégration dans un Lodex."
+  },
   "menu": {
     "home": "Accueil",
     "report": "Rapports",
