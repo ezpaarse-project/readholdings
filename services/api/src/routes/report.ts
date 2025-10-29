@@ -29,10 +29,6 @@ const router: FastifyPluginAsync = async (fastify) => {
         200: {
           description: 'OK',
           type: 'array',
-          items: {
-            type: 'string',
-            example: '[1999-05-22-json, 1999-08-22-json]'
-          },
         }
       }
     },
@@ -44,7 +40,8 @@ const router: FastifyPluginAsync = async (fastify) => {
       if (latest) {
         [reports] = reports;
       }
-      reply.code(200).send(reports);
+      
+      return reply.code(200).send(reports);
     }
   });
 

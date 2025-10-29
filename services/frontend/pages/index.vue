@@ -1,9 +1,6 @@
 <template>
   <v-container class="fill-height">
     <v-row align="center" justify="center">
-      <div class="text-center easter-egg">
-        Mélanie svp fait nous un petit logo sympa
-      </div>
       <v-col cols="12" sm="12" md="12">
         <v-card class="pa-6" elevation="4">
           <v-card-title class="text-h5 mb-4">
@@ -30,9 +27,5 @@ const { t } = useI18n();
 </script>
 
 <style scoped>
-.easter-egg {
-  font-size: 0.7rem;
-  color: #9e9e9e;
-  user-select: none;
-}
+
 </style>
