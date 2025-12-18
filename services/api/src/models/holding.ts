@@ -25,6 +25,10 @@ export interface HoldingStandard {
   CustomEmbargo?: string | null;
   Description?: string | null;
   Subject?: string | string[] | null;
+  BISAC: string | string[] | null;
+  General: string | string[] | null;
+  LC: string | string[] | null;
+  Medical: string | string[] | null;
   ResourceType?: string | null;
   PackageContentType?: string | null;
   CreateCustom?: string | null;

@@ -1,6 +1,22 @@
 import { format } from 'date-fns';
 
 /**
+ * Transform string for field standard : BISAC, General, LC, Medical
+ * if subject includes '--', return array of string
+ * 
+ * @param subject
+ * @returns 
+ */
+// TODO, split also on | AND --
+export function transformSubject(subject: string) {
+  if (subject.includes('--')) {
+    // split on -- and remove useless space
+    return subject.split('--').map((item) => item.trim());
+  }
+  return subject;
+}
+
+/**
  * Transform the array into a string,
  * replacing 'Present' with the 31st of December of the current year and 'No Access' with '0001-01-01'
  * Date as FR format

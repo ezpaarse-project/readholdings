@@ -1,5 +1,11 @@
 <template>
-  <v-container class="fill-height">
+  <v-container>
+    <v-container class="d-flex justify-center align-center">
+      <v-img
+        src="@/static/images/readholdings.jpg"
+        max-width="300"
+      />
+    </v-container>
     <v-row align="center" justify="center">
       <v-col cols="12" sm="12" md="12">
         <v-card class="pa-6" elevation="4">

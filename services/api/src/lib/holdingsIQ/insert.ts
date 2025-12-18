@@ -14,6 +14,7 @@ import {
   transformCoverage,
   transformStringToArray,
   transformEmbargo,
+  transformSubject,
 } from '~/lib/holdingsIQ/transform';
 
 import type { DeepPartial } from '~/type/utils';
@@ -79,7 +80,10 @@ export async function insertStandardFileInElastic(
         Embargo: record?.Embargo || null,
         CustomEmbargo: record?.CustomEmbargo || null,
         Description: record?.Description || null,
-        Subject: transformStringToArray(record?.Subject) || null,
+        BISAC: record?.BISAC || null,
+        General: record?.General || null,
+        LC: record?.LC || null,
+        Medical: record?.Medical || null,
         ResourceType: record?.ResourceType || null,
         PackageContentType: record?.PackageContentType || null,
         CreateCustom: record?.CreateCustom || null,
