@@ -82,55 +82,101 @@ export function notFound(messages: string[]) {
 
 
 export const jobUpdateState = {
-  type: 'object',
-  description: 'Job execution state with index metadata and processing steps',
-  properties: {
-    status: { type: 'string', enum: ['pending', 'running', 'done', 'error'], example: 'done' },
-    index: { type: 'string', example: 'holdings-2025-04-10' },
-    createdAt: { type: 'string', format: 'date-time', example: '2025-04-10T08:09:54.749Z' },
-    documents: { type: ['integer', 'string', 'null'], example: '2786405' },
-    endAt: { type: ['string', 'null'], format: 'date-time', example: '2025-04-10T10:21:20.558Z' },
-    took: { type: 'number', example: 7885.809 },
-    steps: {
-      type: 'array',
-      description: 'List of processing steps executed during the job',
-      items: {
-        type: 'object',
-        properties: {
-          portal: { type: 'string', example: 'INSU' },
-          name: { type: 'string', example: '[holdingsIQ][download]' },
-          fileType: { type: 'string', example: 'STANDARD' },
-          startDate: { type: 'string', format: 'date-time', example: '2025-04-10T08:09:55.720Z' },
-          endDate: { type: ['string', 'null'], format: 'date-time', example: '2025-04-10T08:12:00.956Z' },
-          status: { type: 'string', enum: ['done', 'error'], example: 'done' },
-          lineUpserted: { type: ['integer', 'null'], example: 208279 },
+  oneOf: [
+    {
+      type: 'object',
+      description: 'Job execution state with index metadata and processing steps',
+      additionalProperties: false,
+      required: ['status', 'index', 'createdAt', 'steps'],
+      properties: {
+        status: {
+          type: 'string',
+          enum: ['pending', 'running', 'inProgress', 'done', 'error'],
+          example: 'inProgress',
         },
-        required: ['portal', 'name', 'fileType', 'startDate', 'status'],
-        additionalProperties: false,
+
+        index: {
+          type: 'string',
+          example: 'holdings-2025-12-18',
+        },
+
+        createdAt: {
+          type: 'string',
+          format: 'date-time',
+          example: '2025-12-18T08:01:06.170Z',
+        },
+
+        documents: {
+          type: ['integer', 'string', 'null'],
+          example: 0,
+        },
+
+        endAt: {
+          type: ['string', 'null'],
+          format: 'date-time',
+          example: null,
+        },
+
+        took: {
+          type: 'number',
+          example: 0,
+        },
+
+        steps: {
+          type: 'array',
+          description: 'List of processing steps executed during the job',
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['key', 'name', 'fileType', 'startDate', 'status'],
+            properties: {
+              key: {
+                type: 'string',
+                example: 'portal:INC',
+              },
+
+              name: {
+                type: 'string',
+                example: '[holdingsIQ][download]',
+              },
+
+              fileType: {
+                type: 'string',
+                example: 'STANDARD',
+              },
+
+              startDate: {
+                type: 'string',
+                format: 'date-time',
+                example: '2025-12-18T08:01:06.173Z',
+              },
+
+              endDate: {
+                type: ['string', 'null'],
+                format: 'date-time',
+                example: null,
+              },
+
+              status: {
+                type: 'string',
+                enum: ['pending', 'running', 'inProgress', 'done', 'error'],
+                example: 'done',
+              },
+
+              lineUpserted: {
+                type: ['integer', 'null'],
+                example: 208279,
+              },
+            },
+          },
+        },
       },
-      examples: [
-        [
-          {
-            portal: 'INSU',
-            name: '[holdingsIQ][download]',
-            fileType: 'STANDARD',
-            startDate: '2025-04-10T08:09:55.720Z',
-            endDate: '2025-04-10T08:12:00.956Z',
-            status: 'done',
-          },
-          {
-            portal: 'INSU',
-            name: '[elastic][insert]',
-            fileType: 'STANDARD',
-            startDate: '2025-04-10T08:12:00.956Z',
-            endDate: '2025-04-10T08:12:35.711Z',
-            status: 'done',
-            lineUpserted: 208279,
-          },
-        ],
-      ],
     },
-  },
-  required: ['status', 'index', 'createdAt', 'steps'],
-  additionalProperties: false,
+    {
+      type: 'object',
+      description: 'No job running',
+      additionalProperties: false,
+      maxProperties: 0,
+    },
+  ],
 };

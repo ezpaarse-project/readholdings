@@ -16,11 +16,7 @@ const router: FastifyPluginAsync = async (fastify) => {
       description: 'Get information if update job is running',
       response: {
         200: {
-          description: 'OK',
-          type: 'object',
-          properties: {
-            status: { type: 'boolean' },
-          },
+          type: 'boolean',
         },
       }
     },
