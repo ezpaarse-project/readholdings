@@ -54,7 +54,6 @@ services:
       - CRON_CLEAN_HOLDINGSIQ_THRESHOLD
       - CRON_DATA_UPDATE_SCHEDULE
       - CRON_DATA_UPDATE_ACTIVE
-
     working_dir: /usr/src/app
     volumes:
       - ./services/api:/usr/src/app
