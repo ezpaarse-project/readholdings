@@ -7,14 +7,18 @@ import update from '~/lib/update';
 
 const { cron: { dataUpdate: cronConfig } } = config;
 
+const name = 'dataUpdate';
+
 /**
  * Start update with HoldingsIQ API.
  */
 async function task(this: Cron): Promise<void> {
+  appLogger.info(`[cron][${name}]: task start`);
   update();
-  appLogger.info(`[cron][${this.name}]: update is started`);
+  appLogger.info(`[cron][${name}]: update is started`);
+  appLogger.info(`[cron][${name}]: task end`);
 }
 
-const updateDataCron = new Cron('dataUpdate', cronConfig.schedule, task, cronConfig.active);
+const updateDataCron = new Cron(name, cronConfig.schedule, task, cronConfig.active);
 
 export default updateDataCron;
