@@ -100,6 +100,13 @@ docker compose -f docker-compose-dev.yml ps
 
 You can create an environment file named `readholdings.local.env.sh` and export the following environment variables. You can then source `readholdings.env.sh`, which contains a set of predefined variables and is overridden by `readholdings.local.env.sh`.
 
+#### Command to set volume permissions (non root image docker)
+
+```sh
+docker compose run --rm --entrypoint "" --user root api chown -R node /usr/src/app/log
+docker compose run --rm --entrypoint "" --user root api chown -R node /usr/src/app/data
+```
+
 #### Adjust system configuration for Elasticsearch
 
 Elasticsearch has some [system requirements](https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config.html) that you should check.
@@ -131,4 +138,4 @@ docker-compose ps
 
 #### Tests
 
-No test are available (coming soon).
+No test are available (coming soon, lol).
